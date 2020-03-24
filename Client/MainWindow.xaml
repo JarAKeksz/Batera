@@ -17,7 +17,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Text="Batera" Foreground="Magenta" FontSize="24" FontWeight="Bold" FontStyle="Italic" TextDecorations="Underline" Width="150" TextAlignment="Center" Height="30"/>
+            <TextBlock x:Name="logoTextBlock" Text="Batera" Foreground="Magenta" FontSize="24" FontWeight="Bold" FontStyle="Italic" TextDecorations="Underline" Width="150" TextAlignment="Center" Height="30"/>
 
             <!-- Sarch bar -->
             <Grid Grid.Column="1" HorizontalAlignment="Stretch"  VerticalAlignment="Center">
@@ -27,7 +27,7 @@
                     <ColumnDefinition Width="50"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="Search: "  Margin="5,10,5,0" Grid.Column="0" FontSize="16" TextAlignment="Center"/>
-                <TextBox   Padding="5"  Margin="5" Grid.Column="1"/>
+                <TextBox x:Name="searchBarTextBox"  Padding="5"  Margin="5" Grid.Column="1"/>
                 <Button x:Name="searchButton" Grid.Column="2" BorderBrush="{x:Null}" >
                     <Button.Background>
                         <ImageBrush ImageSource="icon_search_1.png" Stretch="Uniform"/>
@@ -45,13 +45,13 @@
 
                 <!-- Categories -->
                 <TextBlock Text="Categories:" Margin="4 ,0,4,2" FontSize="16"/>
-                <ComboBox SelectedItem="0" Padding="2" Margin="4 ,0,4,15"/>
+                <ComboBox x:Name="categoriesComboBox" SelectedItem="0" Padding="2" Margin="4 ,0,4,15"/>
 
                 <!-- Condition -->
                 <TextBlock Text="Condition: " FontSize="16" Margin="4"/>
-                <CheckBox Content=" New" Margin="4,0,4,0"/>
-                <CheckBox Content=" Used" Margin="4,0,4,0"/>
-                <CheckBox Content=" Not specified" Margin="4,0,4,15" />
+                <CheckBox x:Name="newConditionCheckBox" Content=" New" Margin="4,0,4,0"/>
+                <CheckBox x:Name="usedConditionCheckBox" Content=" Used" Margin="4,0,4,0"/>
+                <CheckBox x:Name="notSpecifiedConditionCheckBox" Content=" Not specified" Margin="4,0,4,15" />
 
                 <!-- Price -->
                 <TextBlock Text="Price: " Margin="4 ,0,4,0" FontSize="16"/>
@@ -72,8 +72,8 @@
 
                 <!-- Buying format -->
                 <TextBlock Text="Buying Format: " FontSize="16" Margin="4"/>
-                <CheckBox Content=" New" Margin="4,0,4,0"/>
-                <CheckBox Content=" Used" Margin="4,0,4,0"/>
+                <CheckBox x:Name="bidBuyingFormatCheckBox" Content="Bid" Margin="4,0,4,0"/>
+                <CheckBox x:Name="buyBuyingFormatCheckBox" Content="Buy" Margin="4,0,4,0"/>
                 
 
 
