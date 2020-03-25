@@ -94,5 +94,14 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="barack-obama.jpeg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Icons\icon_search_1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="icon_search_1.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
