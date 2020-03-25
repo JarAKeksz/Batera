@@ -10,6 +10,8 @@ namespace Server
     {
         static void Main(string[] args)
         {
+            HttpServer server = new HttpServer(8000);
+            server.run();
         }
     }
 }
