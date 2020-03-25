@@ -31,10 +31,10 @@ namespace Server
 
             try
             {
-                using (SqlCommand command = new SqlCommand("SELECT Id, Name, Price FROM Items WHERE Name LIKE '%@searchTerm%'", connection))
+                using (SqlCommand command = new SqlCommand("SELECT Id, Name FROM Items WHERE Name LIKE '%' + @searchTerm + '%'", connection))
                 {
-                    command.Parameters.Add(new SqlParameter("searchTerm", searchTerm));
-
+                    command.Parameters.Add(new SqlParameter("@searchTerm", searchTerm));
+                    
                     SqlDataReader reader = command.ExecuteReader();
                     while (reader.Read())
                     {
@@ -42,11 +42,12 @@ namespace Server
                         string name = reader.GetString(1);
                         ret.Add(new Item(id, name));
                     }
+                    reader.Close();
                 }
             }
-            catch
+            catch(Exception e)
             {
-                Console.WriteLine("Exception");
+                Console.WriteLine(e);
             }
 
             return ret;
