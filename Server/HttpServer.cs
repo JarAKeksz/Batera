@@ -28,6 +28,12 @@ namespace Server
 
         public void run()
         {
+            if (!DataBase.connect())
+            {
+                Console.WriteLine("Error, database not connected!");
+                return;
+            }
+
             listener.Start();
             Console.WriteLine("Listening for connections on {0}", url);
 
@@ -43,9 +49,28 @@ namespace Server
                 Console.WriteLine(request.UserHostName);
                 Console.WriteLine(request.UserAgent);
                 Console.WriteLine();
+
+                byte[] data;
+
+                if (request.HttpMethod == "GET")
+                {
+                    if(request.QueryString["search"] != null)
+                    {
+                        int c = DataBase.getItems(request.QueryString["search"]).Count;
+                        data = Encoding.UTF8.GetBytes("{status:\"OK\",count=" + c + "}");
+                    }
+                    else
+                    {
+                        data = Encoding.UTF8.GetBytes("{status:\"OK\"}");
+                    }
+                }
+                else
+                {
+                    data = Encoding.UTF8.GetBytes("{status:\"OK\"}");
+                }
+
                 
-                byte[] data = Encoding.UTF8.GetBytes("BATERA");
-                response.ContentType = "text/plain";
+                response.ContentType = "application/json";
                 response.ContentEncoding = Encoding.UTF8;
                 response.ContentLength64 = data.LongLength;
                 
