@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
@@ -24,13 +25,13 @@ namespace Server
                 return false;
             }
         }
-        public static List<User> login(string email, string password)
+        public static User logIn(string email, string password)
         {
-            List<User> ret = new List<User>();
+            User ret = null;
 
             try
             {
-                using (SqlCommand command = new SqlCommand("SELECT Id, UserName FROM Users WHERE Email = @email AND PasswordHash = HASHBYTES('SHA1', CONVERT(NVARCHAR(40), @password)", connection))
+                using (SqlCommand command = new SqlCommand("SELECT Id, UserName FROM Users WHERE Email = @email AND PasswordHash = HASHBYTES('SHA1', CONVERT(NVARCHAR(40), @password))", connection))
                 {
                     command.Parameters.Add(new SqlParameter("@email", email));
                     command.Parameters.Add(new SqlParameter("@password", password));
@@ -40,7 +41,7 @@ namespace Server
                     {
                         int id = reader.GetInt32(0);
                         string userName = reader.GetString(1);
-                        ret.Add(new User(id, userName));
+                        ret = new User(id, userName);
                     }
                     reader.Close();
                 }
@@ -51,6 +52,26 @@ namespace Server
             }
 
             return ret;
+        }
+        public static User signUp(string userName, string name, string email, string password)
+        {
+            try
+            {
+                using (SqlCommand command = new SqlCommand("INSERT INTO Users VALUES(UserName, Name, Email, PasswordHash) @userName, @name, @email, HASHBYTES('SHA1', CONVERT(NVARCHAR(40), @password))", connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@userName", userName));
+                    command.Parameters.Add(new SqlParameter("@name", name));
+                    command.Parameters.Add(new SqlParameter("@email", email));
+                    command.Parameters.Add(new SqlParameter("@password", password));
+
+                    Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return logIn(email, password);
         }
         public static List<User> getUsers (string searchTerm)
         {
@@ -107,9 +128,9 @@ namespace Server
 
             return ret;
         }
-        public static List<Item> getItemById(int searchId)
+        public static Item getItemById(int searchId)
         {
-            List<Item> ret = new List<Item>();
+            Item ret = null;
 
             try
             {
@@ -122,7 +143,7 @@ namespace Server
                     {
                         int id = reader.GetInt32(0);
                         string name = reader.GetString(1);
-                        ret.Add(new Item(id, name));
+                        ret = new Item(id, name);
                     }
                     reader.Close();
                 }

@@ -132,6 +132,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <DependentUpon>BateraDB.mdf</DependentUpon>
     </Content>
+    <Content Include="_jelszavak.txt" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">
