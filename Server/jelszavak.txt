@@ -6,5 +6,11 @@ Admin:
 admin@batera.jp
 admin
 
-frissítsd ezt a ha változtatsz pls
+A_rasek:
+user@domain.com
+noticeme
+
+
+
+frissítsd ha változtatsz pls
 max 40 karakteres jelszó
