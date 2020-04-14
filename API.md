@@ -7,6 +7,15 @@ Answers with a simple message. It can be used to test connection to the server.
 * Request type: `GET`
 * Endpoint: `/ping`
 
+### Search
+Returns a list of items based on a search term.
+* Request type: `GET`
+* Endpoint: `/search`
+* Parameters:
+	* `term`: a string containing the serch term
+* Retruns:
+	* `items`: an array containing objects. Each object has an `id` (int), `name` (string), `price` (int), `category` (string) and `image` (string, base64 coded image).
+
 ### Login
 Is used to get a session token for a session of a registered user.
 * Request type: `POST`
