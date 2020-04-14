@@ -75,13 +75,15 @@ namespace Server
                         data = handlePOST(request);
                         break;
                     default:
-                        //response.StatusCode = 400; TODO
                         data = null;
                         break;
                 }
 
                 if (data == null)
+                {
                     data = Encoding.UTF8.GetBytes("{}");
+                    response.StatusCode = 400;
+                }
 
 
                 response.ContentType = "application/json";
@@ -99,22 +101,30 @@ namespace Server
         {
             switch (getEndpoint(request.RawUrl))
             {
-                case "search":
-                    if (request.QueryString["search"] == null)
-                        return null;
-
-                    int c = DataBase.getItems(request.QueryString["term"]).Count;
-                    return Encoding.UTF8.GetBytes("{status:\"OK\",count=" + c + "}");
                 case "ping":
                     return Response.pingResponse();
+
+                case "search":
+                    if (request.QueryString["term"] == null)
+                        return null;
+
+                    return Response.searchResponse(request.QueryString["term"]);
+                
                 default:
-                    return Encoding.UTF8.GetBytes("{status:\"OK\"}");
+                    return null;
             }
         }
 
         private byte[] handlePOST(HttpListenerRequest request)
         {
-            return Encoding.UTF8.GetBytes("{status:\"OK\"}");
+            switch (getEndpoint(request.RawUrl))
+            {
+                case "login":
+                    return Response.pingResponse();
+
+                default:
+                    return null;
+            }
         }
 
         private string getEndpoint(string url)

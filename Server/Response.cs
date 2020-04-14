@@ -10,7 +10,7 @@ namespace Server
 {
     class Response
     {
-        private byte[] getBytes(JsonDocument json)
+        private static byte[] getBytes(JsonDocument json)
         {
             using (MemoryStream stream = new MemoryStream())
             {
@@ -21,11 +21,10 @@ namespace Server
             }
         }
 
-        private byte[] getBytes(string json)
+        private static byte[] getBytes(string json)
         {
             return Encoding.UTF8.GetBytes(json);
         }
-
 
         public static byte[] pingResponse()
         {
@@ -35,6 +34,29 @@ namespace Server
                 {
                     writer.WriteStartObject();
                     writer.WriteString("message", "blin");
+                    writer.WriteEndObject();
+                }
+
+                return stream.ToArray();
+            }
+        }
+
+        public static byte[] searchResponse(string term)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                using (Utf8JsonWriter writer = new Utf8JsonWriter(stream))
+                {
+                    writer.WriteStartObject();
+                    writer.WriteStartArray("items");
+                    foreach (Item i in DataBase.getItems(term))
+                    {
+                        writer.WriteStartObject();
+                        writer.WriteNumber("id", i.id);
+                        writer.WriteString("name", i.name);
+                        writer.WriteEndObject();
+                    }
+                    writer.WriteEndArray();
                     writer.WriteEndObject();
                 }
 
