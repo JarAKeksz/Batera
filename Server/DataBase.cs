@@ -57,14 +57,47 @@ namespace Server
         {
             try
             {
-                using (SqlCommand command = new SqlCommand("INSERT INTO Users VALUES(UserName, Name, Email, PasswordHash) @userName, @name, @email, HASHBYTES('SHA1', CONVERT(NVARCHAR(40), @password))", connection))
+                bool emailIsTaken = false;
+                using (SqlCommand command = new SqlCommand("CASE WHEN EXISTS(SELECT Email FROM Users WHERE Email = @email) THEN 1 ELSE 0 END", connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@email", email));
+
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        emailIsTaken = reader.GetInt32(0) == 1;
+                    }
+                    reader.Close();
+                }
+                if(emailIsTaken)
+                    Console.WriteLine("Az email foglalt.");
+
+                bool nameIsTaken = false;
+                using (SqlCommand command = new SqlCommand("CASE WHEN EXISTS(SELECT UserName FROM Users WHERE UserName = @userName) THEN 1 ELSE 0 END", connection))
                 {
                     command.Parameters.Add(new SqlParameter("@userName", userName));
-                    command.Parameters.Add(new SqlParameter("@name", name));
-                    command.Parameters.Add(new SqlParameter("@email", email));
-                    command.Parameters.Add(new SqlParameter("@password", password));
 
-                    Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        nameIsTaken = reader.GetInt32(0) == 1;
+                    }
+                    reader.Close();
+                }
+                if (nameIsTaken)
+                    Console.WriteLine("A felhasznalonev foglalt.");
+
+                if (!emailIsTaken && !nameIsTaken)
+                {
+                    using (SqlCommand command = new SqlCommand("INSERT INTO Users (UserName, Name, Email, PasswordHash) VALUES(@userName, @name, @email, HASHBYTES('SHA1', CONVERT(NVARCHAR(40), @password)))", connection))
+                    {
+                        command.Parameters.Add(new SqlParameter("@userName", userName));
+                        command.Parameters.Add(new SqlParameter("@name", name));
+                        command.Parameters.Add(new SqlParameter("@email", email));
+                        command.Parameters.Add(new SqlParameter("@password", password));
+
+                        Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
+                    }
                 }
             }
             catch (Exception e)

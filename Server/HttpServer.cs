@@ -48,28 +48,42 @@ namespace Server
                 Console.WriteLine(request.HttpMethod);
                 Console.WriteLine(request.UserHostName);
                 Console.WriteLine(request.UserAgent);
+                // Display the URL used by the client.
+                /*Console.WriteLine("URL: {0}", request.Url.OriginalString);
+                Console.WriteLine("Raw URL: {0}", request.RawUrl);
+                Console.WriteLine("Query: {0}", request.QueryString);
+
+                // Display the referring URI.
+                Console.WriteLine("Referred by: {0}", request.UrlReferrer);
+
+                //Display the HTTP method.
+                Console.WriteLine("HTTP Method: {0}", request.HttpMethod);
+                //Display the host information specified by the client;
+                Console.WriteLine("Host name: {0}", request.UserHostName);
+                Console.WriteLine("Host address: {0}", request.UserHostAddress);
+                Console.WriteLine("User agent: {0}", request.UserAgent);*/
                 Console.WriteLine();
 
                 byte[] data;
 
-                if (request.HttpMethod == "GET")
+                switch (request.HttpMethod)
                 {
-                    if(request.QueryString["search"] != null)
-                    {
-                        int c = DataBase.getItems(request.QueryString["search"]).Count;
-                        data = Encoding.UTF8.GetBytes("{status:\"OK\",count=" + c + "}");
-                    }
-                    else
-                    {
-                        data = Encoding.UTF8.GetBytes("{status:\"OK\"}");
-                    }
-                }
-                else
-                {
-                    data = Encoding.UTF8.GetBytes("{status:\"OK\"}");
+                    case "GET":
+                        data = handleGET(request);
+                        break;
+                    case "POST":
+                        data = handlePOST(request);
+                        break;
+                    default:
+                        //response.StatusCode = 400; TODO
+                        data = null;
+                        break;
                 }
 
-                
+                if (data == null)
+                    data = Encoding.UTF8.GetBytes("{}");
+
+
                 response.ContentType = "application/json";
                 response.ContentEncoding = Encoding.UTF8;
                 response.ContentLength64 = data.LongLength;
@@ -79,6 +93,37 @@ namespace Server
             }
 
             listener.Close();
+        }
+
+        private byte[] handleGET(HttpListenerRequest request)
+        {
+            switch (getEndpoint(request.RawUrl))
+            {
+                case "search":
+                    if (request.QueryString["search"] == null)
+                        return null;
+
+                    int c = DataBase.getItems(request.QueryString["term"]).Count;
+                    return Encoding.UTF8.GetBytes("{status:\"OK\",count=" + c + "}");
+                case "ping":
+                    return Response.pingResponse();
+                default:
+                    return Encoding.UTF8.GetBytes("{status:\"OK\"}");
+            }
+        }
+
+        private byte[] handlePOST(HttpListenerRequest request)
+        {
+            return Encoding.UTF8.GetBytes("{status:\"OK\"}");
+        }
+
+        private string getEndpoint(string url)
+        {
+            char[] delimiters = { '/' };
+            string[] parts = url.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
+            if(parts != null && parts.Length >= 1)
+                return parts[0];
+            return null;
         }
     }
 }
