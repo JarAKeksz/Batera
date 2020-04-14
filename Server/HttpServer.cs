@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Server
@@ -120,7 +122,14 @@ namespace Server
             switch (getEndpoint(request.RawUrl))
             {
                 case "login":
-                    return Response.pingResponse();
+                    using (var reader = new StreamReader(request.InputStream, request.ContentEncoding))
+                    {
+                        using (JsonDocument document = JsonDocument.Parse(reader.ReadToEnd()))
+                        {
+                            return Response.loginResponse(document.RootElement.GetProperty("email").GetString(),
+                                                          document.RootElement.GetProperty("password").GetString());
+                        }
+                    }
 
                 default:
                     return null;

@@ -65,5 +65,20 @@ namespace Server
                 return stream.ToArray();
             }
         }
+
+        public static byte[] loginResponse(string email, string password)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
+                {
+                    writer.WriteStartObject();
+                    writer.WriteString("token", DataBase.logIn(email, password).logInToken);
+                    writer.WriteEndObject();
+                }
+
+                return stream.ToArray();
+            }
+        }
     }
 }
