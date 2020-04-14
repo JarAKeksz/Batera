@@ -10,12 +10,16 @@ namespace Server
     {
         public int id { get; }
         public string name { get; }
+        public string category { get; }
+        public int price { get; }
         public string image { get; }
-        public Item(int _id, string _name, string _image)
+        public Item(int _id, string _name)//, string _category, int _price, string _image)
         {
             id = _id;
             name = _name;
-            image = _image;
+            /*category = _category;
+            price = _price;
+            image = _image;*/
         }
     }
 }

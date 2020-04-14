@@ -129,7 +129,7 @@ namespace Server
 
         private string getEndpoint(string url)
         {
-            char[] delimiters = { '/' };
+            char[] delimiters = { '/', '?', '&' };
             string[] parts = url.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
             if(parts != null && parts.Length >= 1)
                 return parts[0];
