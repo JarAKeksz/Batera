@@ -25,13 +25,16 @@ namespace Server
                 return false;
             }
         }
+
         public static User logIn(string email, string password)
         {
             User ret = null;
 
             try
             {
-                using (SqlCommand command = new SqlCommand("SELECT Id, UserName FROM Users WHERE Email = @email AND PasswordHash = HASHBYTES('SHA1', CONVERT(NVARCHAR(40), @password))", connection))
+                //todo: megvizsgalni h van-e ervenyes token
+                using (SqlCommand command = new SqlCommand("SELECT Id, UserName, CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', CONCAT(Id, UserName, GETDATE())), 2) " +
+                    "FROM Users WHERE Email = @email AND PasswordHash = CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @password), 2)", connection))
                 {
                     command.Parameters.Add(new SqlParameter("@email", email));
                     command.Parameters.Add(new SqlParameter("@password", password));
@@ -41,7 +44,16 @@ namespace Server
                     {
                         int id = reader.GetInt32(0);
                         string userName = reader.GetString(1);
-                        ret = new User(id, userName);
+                        string logInToken = reader.GetString(2);
+                        ret = new User(id, userName, logInToken);
+                        
+                        using (SqlCommand update = new SqlCommand("UPDATE Users SET Token = @logInToken WHERE Id = @id", connection))
+                        {
+                            command.Parameters.Add(new SqlParameter("@logInToken", logInToken));
+                            command.Parameters.Add(new SqlParameter("@id", id));
+
+                            Console.WriteLine("Erintett sorok: " + update.ExecuteNonQuery());
+                        }
                     }
                     reader.Close();
                 }
@@ -53,6 +65,7 @@ namespace Server
 
             return ret;
         }
+
         public static User signUp(string userName, string name, string email, string password)
         {
             try
@@ -89,7 +102,8 @@ namespace Server
 
                 if (!emailIsTaken && !nameIsTaken)
                 {
-                    using (SqlCommand command = new SqlCommand("INSERT INTO Users (UserName, Name, Email, PasswordHash) VALUES(@userName, @name, @email, HASHBYTES('SHA1', CONVERT(NVARCHAR(40), @password)))", connection))
+                    using (SqlCommand command = new SqlCommand("INSERT INTO Users (UserName, Name, Email, PasswordHash) " +
+                        "VALUES(@userName, @name, @email, CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @password), 2)", connection))
                     {
                         command.Parameters.Add(new SqlParameter("@userName", userName));
                         command.Parameters.Add(new SqlParameter("@name", name));
@@ -106,6 +120,7 @@ namespace Server
             }
             return logIn(email, password);
         }
+
         public static List<User> getUsers (string searchTerm)
         {
             List<User> ret = new List<User>();
@@ -161,6 +176,7 @@ namespace Server
 
             return ret;
         }
+
         public static Item getItemById(int searchId)
         {
             Item ret = null;
@@ -215,6 +231,7 @@ namespace Server
 
             return ret;
         }
+
         public static List<Category> getCategories(string searchTerm)
         {
             List<Category> ret = new List<Category>();
@@ -242,6 +259,7 @@ namespace Server
 
             return ret;
         }
+
         public static Category getCategoryById(int searchId)
         {
             Category ret = null;
