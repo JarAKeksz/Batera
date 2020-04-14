@@ -51,7 +51,7 @@ namespace Client.Pages
                             writer.WriteEndObject();
                         }
 
-                        content = new StringContent(stream.ToString(), Encoding.UTF8, "application/json");
+                        content = new StringContent(Encoding.UTF8.GetString(stream.ToArray()), Encoding.UTF8, "application/json");
                     }
                     var result = await client.PostAsync("/login", content);
                     string resultContent = await result.Content.ReadAsStringAsync();
