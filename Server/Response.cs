@@ -10,6 +10,8 @@ namespace Server
 {
     class Response
     {
+        private static readonly JsonWriterOptions JW_OPTS = new JsonWriterOptions { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+
         private static byte[] getBytes(JsonDocument json)
         {
             using (MemoryStream stream = new MemoryStream())
@@ -30,7 +32,7 @@ namespace Server
         {
             using (MemoryStream stream = new MemoryStream())
             {
-                using (Utf8JsonWriter writer = new Utf8JsonWriter(stream))
+                using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
                 {
                     writer.WriteStartObject();
                     writer.WriteString("message", "blin");
@@ -45,7 +47,7 @@ namespace Server
         {
             using (MemoryStream stream = new MemoryStream())
             {
-                using (Utf8JsonWriter writer = new Utf8JsonWriter(stream))
+                using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
                 {
                     writer.WriteStartObject();
                     writer.WriteStartArray("items");
