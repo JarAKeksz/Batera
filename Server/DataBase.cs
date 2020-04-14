@@ -242,23 +242,22 @@ namespace Server
 
             return ret;
         }
-        public static List<Category> getCategoryById(int searchId)
+        public static Category getCategoryById(int searchId)
         {
-            List<Category> ret = new List<Category>();
+            Category ret = null;
 
             try
             {
-                using (SqlCommand command = new SqlCommand("SELECT Id, Name, Description FROM Categories WHERE Id = @searchId", connection))
+                using (SqlCommand command = new SqlCommand("SELECT Name, Description FROM Categories WHERE Id = @searchId", connection))
                 {
                     command.Parameters.Add(new SqlParameter("@searchId", searchId));
 
                     SqlDataReader reader = command.ExecuteReader();
                     while (reader.Read())
                     {
-                        int id = reader.GetInt32(0);
-                        string name = reader.GetString(1);
-                        string description = reader.GetString(2);
-                        ret.Add(new Category(id, name, description));
+                        string name = reader.GetString(0);
+                        string description = reader.GetString(0);
+                        ret = new Category(searchId, name, description);
                     }
                     reader.Close();
                 }
