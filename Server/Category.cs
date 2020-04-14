@@ -18,5 +18,11 @@ namespace Server
             name = _name;
             description = _description;
         }
+        public Category(int _id, string _name)
+        {
+            id = _id;
+            name = _name;
+            description = null;
+        }
     }
 }
