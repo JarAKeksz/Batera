@@ -52,5 +52,33 @@ namespace Server
 
             return ret;
         }
+        public static List<Category> getCategories(string searchTerm)
+        {
+            List<Category> ret = new List<Category>();
+
+            try
+            {
+                using (SqlCommand command = new SqlCommand("SELECT Id, Name, Description FROM Categories WHERE Name LIKE '%' + @searchTerm + '%'", connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@searchTerm", searchTerm));
+
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        int id = reader.GetInt32(0);
+                        string name = reader.GetString(1);
+                        string desc = reader.GetString(2);
+                        ret.Add(new Category(id, name, desc));
+                    }
+                    reader.Close();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+            return ret;
+        }
     }
 }
