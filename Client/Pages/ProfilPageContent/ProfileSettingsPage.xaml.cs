@@ -13,19 +13,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Client
+namespace Client.ProfilPageContent
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for ProfileSettingsPage.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class ProfileSettingsPage : Page
     {
-        public MainWindow()
+        public ProfileSettingsPage()
         {
             InitializeComponent();
-
-            mainFrame.NavigationService.Navigate(new MainPage());
         }
-
     }
 }

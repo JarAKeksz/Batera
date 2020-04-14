@@ -13,19 +13,26 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Client
+namespace Client.Pages
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for LoginPage.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class LoginPage : Page
     {
-        public MainWindow()
+        public LoginPage()
         {
             InitializeComponent();
-
-            mainFrame.NavigationService.Navigate(new MainPage());
         }
 
+        private void loginButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.NavigationService.Navigate(new LoginPage());
+        }
+
+        private void signupButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.NavigationService.Navigate(new SignUpPage());
+        }
     }
 }

@@ -13,19 +13,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Client
+namespace Client.ProfilPageContent
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for SavedItemsPage.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class SavedItemsPage : Page
     {
-        public MainWindow()
+        public SavedItemsPage()
         {
             InitializeComponent();
-
-            mainFrame.NavigationService.Navigate(new MainPage());
         }
-
     }
 }

@@ -1,0 +1,51 @@
+﻿<Page x:Class="Client.ProfilePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Client"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="ProfilePage">
+
+    <Grid>
+
+        <!-- Head -->
+        <Grid Height="50"  VerticalAlignment="Top" HorizontalAlignment="Stretch" Background="#FFFFB1F7">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock x:Name="logoTextBlock" Text="Batera" Foreground="Magenta" FontSize="24" FontWeight="Bold" FontStyle="Italic" TextDecorations="Underline" Width="150" TextAlignment="Center" Height="30" PreviewMouseDown="logoTextBlock_PreviewMouseDown"/>
+
+            <!-- Sarch bar -->
+            
+
+            <!-- Profile button -->
+            <Button x:Name="profileButton" Grid.Column="2" Content="Profile" Margin="5" Background="#FFFFB1F7" Click="profileButton_Click"/>
+        </Grid>
+
+        <!-- Sarch options -->
+        <Grid HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="150"  Margin="0,50,0,0" Background="#FFFFB1F7" >
+            <StackPanel>
+
+                <!-- Page Navigation -->
+                
+                <Button x:Name="savedItemsButton" Content="Saved Items" Margin="5" Background="#FFFFB1F7" Click="savedItemsButton_Click"/>
+                <Button x:Name="boughtItemsButton" Content="Bought Items" Margin="5" Background="#FFFFB1F7" Click="boughtItemsButton_Click"/>
+                <Button x:Name="ProfileSettingsButton" Content="Profile settings" Margin="5" Background="#FFFFB1F7" Click="ProfileSettingsButton_Click"/>
+
+            </StackPanel>
+        </Grid>
+        <!-- Item list grid -->
+        <Grid HorizontalAlignment="Stretch"  Margin="150,50,0,0" VerticalAlignment="Stretch" Background="White">
+            <DockPanel>
+                <Frame x:Name="ProfilPageContent" />
+            </DockPanel>
+        </Grid>
+
+    </Grid>
+</Page>

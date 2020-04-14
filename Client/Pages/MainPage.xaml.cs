@@ -16,16 +16,19 @@ using System.Windows.Shapes;
 namespace Client
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for MainPage.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainPage : Page
     {
-        public MainWindow()
+        public MainPage()
         {
             InitializeComponent();
-
-            mainFrame.NavigationService.Navigate(new MainPage());
         }
 
+        private void profileButton_Click(object sender, RoutedEventArgs e)
+        {
+
+            this.NavigationService.Navigate(new ProfilePage());
+        }
     }
 }

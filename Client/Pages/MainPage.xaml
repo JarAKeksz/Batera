@@ -1,0 +1,94 @@
+﻿<Page x:Class="Client.MainPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Client"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="MainPage">
+
+    <Grid>
+
+        <!-- Head -->
+        <Grid Height="50"  VerticalAlignment="Top" HorizontalAlignment="Stretch" Background="#FFFFB1F7">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock x:Name="logoTextBlock" Text="Batera" Foreground="Magenta" FontSize="24" FontWeight="Bold" FontStyle="Italic" TextDecorations="Underline" Width="150" TextAlignment="Center" Height="30"/>
+
+            <!-- Sarch bar -->
+            <Grid Grid.Column="1" HorizontalAlignment="Stretch"  VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="70"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="50"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Search: "  Margin="5,10,5,0" Grid.Column="0" FontSize="16" TextAlignment="Center"/>
+                <TextBox x:Name="searchBarTextBox"  Padding="5"  Margin="5" Grid.Column="1"/>
+                <Button x:Name="searchButton" Grid.Column="2" Content="Search" BorderBrush="{x:Null}" >
+                    <Button.Background>
+                        <ImageBrush x:Name="searchImage" Stretch="Uniform"/>
+                    </Button.Background>
+                </Button>
+            </Grid>
+
+            <!-- Profile button -->
+            <Button x:Name="profileButton" Grid.Column="2" Content="Profile" Margin="5" Background="#FFFFB1F7" Click="profileButton_Click"/>
+        </Grid>
+
+        <!-- Sarch options -->
+        <Grid HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="150"  Margin="0,50,0,0" Background="#FFFFB1F7" >
+            <StackPanel>
+
+                <!-- Categories -->
+                <TextBlock Text="Categories:" Margin="4 ,0,4,2" FontSize="16"/>
+                <ComboBox x:Name="categoriesComboBox" SelectedItem="0" Padding="2" Margin="4 ,0,4,15"/>
+
+                <!-- Condition -->
+                <TextBlock Text="Condition: " FontSize="16" Margin="4"/>
+                <CheckBox x:Name="newConditionCheckBox" Content=" New" Margin="4,0,4,0"/>
+                <CheckBox x:Name="usedConditionCheckBox" Content=" Used" Margin="4,0,4,0"/>
+                <CheckBox x:Name="notSpecifiedConditionCheckBox" Content=" Not specified" Margin="4,0,4,15" />
+
+                <!-- Price -->
+                <TextBlock Text="Price: " Margin="4 ,0,4,0" FontSize="16"/>
+                <Grid Margin="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="From:" Margin="2" FontSize="8"/>
+                        <TextBox x:Name="priceFromTextBox" Margin="2"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="To:" Margin="2" FontSize="8"/>
+                        <TextBox x:Name="priceToTextBox" Margin="2"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Buying format -->
+                <TextBlock Text="Buying Format: " FontSize="16" Margin="4"/>
+                <CheckBox x:Name="bidBuyingFormatCheckBox" Content="Bid" Margin="4,0,4,0"/>
+                <CheckBox x:Name="buyBuyingFormatCheckBox" Content="Buy" Margin="4,0,4,0"/>
+
+
+
+
+            </StackPanel>
+        </Grid>
+        <!-- Item list grid -->
+        <Grid HorizontalAlignment="Stretch"  Margin="150,50,0,0" VerticalAlignment="Stretch" Background="White">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+        </Grid>
+
+    </Grid>
+</Page>
