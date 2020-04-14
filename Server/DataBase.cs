@@ -1,6 +1,7 @@
 ﻿using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
@@ -33,29 +34,33 @@ namespace Server
             try
             {
                 //todo: megvizsgalni h van-e ervenyes token
-                using (SqlCommand command = new SqlCommand("SELECT Id, UserName, CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', CONCAT(Id, UserName, GETDATE())), 2) " +
+                using (SqlCommand command = new SqlCommand("SELECT Id, UserName, CONVERT(NVARCHAR(64) , HASHBYTES('SHA2_256', CONCAT(Id, UserName, GETDATE())), 2) " +
                     "FROM Users WHERE Email = @email AND PasswordHash = CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @password), 2)", connection))
                 {
                     command.Parameters.Add(new SqlParameter("@email", email));
-                    command.Parameters.Add(new SqlParameter("@password", password));
+                    //command.Parameters.Add(new SqlParameter("@password", System.Data.SqlDbType.VarChar).Value = password);
+                    command.Parameters.Add("@password", SqlDbType.VarChar).Value = password;
 
                     SqlDataReader reader = command.ExecuteReader();
-                    while (reader.Read())
+
+                    if (reader.Read())
                     {
                         int id = reader.GetInt32(0);
                         string userName = reader.GetString(1);
                         string logInToken = reader.GetString(2);
                         ret = new User(id, userName, logInToken);
-                        
-                        using (SqlCommand update = new SqlCommand("UPDATE Users SET Token = @logInToken WHERE Id = @id", connection))
-                        {
-                            command.Parameters.Add(new SqlParameter("@logInToken", logInToken));
-                            command.Parameters.Add(new SqlParameter("@id", id));
-
-                            Console.WriteLine("Erintett sorok: " + update.ExecuteNonQuery());
-                        }
+                    }
+                    else
+                    {
+                        return null;
                     }
                     reader.Close();
+                }
+
+                using (SqlCommand update = new SqlCommand("UPDATE Users SET Token = @logInToken WHERE Id = @id", connection))
+                {
+                    update.Parameters.Add(new SqlParameter("@logInToken", ret.logInToken));
+                    update.Parameters.Add(new SqlParameter("@id", ret.id));
                 }
             }
             catch (Exception e)

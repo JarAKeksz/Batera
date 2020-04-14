@@ -124,10 +124,8 @@ namespace Server
                 case "login":
                     using (var reader = new StreamReader(request.InputStream))
                     {
-                        Console.WriteLine("******");
-                        Console.WriteLine(reader.ReadToEnd());
-                        Console.WriteLine("******");
-                        using (JsonDocument document = JsonDocument.Parse(reader.ReadToEnd()))
+                        string s = reader.ReadToEnd();
+                        using (JsonDocument document = JsonDocument.Parse(s))
                         {
                             return Response.loginResponse(document.RootElement.GetProperty("email").GetString(),
                                                           document.RootElement.GetProperty("password").GetString());
