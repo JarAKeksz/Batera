@@ -30,7 +30,7 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="Search: "  Margin="5,10,5,0" Grid.Column="0" FontSize="16" TextAlignment="Center"/>
                 <TextBox x:Name="searchBarTextBox"  Padding="5"  Margin="5" Grid.Column="1"/>
-                <Button x:Name="searchButton" Grid.Column="2" Content="Search" BorderBrush="{x:Null}" >
+                <Button x:Name="searchButton" Grid.Column="2" Content="Search" Click="searchButton_Click" >
                     <Button.Background>
                         <ImageBrush x:Name="searchImage" Stretch="Uniform"/>
                     </Button.Background>
@@ -84,20 +84,20 @@
         </Grid>
         <!-- Item list grid -->
         <Grid HorizontalAlignment="Stretch"  Margin="150,50,0,0" VerticalAlignment="Stretch" Background="White">
-            <ItemsControl Name="icTodoList">
-                <ItemsControl.ItemTemplate>
+            <ListBox Name="itemsList" HorizontalContentAlignment="Stretch">
+                <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Grid Margin="0,0,0,5">
+                        <Grid Margin="3" Background="Aqua">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="{Binding Title}" />
-                            <TextBlock Text="{Binding Value}" />
+                            <TextBlock Text="{Binding Id}" Grid.Column="0"/>
+                            <TextBlock Text="{Binding Name}" Grid.Column="1"/>
                         </Grid>
                     </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                </ListBox.ItemTemplate>
+            </ListBox>
         </Grid>
 
     </Grid>

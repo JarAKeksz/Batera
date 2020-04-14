@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Client.Modells;
+using Client.Pages;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,25 +22,36 @@ namespace Client
     /// </summary>
     public partial class MainPage : Page
     {
+        BateraCliensClass helper = new BateraCliensClass();
         public MainPage()
         {
             InitializeComponent();
+            List<Item> list = new List<Item>();
+            list = helper.AllItem();
 
-
-            BateraCliensClass b = new BateraCliensClass();
-            b.ToString();
-            Console.WriteLine("***a***");
-            b.Main();
-
-
-
-
+            itemsList.ItemsSource = list;
         }
 
         private void profileButton_Click(object sender, RoutedEventArgs e)
         {
+            if (User.Instance.getToken() != null)
+            {
+                this.NavigationService.Navigate(new ProfilePage());
+            }
+            else
+            {
+                this.NavigationService.Navigate(new LoginPage());
+            }
 
-            this.NavigationService.Navigate(new ProfilePage());
+        }
+
+        private void searchButton_Click(object sender, RoutedEventArgs e)
+        {
+            List<Item> list = new List<Item>();
+
+            list = helper.SearchedItem(searchBarTextBox.Text);
+
+            itemsList.ItemsSource = list;
         }
     }
 }

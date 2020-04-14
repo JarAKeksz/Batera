@@ -122,8 +122,11 @@ namespace Server
             switch (getEndpoint(request.RawUrl))
             {
                 case "login":
-                    using (var reader = new StreamReader(request.InputStream, request.ContentEncoding))
+                    using (var reader = new StreamReader(request.InputStream))
                     {
+                        Console.WriteLine("******");
+                        Console.WriteLine(reader.ReadToEnd());
+                        Console.WriteLine("******");
                         using (JsonDocument document = JsonDocument.Parse(reader.ReadToEnd()))
                         {
                             return Response.loginResponse(document.RootElement.GetProperty("email").GetString(),
