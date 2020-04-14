@@ -92,6 +92,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>BateraDBDataSet.xsd</DependentUpon>
     </Compile>
+    <Compile Include="Category.cs" />
     <Compile Include="DataBase.cs" />
     <Compile Include="HttpServer.cs" />
     <Compile Include="Item.cs" />
@@ -102,6 +103,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="User.cs" />
     <Compile Include="Response.cs" />
   </ItemGroup>
   <ItemGroup>
