@@ -10,11 +10,20 @@ namespace Server
     {
         public int id { get; }
         public string userName { get; }
+        public string logInToken { get; }
 
         public User(int _id, string _userName)
         {
             id = _id;
             userName = _userName;
+            logInToken = null;
+        }
+
+        public User(int _id, string _userName, string _logInToken)
+        {
+            id = _id;
+            userName = _userName;
+            logInToken = _logInToken;
         }
     }
 }
