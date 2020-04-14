@@ -10,23 +10,27 @@
 
     <Grid Background="#FFFFB1F7">
 
-        <StackPanel Background="AliceBlue" Margin="30">
-            <TextBlock Text="Login" FontSize="32"/>
-            
-            <TextBlock Text="email: "/>
-            <TextBox x:Name="emailTextBox"/>
+        
 
-            <TextBlock Text="password: "/>
-            <TextBox x:Name="passwordTextBox"/>
-            
-            <TextBlock Text="password again: "/>
-            <TextBox x:Name="passwordAgainTextBox"/>
+        <StackPanel Background="AliceBlue" Margin="30" Width="400" Height="300">
+            <TextBlock Text="Login" FontSize="32" Margin="10"/>
 
-            <TextBlock Text="Name: "/>
-            <TextBox x:Name="NameTextBox"/>
+            <TextBlock Text="email: " Margin="10 0"/>
+            <TextBox x:Name="emailTextBox" Margin="10 0"/>
 
-            <Button x:Name="loginButton" Content="Log in" Click="loginButton_Click"/>
-            <Button x:Name="signupButton" Content="Sign up" Click="signupButton_Click"/>
+            <TextBlock Text="password: " Margin="10 0"/>
+            <PasswordBox x:Name="passwordPasswordBox" Margin="10 0"/>
+
+            <TextBlock Text="password again: " Margin="10 0"/>
+            <PasswordBox x:Name="passwordAgainPasswordBox" Margin="10 0"/>
+
+            <TextBlock Text="Name: " Margin="10 0"/>
+            <TextBox x:Name="nameTextBox" Margin="10 0"/>
+
+            <Button x:Name="loginButton" Content="Log in" Click="loginButton_Click" Margin="10"/>
+            <Button x:Name="signupButton" Content="Sign up" Click="signupButton_Click" Margin="10 0"/>
+
+            <Button x:Name="backButton" Content="Back" Margin="10" Click="backButton_Click"/>
         </StackPanel>
 
 

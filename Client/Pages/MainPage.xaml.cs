@@ -23,6 +23,16 @@ namespace Client
         public MainPage()
         {
             InitializeComponent();
+
+
+            BateraCliensClass b = new BateraCliensClass();
+            b.ToString();
+            Console.WriteLine("***a***");
+            b.Main();
+
+
+
+
         }
 
         private void profileButton_Click(object sender, RoutedEventArgs e)

@@ -32,7 +32,22 @@ namespace Client.Pages
 
         private void signupButton_Click(object sender, RoutedEventArgs e)
         {
+            String email = emailTextBox.Text.Trim(' ');
+            String password = passwordPasswordBox.Password.Trim(' ');
+            String passwordAgain = passwordAgainPasswordBox.Password;
+            String name = nameTextBox.Text;
+
+            if(password == passwordAgain)
+            {
+                // 
+            }
+
             this.NavigationService.Navigate(new SignUpPage());
+        }
+
+        private void backButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.NavigationService.Navigate(new MainPage());
         }
     }
 }

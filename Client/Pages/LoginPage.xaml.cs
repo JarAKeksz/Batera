@@ -27,12 +27,23 @@ namespace Client.Pages
 
         private void loginButton_Click(object sender, RoutedEventArgs e)
         {
+            String email = emailTextBox.Text;
+            String password = passwordPasswordBox.Password;
+
+
             this.NavigationService.Navigate(new LoginPage());
+
+            
         }
 
         private void signupButton_Click(object sender, RoutedEventArgs e)
         {
             this.NavigationService.Navigate(new SignUpPage());
+        }
+
+        private void backButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.NavigationService.Navigate(new MainPage());
         }
     }
 }
