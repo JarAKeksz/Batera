@@ -168,7 +168,7 @@ namespace Server
             try
             {
                 using (SqlCommand command = new SqlCommand("SELECT i.Id, i.Name, c.Name, i.Price, i.Image FROM Items AS i JOIN Categories AS c ON i.CategoryId = c.Id " +
-                    "WHERE Name LIKE '%' + @searchTerm + '%'", connection))
+                    "WHERE i.Name LIKE '%' + @searchTerm + '%'", connection))
                 {
                     command.Parameters.Add(new SqlParameter("@searchTerm", searchTerm));
                     
@@ -200,7 +200,7 @@ namespace Server
             try
             {
                 using (SqlCommand command = new SqlCommand("SELECT i.Id, i.Name, c.Name, i.Price, i.Image FROM Items AS i JOIN Categories AS c ON i.CategoryId = c.Id " +
-                    "WHERE Id = @searchId", connection))
+                    "WHERE i.Id = @searchId", connection))
                 {
                     command.Parameters.Add(new SqlParameter("@searchId", searchId));
 
@@ -231,7 +231,7 @@ namespace Server
             try
             {
                 using (SqlCommand command = new SqlCommand("SELECT i.Id, i.Name, c.Name, i.Price, i.Image FROM Items AS i JOIN Categories AS c ON i.CategoryId = c.Id " +
-                    "WHERE CategoryId = @searchCategoryId", connection))
+                    "WHERE i.CategoryId = @searchCategoryId", connection))
                 {
                     command.Parameters.Add(new SqlParameter("@searchCategoryId", searchCategoryId));
 
