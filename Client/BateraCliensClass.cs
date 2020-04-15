@@ -66,9 +66,11 @@ namespace Client
 
                     int id = element.GetProperty("id").GetInt32();
                     string name = element.GetProperty("name").GetString();
+                    int price = element.GetProperty("price").GetInt32();
+                    string category = element.GetProperty("category").GetString();
+                    string image = element.GetProperty("image").GetString();
 
-
-                    result.Add(new Item(id, name));
+                    result.Add(new Item(id, name, price, category, image));
                 }
             }
             return result;
@@ -93,9 +95,11 @@ namespace Client
 
                     int id = element.GetProperty("id").GetInt32();
                     string name = element.GetProperty("name").GetString();
+                    int price = element.GetProperty("price").GetInt32();
+                    string category = element.GetProperty("category").GetString();
+                    string image = element.GetProperty("image").GetString();
 
-
-                    result.Add(new Item(id, name));
+                    result.Add(new Item(id, name, price, category, image));
                 }
             }
             return result;
