@@ -12,7 +12,7 @@ Returns a list of items based on a search term.
 * Request type: `GET`
 * Endpoint: `/search`
 * Parameters:
-	* `term`: a string containing the serch term
+	* `term`: a string containing the serch term. If not provided, all items will be provided.
 * Retruns:
 	* `items`: an array containing objects. Each object has an `id` (int), `name` (string), `price` (int), `category` (string) and `image` (string, base64 coded image).
 
