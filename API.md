@@ -24,4 +24,5 @@ Is used to get a session token for a session of a registered user.
 	* `email`: a string containing the e-mail address
 	* `password`: a string containing the password
 * Returns:
-	* `token`: a string containing the session token
+	* `success`: a boolean containing if the login was successful
+	* `token`: a string containing the session token in case of a successful login
