@@ -57,10 +57,15 @@ namespace Server
                     reader.Close();
                 }
 
-                using (SqlCommand update = new SqlCommand("UPDATE Users SET Token = @logInToken WHERE Id = @id", connection))
+                if (ret != null)
                 {
-                    update.Parameters.Add(new SqlParameter("@logInToken", ret.logInToken));
-                    update.Parameters.Add(new SqlParameter("@id", ret.id));
+                    using (SqlCommand update = new SqlCommand("UPDATE Users SET Token = @logInToken WHERE Id = @id", connection))
+                    {
+                        update.Parameters.Add(new SqlParameter("@logInToken", ret.logInToken));
+                        update.Parameters.Add(new SqlParameter("@id", ret.id));
+
+                        Console.WriteLine("Erintett sorok: " + update.ExecuteNonQuery());
+                    }
                 }
             }
             catch (Exception e)
@@ -81,7 +86,7 @@ namespace Server
                     command.Parameters.Add(new SqlParameter("@email", email));
 
                     SqlDataReader reader = command.ExecuteReader();
-                    while (reader.Read())
+                    if (reader.Read())
                     {
                         emailIsTaken = reader.GetInt32(0) == 1;
                     }
@@ -96,7 +101,7 @@ namespace Server
                     command.Parameters.Add(new SqlParameter("@userName", userName));
 
                     SqlDataReader reader = command.ExecuteReader();
-                    while (reader.Read())
+                    if (reader.Read())
                     {
                         nameIsTaken = reader.GetInt32(0) == 1;
                     }
