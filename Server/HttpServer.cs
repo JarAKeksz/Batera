@@ -46,10 +46,8 @@ namespace Server
                 HttpListenerRequest request = context.Request;
                 HttpListenerResponse response = context.Response;
 
-                Console.WriteLine(request.Url.ToString());
-                Console.WriteLine(request.HttpMethod);
-                Console.WriteLine(request.UserHostName);
-                Console.WriteLine(request.UserAgent);
+                Console.WriteLine("[" + DateTime.Now.ToLongTimeString() + "] " + request.Url.ToString());
+
                 // Display the URL used by the client.
                 /*Console.WriteLine("URL: {0}", request.Url.OriginalString);
                 Console.WriteLine("Raw URL: {0}", request.RawUrl);
@@ -63,8 +61,8 @@ namespace Server
                 //Display the host information specified by the client;
                 Console.WriteLine("Host name: {0}", request.UserHostName);
                 Console.WriteLine("Host address: {0}", request.UserHostAddress);
-                Console.WriteLine("User agent: {0}", request.UserAgent);*/
-                Console.WriteLine();
+                Console.WriteLine("User agent: {0}", request.UserAgent);
+                Console.WriteLine();*/
 
                 byte[] data;
 

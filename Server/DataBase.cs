@@ -72,6 +72,7 @@ namespace Server
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                ret = null;
             }
 
             return ret;
