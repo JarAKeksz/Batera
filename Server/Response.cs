@@ -56,6 +56,9 @@ namespace Server
                         writer.WriteStartObject();
                         writer.WriteNumber("id", i.id);
                         writer.WriteString("name", i.name);
+                        writer.WriteNumber("price", i.price);
+                        writer.WriteString("category", i.category);
+                        writer.WriteString("image", i.image);
                         writer.WriteEndObject();
                     }
                     writer.WriteEndArray();

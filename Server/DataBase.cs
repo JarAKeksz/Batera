@@ -167,7 +167,7 @@ namespace Server
 
             try
             {
-                using (SqlCommand command = new SqlCommand("SELECT Id, Name FROM Items WHERE Name LIKE '%' + @searchTerm + '%'", connection))
+                using (SqlCommand command = new SqlCommand("SELECT Id, Name, 'category', Price, 'image' FROM Items WHERE Name LIKE '%' + @searchTerm + '%'", connection))
                 {
                     command.Parameters.Add(new SqlParameter("@searchTerm", searchTerm));
                     
@@ -176,7 +176,10 @@ namespace Server
                     {
                         int id = reader.GetInt32(0);
                         string name = reader.GetString(1);
-                        ret.Add(new Item(id, name));
+                        string category = reader.GetString(2);
+                        int price = reader.GetInt32(3);
+                        string image = reader.GetString(4);
+                        ret.Add(new Item(id, name, category, price, image));
                     }
                     reader.Close();
                 }
@@ -195,16 +198,19 @@ namespace Server
 
             try
             {
-                using (SqlCommand command = new SqlCommand("SELECT Id, Name FROM Items WHERE Id = @searchId", connection))
+                using (SqlCommand command = new SqlCommand("SELECT Id, Name, 'category', Price, 'image' FROM Items WHERE Id = @searchId", connection))
                 {
                     command.Parameters.Add(new SqlParameter("@searchId", searchId));
 
                     SqlDataReader reader = command.ExecuteReader();
-                    while (reader.Read())
+                    if (reader.Read())
                     {
                         int id = reader.GetInt32(0);
                         string name = reader.GetString(1);
-                        ret = new Item(id, name);
+                        string category = reader.GetString(2);
+                        int price = reader.GetInt32(3);
+                        string image = reader.GetString(4);
+                        ret = new Item(id, name, category, price, image);
                     }
                     reader.Close();
                 }
@@ -222,7 +228,7 @@ namespace Server
 
             try
             {
-                using (SqlCommand command = new SqlCommand("SELECT Id, Name FROM Items WHERE CategoryId = @searchCategoryId", connection))
+                using (SqlCommand command = new SqlCommand("SELECT Id, Name, 'category', Price, 'image' FROM Items WHERE CategoryId = @searchCategoryId", connection))
                 {
                     command.Parameters.Add(new SqlParameter("@searchCategoryId", searchCategoryId));
 
@@ -231,7 +237,10 @@ namespace Server
                     {
                         int id = reader.GetInt32(0);
                         string name = reader.GetString(1);
-                        ret.Add(new Item(id, name));
+                        string category = reader.GetString(2);
+                        int price = reader.GetInt32(3);
+                        string image = reader.GetString(4);
+                        ret.Add(new Item(id, name, category, price, image));
                     }
                     reader.Close();
                 }

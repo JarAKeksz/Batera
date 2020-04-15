@@ -13,13 +13,14 @@ namespace Server
         public string category { get; }
         public int price { get; }
         public string image { get; }
-        public Item(int _id, string _name)//, string _category, int _price, string _image)
+
+        public Item(int id, string name, string category, int price, string image)
         {
-            id = _id;
-            name = _name;
-            /*category = _category;
-            price = _price;
-            image = _image;*/
+            this.id = id;
+            this.name = name;
+            this.category = category;
+            this.price = price;
+            this.image = image;
         }
     }
 }
