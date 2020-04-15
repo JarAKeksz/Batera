@@ -52,7 +52,7 @@ namespace Server
                     }
                     else
                     {
-                        return null;
+                        ret = null;
                     }
                     reader.Close();
                 }
@@ -61,10 +61,11 @@ namespace Server
                 {
                     using (SqlCommand update = new SqlCommand("UPDATE Users SET Token = @logInToken WHERE Id = @id", connection))
                     {
-                        update.Parameters.Add(new SqlParameter("@logInToken", ret.logInToken));
+                        //update.Parameters.Add(new SqlParameter("@logInToken", ret.logInToken));
+                        update.Parameters.Add("@logInToken", SqlDbType.Char).Value = ret.logInToken;
                         update.Parameters.Add(new SqlParameter("@id", ret.id));
 
-                        Console.WriteLine("Erintett sorok: " + update.ExecuteNonQuery());
+                        Console.WriteLine("Rows affected: " + update.ExecuteNonQuery());
                     }
                 }
             }

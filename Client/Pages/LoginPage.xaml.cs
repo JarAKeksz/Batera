@@ -55,12 +55,25 @@ namespace Client.Pages
                     }
                     var result = await client.PostAsync("/login", content);
                     string resultContent = await result.Content.ReadAsStringAsync();
-                    Console.WriteLine(resultContent);
+
+                    using (JsonDocument document = JsonDocument.Parse(resultContent))
+                    {
+                        bool success = document.RootElement.GetProperty("success").GetBoolean();
+                        if (success)
+                        {
+                            //LOGIN SUCCESS
+                            string token = document.RootElement.GetProperty("token").GetString();
+                            User.Instance.setToken(token);
+                            this.NavigationService.Navigate(new MainPage());
+                        }
+                        else
+                        {
+                            //LOGIN FAIL
+                            Console.WriteLine("Login failed.");
+                        }
+                    }
                 }
             }
-
-
-            this.NavigationService.Navigate(new LoginPage());
         }
 
         private void signupButton_Click(object sender, RoutedEventArgs e)

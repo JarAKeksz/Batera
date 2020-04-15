@@ -73,7 +73,15 @@ namespace Server
                 using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
                 {
                     writer.WriteStartObject();
-                    writer.WriteString("token", DataBase.logIn(email, password).logInToken);
+                    User u = DataBase.logIn(email, password);
+                    if (u == null) {
+                        writer.WriteBoolean("success", false);
+                    }
+                    else
+                    {
+                        writer.WriteBoolean("success", true);
+                        writer.WriteString("token", u.logInToken);
+                    }
                     writer.WriteEndObject();
                 }
 
