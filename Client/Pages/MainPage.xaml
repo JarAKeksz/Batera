@@ -89,11 +89,13 @@
                     <DataTemplate>
                         <Grid Margin="3" Background="Aqua">
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="{Binding Id}" Grid.Column="0"/>
-                            <TextBlock Text="{Binding Name}" Grid.Column="1"/>
+                            <Image Source="{Binding Image}" Grid.Column="0"/>
+                            <TextBlock Text="{Binding Id}" Grid.Column="1"/>
+                            <TextBlock Text="{Binding Name}" Grid.Column="2"/>
                         </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
