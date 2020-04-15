@@ -29,12 +29,19 @@ namespace Client.Modells
 
         private void convertImage(string b64)
         {
-            byte[] binaryData = Convert.FromBase64String(b64);
+            try
+            {
+                byte[] binaryData = Convert.FromBase64String(b64);
 
-            Image = new BitmapImage();
-            Image.BeginInit();
-            Image.StreamSource = new MemoryStream(binaryData);
-            Image.EndInit();
+                Image = new BitmapImage();
+                Image.BeginInit();
+                Image.StreamSource = new MemoryStream(binaryData);
+                Image.EndInit();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
     }
 }
