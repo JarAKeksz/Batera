@@ -51,7 +51,7 @@ namespace Client
         {
             List<Item> result = new List<Item>();
 
-            string itemsJson = JsonBody("http://localhost:8000/search?term=a");
+            string itemsJson = JsonBody("http://localhost:8000/search");
 
             //json parse 
             var options = new JsonDocumentOptions

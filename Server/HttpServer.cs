@@ -108,8 +108,7 @@ namespace Server
 
                 case "search":
                     if (request.QueryString["term"] == null)
-                        return null;
-
+                        return Response.searchResponse("");
                     return Response.searchResponse(request.QueryString["term"]);
                 
                 default:
