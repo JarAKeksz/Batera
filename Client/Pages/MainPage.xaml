@@ -47,17 +47,16 @@
 
                 <!-- Categories -->
                 <TextBlock Text="Categories:" Margin="4 ,0,4,2" FontSize="16"/>
-                <ComboBox x:Name="categoriesComboBox" SelectedItem="0" Padding="2" Margin="4 ,0,4,15"/>
+                <ComboBox x:Name="categoriesComboBox" SelectedItem="0" Padding="2" Margin="4 ,0,4,15" ItemsSource="{Binding categoriesCollection}"/>
 
                 <!-- Condition -->
-                <TextBlock Text="Condition: " FontSize="16" Margin="4"/>
+                <TextBlock Text="Conditiosn: " FontSize="16" Margin="4"/>
                 <CheckBox x:Name="newConditionCheckBox" Content=" New" Margin="4,0,4,0"/>
-                <CheckBox x:Name="usedConditionCheckBox" Content=" Used" Margin="4,0,4,0"/>
-                <CheckBox x:Name="notSpecifiedConditionCheckBox" Content=" Not specified" Margin="4,0,4,15" />
+                <CheckBox x:Name="usedConditionCheckBox" Content=" Used" Margin="4,0,4,15"/>
 
                 <!-- Price -->
                 <TextBlock Text="Price: " Margin="4 ,0,4,0" FontSize="16"/>
-                <Grid Margin="4">
+                <Grid Margin="4,0,4,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>

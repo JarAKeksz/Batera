@@ -76,7 +76,7 @@ namespace Client
             return result;
         }
 
-        public List<Item> SearchedItem(string searchedName)
+        public List<Item> SearchedItem(string searchedName, string searchedCategory)
         {
             List<Item> result = new List<Item>();
 

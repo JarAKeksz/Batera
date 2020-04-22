@@ -30,6 +30,9 @@ namespace Client
             list = helper.AllItem();
 
             itemsList.ItemsSource = list;
+
+            DataContext = new ComboBoxViewModel();
+
         }
 
         private void profileButton_Click(object sender, RoutedEventArgs e)
@@ -47,11 +50,64 @@ namespace Client
 
         private void searchButton_Click(object sender, RoutedEventArgs e)
         {
+
             List<Item> list = new List<Item>();
 
-            list = helper.SearchedItem(searchBarTextBox.Text);
+            string selectedcategory = categoriesComboBox.SelectedItem.ToString();
+            ConditionValue selectedCondition = GetCondition();
+            BuyingFormat selectedBuyingFormat = SelectedBuyingFormat();
+            int minPrice = Int32.Parse(priceFromTextBox.Text);
+            int maxPrice = Int32.Parse(priceToTextBox.Text);
+
+            list = helper.SearchedItem(searchBarTextBox.Text, selectedcategory);
+
+
 
             itemsList.ItemsSource = list;
         }
+
+        private class ComboBoxViewModel{
+            public List<String> categoriesCollection { get; set; }
+
+            public ComboBoxViewModel()
+            {
+                categoriesCollection = new List<string>()
+                {
+                    "game",
+                    "nature",
+                    "anime"
+                };
+            }
+            
+        }
+        private enum ConditionValue
+        {
+            All,
+            Used,
+            New
+        }
+        private ConditionValue GetCondition()
+        {
+            ConditionValue selectedCondition = ConditionValue.All;
+            if(newConditionCheckBox.IsChecked.Value && !usedConditionCheckBox.IsChecked.Value) { selectedCondition = ConditionValue.New; }
+            else if(usedConditionCheckBox.IsChecked.Value && !newConditionCheckBox.IsChecked.Value) { selectedCondition = ConditionValue.Used; }
+            return selectedCondition;
+        }
+
+        private enum BuyingFormat
+        {
+            All,
+            Bid,
+            Buy
+        }
+        private BuyingFormat SelectedBuyingFormat()
+        {
+            BuyingFormat format = BuyingFormat.All;
+            if(bidBuyingFormatCheckBox.IsChecked.Value && !buyBuyingFormatCheckBox.IsChecked.Value) { format = BuyingFormat.Bid; }
+            else if (!bidBuyingFormatCheckBox.IsChecked.Value && buyBuyingFormatCheckBox.IsChecked.Value) { format = BuyingFormat.Buy; }
+            return format;
+        }
+
+
     }
 }
