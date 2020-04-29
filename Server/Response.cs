@@ -43,7 +43,7 @@ namespace Server
             }
         }
 
-        public static byte[] searchResponse(string term)
+        public static byte[] searchResponse(Dictionary<string, string> searchTerms = null)
         {
             using (MemoryStream stream = new MemoryStream())
             {
@@ -51,7 +51,7 @@ namespace Server
                 {
                     writer.WriteStartObject();
                     writer.WriteStartArray("items");
-                    foreach (Item i in DataBase.getItems(term))
+                    foreach (Item i in DataBase.getItems(searchTerms))
                     {
                         writer.WriteStartObject();
                         writer.WriteNumber("id", i.id);

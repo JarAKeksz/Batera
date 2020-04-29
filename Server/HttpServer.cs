@@ -105,9 +105,12 @@ namespace Server
                     return Response.pingResponse();
 
                 case "search":
-                    if (request.QueryString["term"] == null)
-                        return Response.searchResponse("");
-                    return Response.searchResponse(request.QueryString["term"]);
+                    if (request.QueryString.HasKeys())
+                    {
+                        Dictionary<string, string> parameters = request.QueryString.Keys.Cast<string>().ToDictionary(k => k, v => request.QueryString[v]);
+                        return Response.searchResponse(parameters);
+                    }
+                    return Response.searchResponse();
                 
                 default:
                     return null;
