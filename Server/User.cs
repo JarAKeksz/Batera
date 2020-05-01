@@ -9,21 +9,27 @@ namespace Server
     class User
     {
         public int id { get; }
-        public string userName { get; }
-        public string logInToken { get; }
+        public string userName { get; set; }
+        public string logInToken { get; set; }
+        public string name { get; set; }
+        public string birthDate { get; set; }
+        public string email { get; set; }
+        public string phone { get; set; }
 
         public User(int _id, string _userName)
         {
             id = _id;
             userName = _userName;
-            logInToken = null;
         }
 
-        public User(int _id, string _userName, string _logInToken)
+        public User(int _id, string _userName, string _logInToken, string _name = null, string _birthDate = null, string _email = null)
         {
             id = _id;
             userName = _userName;
             logInToken = _logInToken;
+            name = _name;
+            birthDate = _birthDate;
+            email = _email;
         }
     }
 }

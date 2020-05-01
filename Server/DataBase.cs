@@ -28,72 +28,95 @@ namespace Server
             }
         }
 
-        public static User logIn(string token, string email = "", string password = "")
+        public static User logIn(string token)
         {
             User ret = null;
 
             try
             {
-                if (token != null)
+                string tokenCheckQuery = "SELECT Id, UserName, Name, BirthDate, Email, Phone FROM Users WHERE Token = @logInToken";
+                using (SqlCommand command = new SqlCommand(tokenCheckQuery, connection))
                 {
-                    string tokenCheckQuery = "SELECT Id, UserName FROM Users WHERE Token = @logInToken";
-                    using (SqlCommand command = new SqlCommand(tokenCheckQuery, connection))
+                    command.Parameters.Add("@logInToken", SqlDbType.Char).Value = token;
+
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    if (reader.Read())
                     {
-                        command.Parameters.Add("@logInToken", SqlDbType.Char).Value = token;
-
-                        SqlDataReader reader = command.ExecuteReader();
-
-                        if (reader.Read())
+                        int id = reader.GetInt32(0);
+                        string userName = reader.GetString(1);
+                        string logInToken = token;
+                        string name = reader.GetString(2);
+                        string birthDate = reader.GetString(3);
+                        string emailAddr = reader.GetString(4);
+                        ret = new User(id, userName, logInToken, name, birthDate, emailAddr);
+                        if (!reader.IsDBNull(5))
                         {
-                            int id = reader.GetInt32(0);
-                            string userName = reader.GetString(1);
-                            string logInToken = token;
-                            ret = new User(id, userName, logInToken);
+                            ret.phone = reader.GetString(5);
                         }
-                        else
-                        {
-                            ret = null;
-                        }
-                        reader.Close();
                     }
+                    else
+                    {
+                        ret = null;
+                    }
+                    reader.Close();
                 }
-                else
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                ret = null;
+            }
+
+            return ret;
+        }
+
+        public static User logIn(string email, string password)
+        {
+            User ret = null;
+
+            try
+            {
+                string query = "SELECT Id, UserName, CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', CONCAT(Id, UserName, GETDATE())), 2), Name, BirthDate, Email, Phone " +
+                    "FROM Users WHERE Email = @email AND PasswordHash = CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @password), 2)";
+                using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    string query = "SELECT Id, UserName, CONVERT(NVARCHAR(64) , HASHBYTES('SHA2_256', CONCAT(Id, UserName, GETDATE())), 2) FROM Users " +
-                        "WHERE Email = @email AND PasswordHash = CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @password), 2)";
-                    using (SqlCommand command = new SqlCommand(query, connection))
+                    command.Parameters.Add(new SqlParameter("@email", email));
+                    //command.Parameters.Add(new SqlParameter("@password", System.Data.SqlDbType.VarChar).Value = password);
+                    command.Parameters.Add("@password", SqlDbType.VarChar).Value = password;
+
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    if (reader.Read())
                     {
-                        command.Parameters.Add(new SqlParameter("@email", email));
-                        //command.Parameters.Add(new SqlParameter("@password", System.Data.SqlDbType.VarChar).Value = password);
-                        command.Parameters.Add("@password", SqlDbType.VarChar).Value = password;
-
-                        SqlDataReader reader = command.ExecuteReader();
-
-                        if (reader.Read())
+                        int id = reader.GetInt32(0);
+                        string userName = reader.GetString(1);
+                        string logInToken = reader.GetString(2);
+                        string name = reader.GetString(3);
+                        string birthDate = reader.GetString(4);
+                        string emailAddr = reader.GetString(5);
+                        ret = new User(id, userName, logInToken, name, birthDate, emailAddr);
+                        if (!reader.IsDBNull(6))
                         {
-                            int id = reader.GetInt32(0);
-                            string userName = reader.GetString(1);
-                            string logInToken = reader.GetString(2);
-                            ret = new User(id, userName, logInToken);
+                            ret.phone = reader.GetString(6);
                         }
-                        else
-                        {
-                            ret = null;
-                        }
-                        reader.Close();
                     }
-
-                    if (ret != null)
+                    else
                     {
-                        string createTokenQuery = "UPDATE Users SET Token = @logInToken WHERE Id = @id";
-                        using (SqlCommand update = new SqlCommand(createTokenQuery, connection))
-                        {
-                            //update.Parameters.Add(new SqlParameter("@logInToken", ret.logInToken));
-                            update.Parameters.Add("@logInToken", SqlDbType.Char).Value = ret.logInToken;
-                            update.Parameters.Add(new SqlParameter("@id", ret.id));
+                        ret = null;
+                    }
+                    reader.Close();
+                }
+                if (ret != null)
+                {
+                    string createTokenQuery = "UPDATE Users SET Token = @logInToken WHERE Id = @id";
+                    using (SqlCommand update = new SqlCommand(createTokenQuery, connection))
+                    {
+                        //update.Parameters.Add(new SqlParameter("@logInToken", ret.logInToken));
+                        update.Parameters.Add("@logInToken", SqlDbType.Char).Value = ret.logInToken;
+                        update.Parameters.Add(new SqlParameter("@id", ret.id));
 
-                            Console.WriteLine("Rows affected: " + update.ExecuteNonQuery());
-                        }
+                        Console.WriteLine("Rows affected: " + update.ExecuteNonQuery());
                     }
                 }
             }
@@ -106,7 +129,7 @@ namespace Server
             return ret;
         }
 
-        public static User signUp(string userName, string name, string email, string password, string birthDate, string phone = null)
+        public static byte signUp(string userName, string name, string email, string password, string birthDate, string phone = null)
         {
             try
             {
@@ -123,8 +146,11 @@ namespace Server
                     }
                     reader.Close();
                 }
-                if(emailIsTaken)
+                if (emailIsTaken)
+                {
                     Console.WriteLine("Az email foglalt.");
+                    return 1; // == foglalt email cím
+                }
 
                 bool nameIsTaken = false;
                 string nameCheckQuery = "CASE WHEN EXISTS(SELECT UserName FROM Users WHERE UserName = @userName) THEN 1 ELSE 0 END";
@@ -140,7 +166,10 @@ namespace Server
                     reader.Close();
                 }
                 if (nameIsTaken)
+                {
                     Console.WriteLine("A felhasznalonev foglalt.");
+                    return 2; // == foglalt felhasználónév
+                }
 
                 if (!emailIsTaken && !nameIsTaken)
                 {
@@ -161,11 +190,85 @@ namespace Server
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                return 3; // == vmi más baj van
             }
-            return logIn(email, password);
+            return 0; // == minden rendben
         }
 
-        public static List<User> getUsers (Dictionary<string, string> searchTerms = null)
+        public static User modifyUser(User user, Dictionary<string, string> changes)
+        {
+            try
+            {
+                if (changes != null)
+                {
+                    string query = "UPDATE Users SET ";
+                    foreach (string key in changes.Keys)
+                    {
+                        if (key == "Name" || key == "UserName" || key == "Email" || key == "Phone")
+                        {
+                            query += key + " = [@" + key + "]";
+                        }
+                        else if (key == "BirthDate")
+                        {
+                            query += key + " = '@" + key + "'";
+                        }
+                        else if (key == "Password")
+                        {
+                            query += "PasswordHash = CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @Password), 2)";
+                        }
+
+                        if (key != changes.Last().Key)
+                        {
+                            query += ", ";
+                        }
+                    }
+                    query += " WHERE Id = @id";
+
+                    using (SqlCommand update = new SqlCommand(query, connection))
+                    {
+                        if (changes != null)
+                        {
+                            foreach (KeyValuePair<string, string> pair in changes)
+                            {
+                                string tmp = "@" + pair.Key;
+                                update.Parameters.Add(new SqlParameter(tmp, pair.Value));
+
+                                switch (pair.Key)
+                                {
+                                    case "Name":
+                                        user.name = pair.Value;
+                                        break;
+                                    case "UserName":
+                                        user.userName = pair.Value;
+                                        break;
+                                    case "Email":
+                                        user.email = pair.Value;
+                                        break;
+                                    case "Phone":
+                                        user.phone = pair.Value;
+                                        break;
+                                    case "BirthDate":
+                                        user.birthDate = pair.Value;
+                                        break;
+                                }
+                            }
+                        }
+
+                        update.Parameters.Add(new SqlParameter("@id", user.id));
+
+                        Console.WriteLine("Rows affected: " + update.ExecuteNonQuery());
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+            return user;
+        }
+
+        public static List<User> getUsers(Dictionary<string, string> searchTerms = null)
         {
             List<User> ret = new List<User>();
 
@@ -205,10 +308,13 @@ namespace Server
                 }
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    foreach (KeyValuePair<string, string> pair in searchTerms)
+                    if (searchTerms != null)
                     {
-                        string tmp = "@" + pair.Key;
-                        command.Parameters.Add(new SqlParameter(tmp, pair.Value));
+                        foreach (KeyValuePair<string, string> pair in searchTerms)
+                        {
+                            string tmp = "@" + pair.Key;
+                            command.Parameters.Add(new SqlParameter(tmp, pair.Value));
+                        }
                     }
 
                     SqlDataReader reader = command.ExecuteReader();
@@ -291,12 +397,15 @@ namespace Server
                 }
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    foreach (KeyValuePair<string, string> pair in searchTerms)
+                    if (searchTerms != null)
                     {
-                        string tmp = "@" + pair.Key;
-                        command.Parameters.Add(new SqlParameter(tmp, pair.Value));
+                        foreach (KeyValuePair<string, string> pair in searchTerms)
+                        {
+                            string tmp = "@" + pair.Key;
+                            command.Parameters.Add(new SqlParameter(tmp, pair.Value));
+                        }
                     }
-                    
+
                     SqlDataReader reader = command.ExecuteReader();
                     while (reader.Read())
                     {
@@ -310,7 +419,7 @@ namespace Server
                     reader.Close();
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e);
             }
