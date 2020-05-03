@@ -12,17 +12,11 @@ namespace Server
         public string name { get; }
         public string description { get; }
 
-        public Category(int _id, string _name, string _description)
+        public Category(int _id, string _name, string _description = null)
         {
             id = _id;
             name = _name;
             description = _description;
-        }
-        public Category(int _id, string _name)
-        {
-            id = _id;
-            name = _name;
-            description = null;
         }
     }
 }

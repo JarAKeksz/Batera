@@ -142,7 +142,7 @@ namespace Server
                     SqlDataReader reader = command.ExecuteReader();
                     if (reader.Read())
                     {
-                        emailIsTaken = reader.GetInt32(0) == 1;
+                        emailIsTaken = (bool)reader[0];
                     }
                     reader.Close();
                 }
@@ -161,7 +161,7 @@ namespace Server
                     SqlDataReader reader = command.ExecuteReader();
                     if (reader.Read())
                     {
-                        nameIsTaken = reader.GetInt32(0) == 1;
+                        nameIsTaken = (bool)reader[0];
                     }
                     reader.Close();
                 }
@@ -173,8 +173,17 @@ namespace Server
 
                 if (!emailIsTaken && !nameIsTaken)
                 {
-                    string query = "INSERT INTO Users (UserName, Name, Email, PasswordHash, BirthDate) " +
-                        "VALUES(@userName, @name, @email, CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @password), 2), @birthDate)";
+                    string query;
+                    if(phone != null)
+                    {
+                        query = "INSERT INTO Users (UserName, Name, Email, PasswordHash, BirthDate, Phone) " +
+                            "VALUES(@userName, @name, @email, CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @password), 2), @birthDate, @phone)";
+                    }
+                    else
+                    {
+                        query = "INSERT INTO Users (UserName, Name, Email, PasswordHash, BirthDate) " +
+                            "VALUES(@userName, @name, @email, CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @password), 2), @birthDate)";
+                    }
                     using (SqlCommand command = new SqlCommand(query, connection))
                     {
                         command.Parameters.Add(new SqlParameter("@userName", userName));
@@ -182,6 +191,10 @@ namespace Server
                         command.Parameters.Add(new SqlParameter("@email", email));
                         command.Parameters.Add(new SqlParameter("@password", password));
                         command.Parameters.Add(new SqlParameter("@birthDate", birthDate));
+                        if (phone != null)
+                        {
+                            command.Parameters.Add(new SqlParameter("@phone", phone));
+                        }
 
                         Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
                     }
@@ -341,7 +354,10 @@ namespace Server
 
             try
             {
-                string query = "SELECT i.Id, i.Name, c.Name, i.Price, i.Image FROM Items AS i JOIN Categories AS c ON i.CategoryId = c.Id";
+                string query = "SELECT i.Id, i.Name, c.Name, ISNULL(i.Price,-1), ISNULL(MAX(b.Value),i.BidStart), i.Image AS image FROM Items AS i " +
+                    "JOIN Categories AS c ON i.CategoryId = c.Id LEFT JOIN Bids AS b ON i.Id = b.ItemId";
+                bool eMinBid = false;
+                bool eMaxBid = false;
                 if (searchTerms != null)
                 {
                     query += " WHERE ";
@@ -376,17 +392,18 @@ namespace Server
                             case "MaxEndDate":
                                 query += "EndDate <= '@" + key + "'";
                                 break;
-                            case "MinBid":
-                                query += "TopBid >= @" + key;
-                                break;
-                            case "MaxBid":
-                                query += "TopBid <= @" + key;
-                                break;
                             case "MinPrice":
                                 query += "Price >= @" + key;
                                 break;
                             case "MaxPrice":
                                 query += "Price <= @" + key;
+                                break;
+
+                            case "MinBid":
+                                eMinBid = true;
+                                break;
+                            case "MaxBid":
+                                eMaxBid = true;
                                 break;
                         }
                         if (key != searchTerms.Last().Key)
@@ -395,6 +412,20 @@ namespace Server
                         }
                     }
                 }
+                query += " GROUP BY i.Id, i.Name, c.Name, i.Price, i.BidStart, i.Image";
+                if (eMinBid && eMaxBid)
+                {
+                    query += " HAVING ISNULL(MAX(b.Value),i.BidStart) >= @MinBid AND ISNULL(MAX(b.Value),i.BidStart) <= @MaxBid";
+                }
+                else if (eMinBid)
+                {
+                    query += " HAVING ISNULL(MAX(b.Value),i.BidStart) >= @MinBid";
+                }
+                else if (eMaxBid)
+                {
+                    query += " HAVING ISNULL(MAX(b.Value),i.BidStart) <= @MaxBid";
+                }
+
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     if (searchTerms != null)
@@ -413,8 +444,10 @@ namespace Server
                         string name = reader.GetString(1);
                         string category = reader.GetString(2);
                         int price = reader.GetInt32(3);
-                        string image = reader.GetString(4);
-                        ret.Add(new Item(id, name, category, price, image));
+                        int current = reader.GetInt32(4);
+                        string image = reader.GetString(5);
+
+                        ret.Add(new Item(id, name, category, price, current, image));
                     }
                     reader.Close();
                 }
@@ -427,14 +460,17 @@ namespace Server
             return ret;
         }
 
-        public static Item getItemById(int searchId)
+        public static Item getItemDetails(int searchId)
         {
             Item ret = null;
 
             try
             {
-                string query = "SELECT i.Id, i.Name, c.Name, i.Price, i.Image FROM Items AS i JOIN Categories AS c ON i.CategoryId = c.Id " +
-                    "WHERE i.Id = @searchId";
+                string query = "SELECT i.Id, i.Name, c.Name, ISNULL(i.Price,-1), ISNULL(MAX(b.Value),i.BidStart), i.Image, " +
+                    "u.UserName, i.Description, i.Date, i.EndDate, i.IsItNew, i.BuyWithoutBid, i.BidStart " +
+                    "FROM Items AS i JOIN Categories AS c ON i.CategoryId = c.Id LEFT JOIN Bids AS b ON i.Id = b.ItemId LEFT JOIN Users AS u ON i.Seller = u.Id " +
+                    "GROUP BY i.Id, i.Name, c.Name, i.Price, i.BidStart, i.Image, " +
+                    "u.UserName, i.Description, i.Date, i.EndDate, i.IsItNew, i.BuyWithoutBid, i.BidStart WHERE i.Id = @searchId";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@searchId", searchId));
@@ -446,8 +482,18 @@ namespace Server
                         string name = reader.GetString(1);
                         string category = reader.GetString(2);
                         int price = reader.GetInt32(3);
-                        string image = reader.GetString(4);
-                        ret = new Item(id, name, category, price, image);
+                        int current = reader.GetInt32(4);
+                        string image = reader.GetString(5);
+
+                        string seller = reader.GetString(6);
+                        string description = reader.GetString(7);
+                        string date = reader.GetString(8);
+                        string endDate = reader.GetString(9);
+                        bool isItNew = (bool)reader[10];
+                        bool buyWithoutBid = (bool)reader[11];
+                        int bidStart = reader.GetInt32(12);
+
+                        ret = new Item(id, name, category, price, current, image, seller, description, date, endDate, isItNew, buyWithoutBid, bidStart);
                     }
                     reader.Close();
                 }
@@ -460,52 +506,43 @@ namespace Server
             return ret;
         }
 
-        public static List<Category> getCategories(string searchTerm)
+        public static List<Category> getCategories(bool description = false, string searchTerm = null)
         {
             List<Category> ret = new List<Category>();
 
             try
             {
-                string query = "SELECT Id, Name FROM Categories WHERE Name LIKE '%' + @searchTerm + '%'";
+                string query = "SELECT Id, Name";
+                if(description)
+                {
+                    query += ", Description";
+                }
+                query += " FROM Categories";
+                if (searchTerm != null)
+                {
+                    query += " WHERE Name LIKE '%' + @searchTerm + '%' OR Description LIKE '%' + @searchTerm + '%'";
+                }
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@searchTerm", searchTerm));
+                    if (searchTerm != null)
+                    {
+                        command.Parameters.Add(new SqlParameter("@searchTerm", searchTerm));
+                    }
 
                     SqlDataReader reader = command.ExecuteReader();
                     while (reader.Read())
                     {
                         int id = reader.GetInt32(0);
                         string name = reader.GetString(1);
-                        ret.Add(new Category(id, name));
-                    }
-                    reader.Close();
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-
-            return ret;
-        }
-
-        public static Category getCategoryById(int searchId)
-        {
-            Category ret = null;
-
-            try
-            {
-                string query = "SELECT Name, Description FROM Categories WHERE Id = @searchId";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.Add(new SqlParameter("@searchId", searchId));
-
-                    SqlDataReader reader = command.ExecuteReader();
-                    while (reader.Read())
-                    {
-                        string name = reader.GetString(0);
-                        string description = reader.GetString(0);
-                        ret = new Category(searchId, name, description);
+                        if (description)
+                        {
+                            string desc = reader.GetString(2);
+                            ret.Add(new Category(id, name, desc));
+                        }
+                        else
+                        {
+                            ret.Add(new Category(id, name));
+                        }
                     }
                     reader.Close();
                 }

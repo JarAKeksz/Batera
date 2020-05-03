@@ -22,7 +22,7 @@ namespace Server
             userName = _userName;
         }
 
-        public User(int _id, string _userName, string _logInToken, string _name = null, string _birthDate = null, string _email = null)
+        public User(int _id, string _userName, string _logInToken, string _name, string _birthDate, string _email)
         {
             id = _id;
             userName = _userName;
