@@ -88,7 +88,7 @@ namespace Client
         }
 
 
-        public List<Item> SearchedItem(string searchedName, int searchedCategory, string selectedBuyingFormat, string selectedCondition, int minPrice, int maxPrice)
+        public List<Item> SearchedItem(string searchedName, int searchedCategory, string selectedBuyingFormat, string selectedCondition, int minPrice, int maxPrice, int selectedCategory)
         {
             List<Item> result = new List<Item>();
 
@@ -127,6 +127,10 @@ namespace Client
             if (maxPrice != -1)
             {
                 query["MaxPrice"] = maxPrice.ToString();
+            }
+            if(selectedCategory != -1)
+            {
+                query["CategoryId"] = selectedCategory.ToString();
             }
 
                 builder.Query = query.ToString();

@@ -56,15 +56,11 @@ namespace Client
         {
 
             List<Item> list = new List<Item>();
-            int selectedcategory;
-            if (categoriesComboBox.SelectedItem == null)
+            int selectedCategory = -1;
+            if (categoriesComboBox.SelectedItem != null)
             {
-                selectedcategory = 0;
-            }
-            else
-            {
-                selectedcategory = categoriesComboBox.SelectedIndex;
-                Console.WriteLine(selectedcategory.ToString() + "  category selected");
+                selectedCategory = categoriesComboBox.SelectedIndex;
+                Console.WriteLine(selectedCategory.ToString() + "  category selected");
             }
             
             string selectedCondition = GetCondition().ToString();
@@ -76,7 +72,7 @@ namespace Client
 
             Console.WriteLine(minPrice.ToString()+ " " + maxPrice.ToString());
 
-            list = helper.SearchedItem(searchBarTextBox.Text, selectedcategory, selectedBuyingFormat, selectedCondition, minPrice, maxPrice);
+            list = helper.SearchedItem(searchBarTextBox.Text, selectedCategory, selectedBuyingFormat, selectedCondition, minPrice, maxPrice, selectedCategory);
 
 
             itemsList.ItemsSource = list;
