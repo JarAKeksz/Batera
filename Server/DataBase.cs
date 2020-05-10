@@ -354,8 +354,8 @@ namespace Server
 
             try
             {
-                string query = "SELECT i.Id, i.Name, c.Name, ISNULL(i.Price,-1), ISNULL(MAX(b.Value),i.BidStart), i.Image AS image FROM Items AS i " +
-                    "JOIN Categories AS c ON i.CategoryId = c.Id LEFT JOIN Bids AS b ON i.Id = b.ItemId";
+                string query = "SELECT i.Id, i.Name, c.Name, ISNULL(i.Price,-1), ISNULL(MAX(b.Value),i.BidStart), i.Image " +
+                    "FROM Items AS i JOIN Categories AS c ON i.CategoryId = c.Id LEFT JOIN Bids AS b ON i.Id = b.ItemId";
                 bool eMinBid = false;
                 bool eMaxBid = false;
                 if (searchTerms != null)
@@ -466,11 +466,11 @@ namespace Server
 
             try
             {
-                string query = "SELECT i.Id, i.Name, c.Name, ISNULL(i.Price,-1), ISNULL(MAX(b.Value),i.BidStart), i.Image, " +
-                    "u.UserName, i.Description, i.Date, i.EndDate, i.IsItNew, i.BuyWithoutBid, i.BidStart " +
+                string query = "SELECT i.Id, i.Name, c.Name, ISNULL(i.Price,-1), ISNULL(MAX(b.Value),i.BidStart), i.Image, u.UserName, i.Description, i.Date, " +
+                    "i.EndDate, i.IsItNew, i.BuyWithoutBid, i.BidStart " +
                     "FROM Items AS i JOIN Categories AS c ON i.CategoryId = c.Id LEFT JOIN Bids AS b ON i.Id = b.ItemId LEFT JOIN Users AS u ON i.Seller = u.Id " +
-                    "GROUP BY i.Id, i.Name, c.Name, i.Price, i.BidStart, i.Image, " +
-                    "u.UserName, i.Description, i.Date, i.EndDate, i.IsItNew, i.BuyWithoutBid, i.BidStart WHERE i.Id = @searchId";
+                    "GROUP BY i.Id, i.Name, c.Name, i.Price, i.BidStart, i.Image, u.UserName, i.Description, i.Date, i.EndDate, i.IsItNew, i.BuyWithoutBid, i.BidStart " +
+                    "WHERE i.Id = @searchId";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@searchId", searchId));
@@ -543,6 +543,109 @@ namespace Server
                         {
                             ret.Add(new Category(id, name));
                         }
+                    }
+                    reader.Close();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+            return ret;
+        }
+
+        public static List<Item> getFavorites(string userId)
+        {
+            List<Item> ret = new List<Item>();
+
+            try
+            {
+                string query = "SELECT f.ItemId, i.Name, c.Name, ISNULL(i.Price,-1), ISNULL(MAX(b.Value),i.BidStart), i.Image " +
+                    "FROM Favorites AS f JOIN Items AS i ON f.ItemId = i.Id JOIN Categories AS c ON i.CategoryId = c.Id " +
+                    "LEFT JOIN Bids AS b ON i.Id = b.ItemId WHERE f.UserId = @userId GROUP BY f.ItemId, i.Name, c.Name, i.Price, i.BidStart, i.Image";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@userId", userId));
+
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        int id = reader.GetInt32(0);
+                        string name = reader.GetString(1);
+                        string category = reader.GetString(2);
+                        int price = reader.GetInt32(3);
+                        int current = reader.GetInt32(4);
+                        string image = reader.GetString(5);
+
+                        ret.Add(new Item(id, name, category, price, current, image));
+                    }
+                    reader.Close();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+            return ret;
+        }
+
+        public static List<Item> getBidsByUser(string userId)
+        {
+            List<Item> ret = new List<Item>();
+
+            try
+            {
+                string query = "SELECT b.ItemId, i.Name, c.Name, ISNULL(i.Price,-1), b.Value, i.Image " +
+                    "FROM Bids AS b JOIN Items AS i ON b.ItemId = i.Id JOIN Categories AS c ON i.CategoryId = c.Id WHERE b.userId = @userId " +
+                    "GROUP BY b.ItemId, i.Name, c.Name, i.Price, b.Value, i.BidStart, i.Image";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@userId", userId));
+
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        int id = reader.GetInt32(0);
+                        string name = reader.GetString(1);
+                        string category = reader.GetString(2);
+                        int price = reader.GetInt32(3);
+                        int current = reader.GetInt32(4);
+                        string image = reader.GetString(5);
+
+                        ret.Add(new Item(id, name, category, price, current, image));
+                    }
+                    reader.Close();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+            return ret;
+        }
+
+        public static List<Bid> getBidsForItem(int searchId)
+        {
+            List<Bid> ret = new List<Bid>();
+
+            try
+            {
+                string query = "SELECT u.Id, u.UserName, b.Value FROM Bids AS b JOIN Users AS u ON b.UserId = u.Id WHERE b.ItemId = @searchId";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@searchId", searchId));
+
+                    SqlDataReader reader = command.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        int id = reader.GetInt32(0);
+                        string userName = reader.GetString(1);
+                        int value = reader.GetInt32(2);
+
+                        ret.Add(new Bid(id, userName, value));
                     }
                     reader.Close();
                 }
