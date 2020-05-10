@@ -23,7 +23,6 @@ namespace Client.Modells
             Name = name;
             Price = price;
             Category = category;
-
             convertImage(image);
         }
 

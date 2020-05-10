@@ -31,10 +31,14 @@ namespace Client
 
             itemsList.ItemsSource = list;
 
-            DataContext = new ComboBoxViewModel();
+            List<string> categories = helper.GetCategories();
+            categoriesComboBox.ItemsSource = categories;
+            categoriesComboBox.SelectedItem = null;
+            categoriesComboBox.Text = "--select--";
 
         }
 
+        
         private void profileButton_Click(object sender, RoutedEventArgs e)
         {
             if (User.Instance.getToken() != null)
@@ -52,34 +56,33 @@ namespace Client
         {
 
             List<Item> list = new List<Item>();
+            int selectedcategory;
+            if (categoriesComboBox.SelectedItem == null)
+            {
+                selectedcategory = 0;
+            }
+            else
+            {
+                selectedcategory = categoriesComboBox.SelectedIndex;
+                Console.WriteLine(selectedcategory.ToString() + "  category selected");
+            }
+            
+            string selectedCondition = GetCondition().ToString();
+            string selectedBuyingFormat = SelectedBuyingFormat().ToString();
 
-            string selectedcategory = categoriesComboBox.SelectedItem.ToString();
-            ConditionValue selectedCondition = GetCondition();
-            BuyingFormat selectedBuyingFormat = SelectedBuyingFormat();
-            int minPrice = Int32.Parse(priceFromTextBox.Text);
-            int maxPrice = Int32.Parse(priceToTextBox.Text);
 
-            list = helper.SearchedItem(searchBarTextBox.Text, selectedcategory);
+            int minPrice = priceFromTextBox.Text.ToString() != "" ? int.Parse(priceFromTextBox.Text) : -1;
+            int maxPrice = priceToTextBox.Text.ToString() != "" ? int.Parse(priceToTextBox.Text) : -1;
 
+            Console.WriteLine(minPrice.ToString()+ " " + maxPrice.ToString());
+
+            list = helper.SearchedItem(searchBarTextBox.Text, selectedcategory, selectedBuyingFormat, selectedCondition, minPrice, maxPrice);
 
 
             itemsList.ItemsSource = list;
+
         }
 
-        private class ComboBoxViewModel{
-            public List<String> categoriesCollection { get; set; }
-
-            public ComboBoxViewModel()
-            {
-                categoriesCollection = new List<string>()
-                {
-                    "game",
-                    "nature",
-                    "anime"
-                };
-            }
-            
-        }
         private enum ConditionValue
         {
             All,
@@ -108,6 +111,6 @@ namespace Client
             return format;
         }
 
-
+        
     }
 }
