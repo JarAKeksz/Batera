@@ -134,71 +134,43 @@ namespace Server
         {
             try
             {
-                bool emailIsTaken = false;
-                string emailCheckQuery = "CASE WHEN EXISTS(SELECT Email FROM Users WHERE Email = @email) THEN 1 ELSE 0 END";
-                using (SqlCommand command = new SqlCommand(emailCheckQuery, connection))
+                string query;
+                if (phone != null)
                 {
-                    command.Parameters.Add(new SqlParameter("@email", email));
-
-                    SqlDataReader reader = command.ExecuteReader();
-                    if (reader.Read())
-                    {
-                        emailIsTaken = (bool)reader[0];
-                    }
-                    reader.Close();
+                    query = "INSERT INTO Users (UserName, Name, Email, PasswordHash, BirthDate, Phone) " +
+                        "VALUES(@userName, @name, @email, CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @password), 2), '@birthDate', @phone)";
                 }
-                if (emailIsTaken)
+                else
                 {
-                    Console.WriteLine("Az email foglalt.");
-                    return 1; // == foglalt email cím
+                    query = "INSERT INTO Users (UserName, Name, Email, PasswordHash, BirthDate) " +
+                        "VALUES(@userName, @name, @email, CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @password), 2), '@birthDate')";
                 }
-
-                bool nameIsTaken = false;
-                string nameCheckQuery = "CASE WHEN EXISTS(SELECT UserName FROM Users WHERE UserName = @userName) THEN 1 ELSE 0 END";
-                using (SqlCommand command = new SqlCommand(nameCheckQuery, connection))
+                using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@userName", userName));
-
-                    SqlDataReader reader = command.ExecuteReader();
-                    if (reader.Read())
-                    {
-                        nameIsTaken = (bool)reader[0];
-                    }
-                    reader.Close();
-                }
-                if (nameIsTaken)
-                {
-                    Console.WriteLine("A felhasznalonev foglalt.");
-                    return 2; // == foglalt felhasználónév
-                }
-
-                if (!emailIsTaken && !nameIsTaken)
-                {
-                    string query;
+                    command.Parameters.Add(new SqlParameter("@name", name));
+                    command.Parameters.Add(new SqlParameter("@email", email));
+                    command.Parameters.Add(new SqlParameter("@password", password));
+                    command.Parameters.Add(new SqlParameter("@birthDate", birthDate));
                     if (phone != null)
                     {
-                        query = "INSERT INTO Users (UserName, Name, Email, PasswordHash, BirthDate, Phone) " +
-                            "VALUES(@userName, @name, @email, CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @password), 2), @birthDate, @phone)";
+                        command.Parameters.Add(new SqlParameter("@phone", phone));
                     }
-                    else
-                    {
-                        query = "INSERT INTO Users (UserName, Name, Email, PasswordHash, BirthDate) " +
-                            "VALUES(@userName, @name, @email, CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @password), 2), @birthDate)";
-                    }
-                    using (SqlCommand command = new SqlCommand(query, connection))
-                    {
-                        command.Parameters.Add(new SqlParameter("@userName", userName));
-                        command.Parameters.Add(new SqlParameter("@name", name));
-                        command.Parameters.Add(new SqlParameter("@email", email));
-                        command.Parameters.Add(new SqlParameter("@password", password));
-                        command.Parameters.Add(new SqlParameter("@birthDate", birthDate));
-                        if (phone != null)
-                        {
-                            command.Parameters.Add(new SqlParameter("@phone", phone));
-                        }
 
-                        Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
-                    }
+                    Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
+                }
+            }
+            catch (SqlException e)
+            {
+                Console.WriteLine(e);
+                if (e.Message.Contains("UserNameCheck")) //haha vibe check
+                {
+                    return 1; // == van már ilyen nevű felhasználó
+                }
+                Console.WriteLine(e);
+                if (e.Message.Contains("EmailCheck"))
+                {
+                    return 2; // == van már ilyen email
                 }
             }
             catch (Exception e)
@@ -210,24 +182,28 @@ namespace Server
         }
 
         public static byte addItem(string name, int categoryId, string image, int sellerId, string description, string date, string endDate,
-            bool isItNew, bool buyWithoutBid, int bidStart, int price = -1)
+            bool isItNew, int bidStart, bool buyWithoutBid = false, int price = -1)
         {
             try
             {
                 string query;
+                if(string.Compare(date,endDate) < 0)
+                {
+                    return 1; // == endDate nagyobb kell h legyen mint a date
+                }
                 if (buyWithoutBid && price != -1)
                 {
                     query = "INSERT INTO Items (Name, Seller, CategoryId, Image, Description, Date, EndDate, IsItNew, BuyWithoutBid, Price, BidStart) " +
-                        "VALUES(@Name, @Seller, @CategoryId, @Image, @Description, @Date, @EndDate, @IsItNew, @BuyWithoutBid, @Price, @BidStart)";
+                        "VALUES(@Name, @Seller, @CategoryId, @Image, @Description, '@Date', '@EndDate', @IsItNew, @BuyWithoutBid, @Price, @BidStart)";
                 }
                 else if (!buyWithoutBid)
                 {
                     query = "INSERT INTO Items (Name, Seller, CategoryId, Image, Description, Date, EndDate, IsItNew, BidStart) " +
-                        "VALUES(@Name, @Seller, @CategoryId, @Image, @Description, @Date, @EndDate, @IsItNew, @BidStart)";
+                        "VALUES(@Name, @Seller, @CategoryId, @Image, @Description, '@Date', '@EndDate', @IsItNew, @BidStart)";
                 }
                 else
                 {
-                    return 1; // == buyWithoutBid igaz, de nem adtál meg árat
+                    return 2; // == buyWithoutBid igaz, de nem adtál meg árat
                 }
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
@@ -242,7 +218,7 @@ namespace Server
                     command.Parameters.Add(new SqlParameter("@BidStart", bidStart));
                     if (buyWithoutBid && price != -1)
                     {
-                        command.Parameters.Add(new SqlParameter("@BidStart", bidStart));
+                        command.Parameters.Add(new SqlParameter("@BuyWithoutBid", buyWithoutBid));
                         command.Parameters.Add(new SqlParameter("@Price", price));
                     }
 
@@ -252,14 +228,9 @@ namespace Server
             catch (SqlException e)
             {
                 Console.WriteLine(e);
-                if(e.Message.Contains("DateCheck"))
+                if (e.Message.Contains("NameCheck"))
                 {
-                    return 2; // == sql date check megszegve
-                }
-                else
-                if (e.Message.Contains("Unique"))
-                {
-                    return 3; // == sql unique check megszegve
+                    return 3; // == van már ilyen nevű termék
                 }
             }
             catch (Exception e)
@@ -290,6 +261,10 @@ namespace Server
                         else if (key == "Password")
                         {
                             query += "PasswordHash = CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @Password), 2)";
+                        }
+                        else
+                        {
+                            return null;
                         }
 
                         if (key != changes.Last().Key)
@@ -539,10 +514,10 @@ namespace Server
             try
             {
                 string query = "SELECT i.Name, c.Name, ISNULL(i.Price,-1), ISNULL(MAX(b.Value),i.BidStart), i.Image, u.UserName, i.Description, i.Date, i.EndDate, " +
-                    "i.IsItNew, i.BuyWithoutBid, i.BidStart " +
+                    "i.IsItNew, i.BuyWithoutBid, i.BidStart, i.BidIncrement " +
                     "FROM Items AS i JOIN Categories AS c ON i.CategoryId = c.Id LEFT JOIN Bids AS b ON i.Id = b.ItemId LEFT JOIN Users AS u ON i.Seller = u.Id " +
                     "WHERE i.Id = @itemId " +
-                    "GROUP BY i.Name, c.Name, i.Price, i.BidStart, i.Image, u.UserName, i.Description, i.Date, i.EndDate, i.IsItNew, i.BuyWithoutBid, i.BidStart";
+                    "GROUP BY i.Name, c.Name, i.Price, i.BidStart, i.Image, u.UserName, i.Description, i.Date, i.EndDate, i.IsItNew, i.BuyWithoutBid, i.BidStart, i.BidIncrement";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@itemId", itemId));
@@ -564,6 +539,7 @@ namespace Server
                         bool isItNew = (bool)reader[9];
                         bool buyWithoutBid = (bool)reader[10];
                         int bidStart = reader.GetInt32(11);
+                        int bidIncrement = (int)reader.GetFloat(12);
 
                         List<Bid> tmp = new List<Bid>();
 
@@ -584,7 +560,7 @@ namespace Server
                             bidReader.Close();
                         }
 
-                        ret = new DetailedItem(id, name, category, price, current, image, seller, description, date, endDate, isItNew, buyWithoutBid, bidStart, tmp);
+                        ret = new DetailedItem(id, name, category, price, current, image, seller, description, date, endDate, isItNew, buyWithoutBid, bidStart, bidIncrement, tmp);
                     }
                     reader.Close();
                 }
@@ -682,11 +658,11 @@ namespace Server
             return ret;
         }
 
-        public static byte toggleFavorite(string userId, int itemId)
+        public static byte toggleFavorite(int itemId, string userId)
         {
+            bool favorite = false;
             try
             {
-                bool favoriteToggle = false;
                 string favoriteCheckQuery = "CASE WHEN EXISTS(SELECT ItemId FROM Favorites WHERE ItemId = @itemId AND UserId = @userId) THEN 1 ELSE 0 END";
                 using (SqlCommand command = new SqlCommand(favoriteCheckQuery, connection))
                 {
@@ -696,11 +672,11 @@ namespace Server
                     SqlDataReader reader = command.ExecuteReader();
                     if (reader.Read())
                     {
-                        favoriteToggle = (bool)reader[0];
+                        favorite = (bool)reader[0];
                     }
                     reader.Close();
                 }
-                if(favoriteToggle)
+                if(favorite)
                 {
                     string query = "DELETE Favorites WHERE ItemId = @itemId AND UserId = @userId";
                     using (SqlCommand command = new SqlCommand(query, connection))
@@ -710,7 +686,7 @@ namespace Server
 
                         Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
                     }
-                    return 0;
+                    favorite = false;
                 }
                 else
                 {
@@ -722,7 +698,7 @@ namespace Server
 
                         Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
                     }
-                    return 1;
+                    favorite = true;
                 }
             }
             catch (Exception e)
@@ -730,6 +706,7 @@ namespace Server
                 Console.WriteLine(e);
                 return 2;
             }
+            return Convert.ToByte(favorite);
         }
 
         public static List<Item> getBidsByUser(string userId)
@@ -766,6 +743,50 @@ namespace Server
             }
 
             return ret;
+        }
+
+        public static byte addBid(int itemId, string userId, int value)
+        {
+            try
+            {
+                string thresholdCheckQuery = "SELECT TOP (1) ISNULL(b.Value,i.BidStart)+i.BidIncrement FROM Items AS i " +
+                    "LEFT JOIN Bids AS b ON b.ItemId = i.Id WHERE i.Id = @itemId ORDER BY ISNULL(b.Value,i.BidStart) DESC";
+                using (SqlCommand command = new SqlCommand(thresholdCheckQuery, connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@itemId", itemId));
+
+                    SqlDataReader reader = command.ExecuteReader();
+                    int tmp = -1;
+                    if (reader.Read())
+                    {
+                        tmp = (int)reader.GetFloat(0);
+                    }
+                    reader.Close();
+                    if (tmp == -1)
+                    {
+                        return 2; // == nem található a termék
+                    }
+                    if (tmp > value)
+                    {
+                        return 1; // == a megadott licit nem éri el a küszöböt
+                    }
+                }
+                string query = "INSERT INTO Bids (ItemId, UserId, Value) VALUES(@itemId, @userId, @value)";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@userId", userId));
+                    command.Parameters.Add(new SqlParameter("@itemId", itemId));
+                    command.Parameters.Add(new SqlParameter("@value", value));
+
+                    Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return 3; // == oops
+            }
+            return 0;
         }
     }
 }
