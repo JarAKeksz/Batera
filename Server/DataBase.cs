@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -174,7 +175,7 @@ namespace Server
                 if (!emailIsTaken && !nameIsTaken)
                 {
                     string query;
-                    if(phone != null)
+                    if (phone != null)
                     {
                         query = "INSERT INTO Users (UserName, Name, Email, PasswordHash, BirthDate, Phone) " +
                             "VALUES(@userName, @name, @email, CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @password), 2), @birthDate, @phone)";
@@ -204,6 +205,60 @@ namespace Server
             {
                 Console.WriteLine(e);
                 return 3; // == vmi más baj van
+            }
+            return 0; // == minden rendben
+        }
+
+        public static byte addItem(string name, int categoryId, string image, int sellerId, string description, string date, string endDate,
+            bool isItNew, bool buyWithoutBid, int bidStart, int price = -1)
+        {
+            try
+            {
+                string query;
+                if (buyWithoutBid && price != -1)
+                {
+                    query = "INSERT INTO Items (Name, Seller, CategoryId, Image, Description, Date, EndDate, IsItNew, BuyWithoutBid, Price, BidStart) " +
+                        "VALUES(@Name, @Seller, @CategoryId, @Image, @Description, @Date, @EndDate, @IsItNew, @BuyWithoutBid, @Price, @BidStart)";
+                }
+                else if (!buyWithoutBid)
+                {
+                    query = "INSERT INTO Items (Name, Seller, CategoryId, Image, Description, Date, EndDate, IsItNew, BidStart) " +
+                        "VALUES(@Name, @Seller, @CategoryId, @Image, @Description, @Date, @EndDate, @IsItNew, @BidStart)";
+                }
+                else
+                {
+                    return 1; // == buyWithoutBid igaz, de nem adtál meg árat
+                }
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@Name", name));
+                    command.Parameters.Add(new SqlParameter("@Seller", sellerId));
+                    command.Parameters.Add(new SqlParameter("@CategoryId", categoryId));
+                    command.Parameters.Add(new SqlParameter("@Image", image));
+                    command.Parameters.Add(new SqlParameter("@Description", description));
+                    command.Parameters.Add(new SqlParameter("@Date", date));
+                    command.Parameters.Add(new SqlParameter("@EndDate", endDate));
+                    command.Parameters.Add(new SqlParameter("@IsItNew", isItNew));
+                    command.Parameters.Add(new SqlParameter("@BidStart", bidStart));
+                    if (buyWithoutBid && price != -1)
+                    {
+                        command.Parameters.Add(new SqlParameter("@BidStart", bidStart));
+                        command.Parameters.Add(new SqlParameter("@Price", price));
+                    }
+
+                    Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
+                }
+            }
+            catch (SqlException e)
+            {
+                Console.WriteLine(e);
+                return 2; // == sql date check megszegve
+                return 3; // == sql unique megszegve
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return 4; // == vmi más baj van
             }
             return 0; // == minden rendben
         }
@@ -312,6 +367,9 @@ namespace Server
                             case "MaxBirthDate":
                                 query += "BirthDate <= '@" + key + "'";
                                 break;
+
+                            default:
+                                return null;
                         }
                         if (key != searchTerms.Last().Key)
                         {
@@ -363,12 +421,11 @@ namespace Server
                     query += " WHERE ";
                     foreach (string key in searchTerms.Keys)
                     {
-                        query += "i.";
                         switch (key)
                         {
                             case "Name":
                             case "Description":
-                                query += key + " LIKE '%' + @" + key + " + '%'";
+                                query += "i." + key + " LIKE '%' + @" + key + " + '%'";
                                 break;
 
                             case "Id":
@@ -377,26 +434,26 @@ namespace Server
                             case "TopBidUser":
                             case "IsItNew":
                             case "BuyWithoutBid":
-                                query += key + " = @" + key;
+                                query += "i." + key + " = @" + key;
                                 break;
 
                             case "MinDate":
-                                query += "Date >= '@" + key + "'";
+                                query += "i.Date >= '@" + key + "'";
                                 break;
                             case "MaxDate":
-                                query += "Date <= '@" + key + "'";
+                                query += "i.Date <= '@" + key + "'";
                                 break;
                             case "MinEndDate":
-                                query += "EndDate >= '@" + key + "'";
+                                query += "i.EndDate >= '@" + key + "'";
                                 break;
                             case "MaxEndDate":
-                                query += "EndDate <= '@" + key + "'";
+                                query += "i.EndDate <= '@" + key + "'";
                                 break;
                             case "MinPrice":
-                                query += "Price >= @" + key;
+                                query += "i.Price >= @" + key;
                                 break;
                             case "MaxPrice":
-                                query += "Price <= @" + key;
+                                query += "i.Price <= @" + key;
                                 break;
 
                             case "MinBid":
@@ -405,6 +462,9 @@ namespace Server
                             case "MaxBid":
                                 eMaxBid = true;
                                 break;
+
+                            default:
+                                return null;
                         }
                         if (key != searchTerms.Last().Key)
                         {
@@ -513,7 +573,7 @@ namespace Server
             try
             {
                 string query = "SELECT Id, Name";
-                if(description)
+                if (description)
                 {
                     query += ", Description";
                 }
