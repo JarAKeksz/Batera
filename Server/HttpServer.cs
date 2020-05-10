@@ -111,7 +111,22 @@ namespace Server
                         return Response.searchResponse(parameters);
                     }
                     return Response.searchResponse();
-                
+
+                case "categories":
+                    return Response.categoriesResponse();
+
+                case "item":
+                    int id;
+                    if (request.QueryString["id"] != null)
+                    {
+                        id = Convert.ToInt32(request.QueryString["id"]); //TODO: itten try meg ilyenek
+                        return Response.itemResponse(id);
+                    }
+                    else
+                    {
+                        return null;
+                    }
+
                 default:
                     return null;
             }
