@@ -101,7 +101,7 @@ namespace Server
                 {
                     writer.WriteStartObject();
 
-                    Item i = DataBase.getItemDetails(id);
+                    DetailedItem i = DataBase.getItemDetails(id);
                     
                     writer.WriteNumber("id", i.id);
                     writer.WriteString("name", i.name);

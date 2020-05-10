@@ -252,8 +252,15 @@ namespace Server
             catch (SqlException e)
             {
                 Console.WriteLine(e);
-                return 2; // == sql date check megszegve
-                return 3; // == sql unique megszegve
+                if(e.Message.Contains("DateCheck"))
+                {
+                    return 2; // == sql date check megszegve
+                }
+                else
+                if (e.Message.Contains("Unique"))
+                {
+                    return 3; // == sql unique check megszegve
+                }
             }
             catch (Exception e)
             {
@@ -437,6 +444,11 @@ namespace Server
                                 query += "i." + key + " = @" + key;
                                 break;
 
+                            /*
+                            case "CategoryId":
+                                query += "i.CategoryId IN(@CategoryId)";
+                                break;*/
+
                             case "MinDate":
                                 query += "i.Date >= '@" + key + "'";
                                 break;
@@ -520,40 +532,59 @@ namespace Server
             return ret;
         }
 
-        public static Item getItemDetails(int searchId)
+        public static DetailedItem getItemDetails(int itemId)
         {
-            Item ret = null;
+            DetailedItem ret = null;
 
             try
             {
-                string query = "SELECT i.Id, i.Name, c.Name, ISNULL(i.Price,-1), ISNULL(MAX(b.Value),i.BidStart), i.Image, u.UserName, i.Description, i.Date, " +
-                    "i.EndDate, i.IsItNew, i.BuyWithoutBid, i.BidStart " +
+                string query = "SELECT i.Name, c.Name, ISNULL(i.Price,-1), ISNULL(MAX(b.Value),i.BidStart), i.Image, u.UserName, i.Description, i.Date, i.EndDate, " +
+                    "i.IsItNew, i.BuyWithoutBid, i.BidStart " +
                     "FROM Items AS i JOIN Categories AS c ON i.CategoryId = c.Id LEFT JOIN Bids AS b ON i.Id = b.ItemId LEFT JOIN Users AS u ON i.Seller = u.Id " +
-                    "GROUP BY i.Id, i.Name, c.Name, i.Price, i.BidStart, i.Image, u.UserName, i.Description, i.Date, i.EndDate, i.IsItNew, i.BuyWithoutBid, i.BidStart " +
-                    "WHERE i.Id = @searchId";
+                    "WHERE i.Id = @itemId " +
+                    "GROUP BY i.Name, c.Name, i.Price, i.BidStart, i.Image, u.UserName, i.Description, i.Date, i.EndDate, i.IsItNew, i.BuyWithoutBid, i.BidStart";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@searchId", searchId));
+                    command.Parameters.Add(new SqlParameter("@itemId", itemId));
 
                     SqlDataReader reader = command.ExecuteReader();
                     if (reader.Read())
                     {
-                        int id = reader.GetInt32(0);
-                        string name = reader.GetString(1);
-                        string category = reader.GetString(2);
-                        int price = reader.GetInt32(3);
-                        int current = reader.GetInt32(4);
-                        string image = reader.GetString(5);
+                        int id = itemId;
+                        string name = reader.GetString(0);
+                        string category = reader.GetString(1);
+                        int price = reader.GetInt32(2);
+                        int current = reader.GetInt32(3);
+                        string image = reader.GetString(4);
 
-                        string seller = reader.GetString(6);
-                        string description = reader.GetString(7);
-                        string date = reader.GetString(8);
-                        string endDate = reader.GetString(9);
-                        bool isItNew = (bool)reader[10];
-                        bool buyWithoutBid = (bool)reader[11];
-                        int bidStart = reader.GetInt32(12);
+                        string seller = reader.GetString(5);
+                        string description = reader.GetString(6);
+                        string date = reader.GetString(7);
+                        string endDate = reader.GetString(8);
+                        bool isItNew = (bool)reader[9];
+                        bool buyWithoutBid = (bool)reader[10];
+                        int bidStart = reader.GetInt32(11);
 
-                        ret = new Item(id, name, category, price, current, image, seller, description, date, endDate, isItNew, buyWithoutBid, bidStart);
+                        List<Bid> tmp = new List<Bid>();
+
+                        string bidsQuery = "SELECT u.Id, u.UserName, b.Value FROM Bids AS b JOIN Users AS u ON b.UserId = u.Id WHERE b.ItemId = @itemId";
+                        using (SqlCommand subcommand = new SqlCommand(bidsQuery, connection))
+                        {
+                            subcommand.Parameters.Add(new SqlParameter("@itemId", itemId));
+
+                            SqlDataReader bidReader = subcommand.ExecuteReader();
+                            if (bidReader.Read())
+                            {
+                                int userId = bidReader.GetInt32(0);
+                                string userName = bidReader.GetString(1);
+                                int value = bidReader.GetInt32(2);
+
+                                tmp.Add(new Bid(userId, userName, value));
+                            }
+                            bidReader.Close();
+                        }
+
+                        ret = new DetailedItem(id, name, category, price, current, image, seller, description, date, endDate, isItNew, buyWithoutBid, bidStart, tmp);
                     }
                     reader.Close();
                 }
@@ -651,6 +682,56 @@ namespace Server
             return ret;
         }
 
+        public static byte toggleFavorite(string userId, int itemId)
+        {
+            try
+            {
+                bool favoriteToggle = false;
+                string favoriteCheckQuery = "CASE WHEN EXISTS(SELECT ItemId FROM Favorites WHERE ItemId = @itemId AND UserId = @userId) THEN 1 ELSE 0 END";
+                using (SqlCommand command = new SqlCommand(favoriteCheckQuery, connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@userId", userId));
+                    command.Parameters.Add(new SqlParameter("@itemId", itemId));
+
+                    SqlDataReader reader = command.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        favoriteToggle = (bool)reader[0];
+                    }
+                    reader.Close();
+                }
+                if(favoriteToggle)
+                {
+                    string query = "DELETE Favorites WHERE ItemId = @itemId AND UserId = @userId";
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.Add(new SqlParameter("@userId", userId));
+                        command.Parameters.Add(new SqlParameter("@itemId", itemId));
+
+                        Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
+                    }
+                    return 0;
+                }
+                else
+                {
+                    string query = "INSERT INTO Favorites (ItemId, UserId) VALUES(@itemId, @userId)";
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.Add(new SqlParameter("@userId", userId));
+                        command.Parameters.Add(new SqlParameter("@itemId", itemId));
+
+                        Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
+                    }
+                    return 1;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return 2;
+            }
+        }
+
         public static List<Item> getBidsByUser(string userId)
         {
             List<Item> ret = new List<Item>();
@@ -675,37 +756,6 @@ namespace Server
                         string image = reader.GetString(5);
 
                         ret.Add(new Item(id, name, category, price, current, image));
-                    }
-                    reader.Close();
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-
-            return ret;
-        }
-
-        public static List<Bid> getBidsForItem(int searchId)
-        {
-            List<Bid> ret = new List<Bid>();
-
-            try
-            {
-                string query = "SELECT u.Id, u.UserName, b.Value FROM Bids AS b JOIN Users AS u ON b.UserId = u.Id WHERE b.ItemId = @searchId";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.Add(new SqlParameter("@searchId", searchId));
-
-                    SqlDataReader reader = command.ExecuteReader();
-                    if (reader.Read())
-                    {
-                        int id = reader.GetInt32(0);
-                        string userName = reader.GetString(1);
-                        int value = reader.GetInt32(2);
-
-                        ret.Add(new Bid(id, userName, value));
                     }
                     reader.Close();
                 }
