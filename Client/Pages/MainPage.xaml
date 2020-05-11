@@ -83,7 +83,7 @@
         </Grid>
         <!-- Item list grid -->
         <Grid HorizontalAlignment="Stretch"  Margin="150,50,0,0" VerticalAlignment="Stretch" Background="White">
-            <ListBox Name="itemsList" HorizontalContentAlignment="Stretch" >
+            <ListBox Name="itemsList" HorizontalContentAlignment="Stretch" SelectionChanged="ItemList_SelectionChanged">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Grid Margin="3" Background="Aqua">

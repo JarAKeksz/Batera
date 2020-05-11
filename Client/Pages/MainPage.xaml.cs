@@ -30,7 +30,7 @@ namespace Client
             list = helper.AllItem();
 
             itemsList.ItemsSource = list;
-
+            
             List<string> categories = helper.GetCategories();
             categoriesComboBox.ItemsSource = categories;
             categoriesComboBox.SelectedItem = null;
@@ -38,7 +38,16 @@ namespace Client
 
         }
 
-        
+        private void ItemList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (itemsList.SelectedItem != null)
+            {
+                Item s = itemsList.SelectedItem as Item;
+                Console.WriteLine(s.Id);
+            }
+        }
+
+
         private void profileButton_Click(object sender, RoutedEventArgs e)
         {
             if (User.Instance.getToken() != null)
