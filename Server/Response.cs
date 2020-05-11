@@ -102,6 +102,8 @@ namespace Server
                     writer.WriteStartObject();
 
                     DetailedItem i = DataBase.getItemDetails(id);
+
+                    if (i == null) return null;
                     
                     writer.WriteNumber("id", i.id);
                     writer.WriteString("name", i.name);
@@ -110,6 +112,8 @@ namespace Server
                     writer.WriteString("category", i.category);
                     writer.WriteString("image", i.image);
                     writer.WriteString("description", i.description);
+                    writer.WriteString("end_date", i.endDate);
+                    writer.WriteString("seller", i.seller);
 
                     writer.WriteEndObject();
                 }

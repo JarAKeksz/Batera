@@ -21,6 +21,15 @@ Returns a list of items based on a search term.
 * Retruns:
 	* `items`: an array containing objects. Each object has an `id` (int), `name` (string), `price` (int), `category` (string) and `image` (string, base64 coded image).
 
+### Item details
+Returns a list of items based on a search term.
+* Request type: `GET`
+* Endpoint: `/item`
+* Parameters:
+	* `id`: a number containing the id of the item.
+* Retruns:
+	* `item`: an object that has an `id` (int), `name` (string), `price` (int), `category` (string), `image` (string, base64 coded image), `description` (string), `end_date` (string), `seller` (string).
+
 ### Category list
 Returns a list of available categories.
 * Request type: `GET`
