@@ -51,7 +51,9 @@ namespace Server
                 {
                     writer.WriteStartObject();
                     writer.WriteStartArray("items");
-                    foreach (Item i in DataBase.getItems(searchTerms))
+                    List<Item> items = DataBase.getItems(searchTerms);
+                    if (items == null) return null;
+                    foreach (Item i in items)
                     {
                         writer.WriteStartObject();
                         writer.WriteNumber("id", i.id);
