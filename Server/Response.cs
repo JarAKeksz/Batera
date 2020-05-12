@@ -230,10 +230,12 @@ namespace Server
                 {
                     writer.WriteStartObject();
 
-                    //TODO: ide a useres tokenes ids gedva
-                    byte b = DataBase.addItem(name, categoryId, imageBase64, 0, description, true, startPrice);
+                    int id = DataBase.tokenToId(token);
+                    if (id < 0) return null;
 
-                    if (b != 0) return null; //TODO: success false meg társai
+                    byte b = DataBase.addItem(name, categoryId, imageBase64, id, description, true, startPrice);
+
+                    if (b != 0) return null; //TODO: success false meg társai?
                     
                     writer.WriteBoolean("success", true);
                     writer.WriteEndObject();
