@@ -48,22 +48,6 @@ namespace Server
 
                 Console.WriteLine("[" + DateTime.Now.ToLongTimeString() + "] " + request.Url.ToString());
 
-                // Display the URL used by the client.
-                /*Console.WriteLine("URL: {0}", request.Url.OriginalString);
-                Console.WriteLine("Raw URL: {0}", request.RawUrl);
-                Console.WriteLine("Query: {0}", request.QueryString);
-
-                // Display the referring URI.
-                Console.WriteLine("Referred by: {0}", request.UrlReferrer);
-
-                //Display the HTTP method.
-                Console.WriteLine("HTTP Method: {0}", request.HttpMethod);
-                //Display the host information specified by the client;
-                Console.WriteLine("Host name: {0}", request.UserHostName);
-                Console.WriteLine("Host address: {0}", request.UserHostAddress);
-                Console.WriteLine("User agent: {0}", request.UserAgent);
-                Console.WriteLine();*/
-
                 byte[] data;
 
                 try
@@ -126,8 +110,19 @@ namespace Server
                     string token;
                     if (request.QueryString["token"] != null)
                     {
-                        token = Convert.ToString(request.QueryString["token"]); //TODO: itten try meg ilyenek
+                        token = request.QueryString["token"];
                         return Response.favoritesResponse(token);
+                    }
+                    else
+                    {
+                        return null;
+                    }
+
+                case "notifications":
+                    if (request.QueryString["token"] != null)
+                    {
+                        token = request.QueryString["token"];
+                        return Response.notificationsResponse(token);
                     }
                     else
                     {
@@ -138,7 +133,7 @@ namespace Server
                     int id;
                     if (request.QueryString["id"] != null)
                     {
-                        id = Convert.ToInt32(request.QueryString["id"]); //TODO: itten try meg ilyenek
+                        id = Convert.ToInt32(request.QueryString["id"]);
                         return Response.itemResponse(id);
                     }
                     else
@@ -163,6 +158,22 @@ namespace Server
                         {
                             return Response.loginResponse(document.RootElement.GetProperty("email").GetString(),
                                                           document.RootElement.GetProperty("password").GetString());
+                        }
+                    }
+
+                case "upload":
+                    using (var reader = new StreamReader(request.InputStream))
+                    {
+                        string s = reader.ReadToEnd();
+                        using (JsonDocument document = JsonDocument.Parse(s))
+                        {
+                            return Response.uploadResponse(document.RootElement.GetProperty("token").GetString(), 
+                                                          document.RootElement.GetProperty("name").GetString(),
+                                                          document.RootElement.GetProperty("description").GetString(),
+                                                          document.RootElement.GetProperty("image").GetString(),
+                                                          document.RootElement.GetProperty("category_id").GetInt32(),
+                                                          document.RootElement.GetProperty("start_price").GetInt32(),
+                                                          document.RootElement.GetProperty("buy_price").GetInt32());
                         }
                     }
 

@@ -37,6 +37,7 @@
                 <Button x:Name="savedItemsButton" Content="Saved Items" Margin="5" Background="#FFFFB1F7" Click="savedItemsButton_Click"/>
                 <Button x:Name="boughtItemsButton" Content="Bought Items" Margin="5" Background="#FFFFB1F7" Click="boughtItemsButton_Click"/>
                 <Button x:Name="ProfileSettingsButton" Content="Profile settings" Margin="5" Background="#FFFFB1F7" Click="ProfileSettingsButton_Click"/>
+                <Button x:Name="AddItemButton" Content="Add Item for sale" Margin="5" Background="#FFFFB1F7" Click="AddItemButton_Click"/>
 
             </StackPanel>
         </Grid>

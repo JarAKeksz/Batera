@@ -122,6 +122,31 @@ namespace Server
             }
         }
 
+        public static byte[] notificationsResponse(string token)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
+                {
+                    writer.WriteStartObject();
+                    writer.WriteStartArray("notifications");
+                    foreach (Notification n in DataBase.getNotifications(token))
+                    {
+                        writer.WriteStartObject();
+                        writer.WriteNumber("item_id", n.itemId);
+                        writer.WriteString("item_name", n.itemName);
+                        writer.WriteString("time", n.timeStamp.ToString());
+                        writer.WriteNumber("type", n.textType);
+                        writer.WriteEndObject();
+                    }
+                    writer.WriteEndArray();
+                    writer.WriteEndObject();
+                }
+
+                return stream.ToArray();
+            }
+        }
+
         public static byte[] itemResponse(int id)
         {
             using (MemoryStream stream = new MemoryStream())
@@ -167,6 +192,27 @@ namespace Server
                         writer.WriteBoolean("success", true);
                         writer.WriteString("token", u.logInToken);
                     }
+                    writer.WriteEndObject();
+                }
+
+                return stream.ToArray();
+            }
+        }
+
+        public static byte[] uploadResponse(string token, string name, string description, string imageBase64, int categoryId, int startPrice, int buyPrice)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
+                {
+                    writer.WriteStartObject();
+
+                    //TODO: ide a useres tokenes ids gedva
+                    byte b = DataBase.addItem(name, categoryId, imageBase64, 0, description, true, startPrice);
+
+                    if (b != 0) return null; //TODO: success false meg társai
+                    
+                    writer.WriteBoolean("success", true);
                     writer.WriteEndObject();
                 }
 
