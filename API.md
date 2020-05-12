@@ -56,3 +56,12 @@ Returns a list of items tagged as favorites by the user.
 	* `token`: a string containing the session token in case of a successful login.
 * Returns:
 	* `items`: an array containing objects. Each object has an `id` (int), `name` (string), `price` (int), `category` (string) and `image` (string, base64 coded image).
+
+### Notifications
+Returns a list of items tagged as favorites by the user.
+* Request type: `GET`
+* Endpoint: `/notifications`
+* Parameters:
+	* `token`: a string containing the session token in case of a successful login.
+* Returns:
+	* `notifications`: an array containing objects. Each object has an `item_id` (int), `item_name` (string), `time` (string) and `type` (int, 0 = ...).
