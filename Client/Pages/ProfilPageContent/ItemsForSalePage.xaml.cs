@@ -13,21 +13,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Client.ProfilPageContent
+namespace Client.Pages.ProfilPageContent
 {
     /// <summary>
-    /// Interaction logic for ProfileSettingsPage.xaml
+    /// Interaction logic for ItemsForSalePage.xaml
     /// </summary>
-    public partial class ProfileSettingsPage : Page
+    public partial class ItemsForSalePage : Page
     {
-        public ProfileSettingsPage()
+        public ItemsForSalePage()
         {
             InitializeComponent();
-        }
-
-        private void LogOutButton_Click(object sender, RoutedEventArgs e)
-        {
-
         }
     }
 }

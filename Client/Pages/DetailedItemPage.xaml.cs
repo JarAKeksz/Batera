@@ -37,7 +37,7 @@ namespace Client.Pages
         }
         private void backButton_Click(object sender, RoutedEventArgs e)
         {
-            this.NavigationService.Navigate(new MainPage());
+            this.NavigationService.GoBack();
         }
 
     }
