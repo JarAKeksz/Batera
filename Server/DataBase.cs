@@ -195,29 +195,25 @@ namespace Server
             return 0; // == minden rendben
         }
 
-        public static byte addItem(string name, int categoryId, string image, int sellerId, string description, string date, string endDate,
-            bool isItNew, int bidStart, bool buyWithoutBid = false, int price = -1)
+        public static byte addItem(string name, int categoryId, string image, int sellerId, string description, bool isItNew, int bidStart, 
+            bool buyWithoutBid = false, int price = -1)
         {
             try
             {
                 string query;
-                if(string.Compare(date,endDate) < 0)
-                {
-                    return 1; // == endDate nagyobb kell h legyen mint a date
-                }
                 if (buyWithoutBid && price != -1)
                 {
                     query = "INSERT INTO Items (Name, Seller, CategoryId, Image, Description, Date, EndDate, IsItNew, BuyWithoutBid, Price, BidStart) " +
-                        "VALUES(@Name, @Seller, @CategoryId, @Image, @Description, '@Date', '@EndDate', @IsItNew, @BuyWithoutBid, @Price, @BidStart)";
+                        "VALUES(@Name, @Seller, @CategoryId, @Image, @Description, GETDATE(), DATEADD(DAY, 7, GETDATE()), @IsItNew, @BuyWithoutBid, @Price, @BidStart)";
                 }
                 else if (!buyWithoutBid)
                 {
                     query = "INSERT INTO Items (Name, Seller, CategoryId, Image, Description, Date, EndDate, IsItNew, BidStart) " +
-                        "VALUES(@Name, @Seller, @CategoryId, @Image, @Description, '@Date', '@EndDate', @IsItNew, @BidStart)";
+                        "VALUES(@Name, @Seller, @CategoryId, @Image, @Description, GETDATE(), DATEADD(DAY, 7, GETDATE()), @IsItNew, @BidStart)";
                 }
                 else
                 {
-                    return 2; // == buyWithoutBid igaz, de nem adtál meg árat
+                    return 1; // == buyWithoutBid igaz, de nem adtál meg árat
                 }
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
@@ -226,8 +222,7 @@ namespace Server
                     command.Parameters.Add(new SqlParameter("@CategoryId", categoryId));
                     command.Parameters.Add(new SqlParameter("@Image", image));
                     command.Parameters.Add(new SqlParameter("@Description", description));
-                    command.Parameters.Add(new SqlParameter("@Date", date));
-                    command.Parameters.Add(new SqlParameter("@EndDate", endDate));
+                    //command.Parameters.Add(new SqlParameter("@EndDate", endDate));
                     command.Parameters.Add(new SqlParameter("@IsItNew", isItNew));
                     command.Parameters.Add(new SqlParameter("@BidStart", bidStart));
                     if (buyWithoutBid && price != -1)
@@ -244,13 +239,13 @@ namespace Server
                 Console.WriteLine(e);
                 if (e.Message.Contains("NameCheck"))
                 {
-                    return 3; // == van már ilyen nevű termék
+                    return 2; // == van már ilyen nevű termék
                 }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return 4; // == vmi más baj van
+                return 3; // == vmi más baj van
             }
             return 0; // == minden rendben
         }
@@ -438,12 +433,6 @@ namespace Server
                                 query += "i.CategoryId IN(@CategoryId)";
                                 break;*/
 
-                            case "MinDate":
-                                query += "i.Date >= '@" + key + "'";
-                                break;
-                            case "MaxDate":
-                                query += "i.Date <= '@" + key + "'";
-                                break;
                             case "MinEndDate":
                                 query += "i.EndDate >= '@" + key + "'";
                                 break;
@@ -536,18 +525,17 @@ namespace Server
 
                 string seller;
                 string description;
-                string date;
-                string endDate;
+                DateTime endDate;
                 bool isItNew;
                 bool buyWithoutBid;
                 int bidStart;
                 int bidIncrement;
 
-                string query = "SELECT i.Name, c.Name, ISNULL(i.Price,-1), ISNULL(MAX(b.Value),i.BidStart), i.Image, u.UserName, i.Description, i.Date, i.EndDate, " +
+                string query = "SELECT i.Name, c.Name, ISNULL(i.Price,-1), ISNULL(MAX(b.Value),i.BidStart), i.Image, u.UserName, i.Description, i.EndDate, " +
                     "i.IsItNew, i.BuyWithoutBid, i.BidStart, i.BidIncrement " +
                     "FROM Items AS i JOIN Categories AS c ON i.CategoryId = c.Id LEFT JOIN Bids AS b ON i.Id = b.ItemId LEFT JOIN Users AS u ON i.Seller = u.Id " +
                     "WHERE i.Id = @itemId " +
-                    "GROUP BY i.Name, c.Name, i.Price, i.BidStart, i.Image, u.UserName, i.Description, i.Date, i.EndDate, i.IsItNew, i.BuyWithoutBid, i.BidStart, i.BidIncrement";
+                    "GROUP BY i.Name, c.Name, i.Price, i.BidStart, i.Image, u.UserName, i.Description, i.EndDate, i.IsItNew, i.BuyWithoutBid, i.BidStart, i.BidIncrement";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@itemId", itemId));
@@ -564,14 +552,11 @@ namespace Server
 
                         seller = reader.GetString(5);
                         description = reader.GetString(6);
-                        DateTime tmpDate = (DateTime)reader[7];
-                        date = tmpDate.ToString("YYYY/MM/DD");
-                        tmpDate = (DateTime)reader[8];
-                        endDate = tmpDate.ToString("YYYY/MM/DD");
-                        isItNew = (bool)reader[9];
-                        buyWithoutBid = (bool)reader[10];
-                        bidStart = reader.GetInt32(11);
-                        bidIncrement = (int)reader.GetDecimal(12);
+                        endDate = reader.GetDateTime(7);
+                        isItNew = (bool)reader[8];
+                        buyWithoutBid = (bool)reader[9];
+                        bidStart = reader.GetInt32(10);
+                        bidIncrement = (int)reader.GetDecimal(11);
                     }
                     else
                     {
@@ -600,7 +585,7 @@ namespace Server
                     bidReader.Close();
                 }
 
-                ret = new DetailedItem(id, name, category, price, current, image, seller, description, date, endDate, isItNew, buyWithoutBid, bidStart, bidIncrement, tmp);
+                ret = new DetailedItem(id, name, category, price, current, image, seller, description, endDate, isItNew, buyWithoutBid, bidStart, bidIncrement, tmp);
             }
             catch (Exception e)
             {
@@ -797,7 +782,7 @@ namespace Server
         {
             try
             {
-                string thresholdCheckQuery = "SELECT TOP (1) ISNULL(b.Value,i.BidStart)+i.BidIncrement FROM Items AS i " +
+                string thresholdCheckQuery = "SELECT TOP (1) i.EndDate, ISNULL(b.Value,i.BidStart)+i.BidIncrement FROM Items AS i " +
                     "LEFT JOIN Bids AS b ON b.ItemId = i.Id WHERE i.Id = @itemId ORDER BY ISNULL(b.Value,i.BidStart) DESC";
                 using (SqlCommand command = new SqlCommand(thresholdCheckQuery, connection))
                 {
@@ -805,14 +790,20 @@ namespace Server
 
                     SqlDataReader reader = command.ExecuteReader();
                     int tmp = -1;
+                    DateTime tmpDate = new DateTime();
                     if (reader.Read())
                     {
-                        tmp = (int)reader.GetFloat(0);
+                        tmpDate = (DateTime)reader[0];
+                        tmp = (int)reader.GetFloat(1);
                     }
                     reader.Close();
                     if (tmp == -1)
                     {
-                        return 2; // == nem található a termék
+                        return 3; // == nem található a termék
+                    }
+                    if (tmpDate <= DateTime.Now)
+                    {
+                        return 2; // == a termékre már nem érkezhet licit
                     }
                     if (tmp > value)
                     {
@@ -824,7 +815,7 @@ namespace Server
                     "DECLARE @id INT " +
                     "SELECT @id = Id FROM Users WHERE Token = @token " +
                     "INSERT INTO Bids(ItemId, UserId, Value) VALUES(@itemId, @id, @value) " +
-                    "INSERT INTO Notifications(UserId, ItemId, TimeStamp, TextType) " +
+                    "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
                     "SELECT UserId, ItemId, GETDATE(), '0' FROM Subscriptions " +
                     "WHERE ItemId = @itemId AND UserId != @id " +
                     "COMMIT TRANSACTION";
@@ -840,7 +831,7 @@ namespace Server
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return 3; // == oops
+                return 4; // == oops
             }
             return 0;
         }
@@ -937,9 +928,9 @@ namespace Server
             bool subscribed = false;
             try
             {
-                string favoriteCheckQuery = "SELECT s.ItemId FROM Subscriptions AS s RIGHT JOIN Users AS u ON s.UserId = u.Id " +
+                string subscriptionCheckQuery = "SELECT s.ItemId FROM Subscriptions AS s RIGHT JOIN Users AS u ON s.UserId = u.Id " +
                     "WHERE u.Token = @token AND s.ItemId = @itemId";
-                using (SqlCommand command = new SqlCommand(favoriteCheckQuery, connection))
+                using (SqlCommand command = new SqlCommand(subscriptionCheckQuery, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@token", token));
                     command.Parameters.Add(new SqlParameter("@itemId", itemId));
