@@ -92,6 +92,33 @@ namespace Server
                 return stream.ToArray();
             }
         }
+        
+        public static byte[] favoritesResponse(int id)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
+                {
+                    writer.WriteStartObject();
+                    writer.WriteStartArray("items");
+                    foreach (Item i in DataBase.getFavorites(id))
+                    {
+                        writer.WriteStartObject();
+                        writer.WriteNumber("id", i.id);
+                        writer.WriteString("name", i.name);
+                        writer.WriteNumber("price", i.price);
+                        writer.WriteNumber("current", i.current);
+                        writer.WriteString("category", i.category);
+                        writer.WriteString("image", i.image);
+                        writer.WriteEndObject();
+                    }
+                    writer.WriteEndArray();
+                    writer.WriteEndObject();
+                }
+
+                return stream.ToArray();
+            }
+        }
 
         public static byte[] itemResponse(int id)
         {

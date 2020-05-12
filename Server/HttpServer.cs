@@ -115,8 +115,20 @@ namespace Server
                 case "categories":
                     return Response.categoriesResponse();
 
-                case "item":
+                case "favorites":
                     int id;
+                    if (request.QueryString["id"] != null)
+                    {
+                        id = Convert.ToInt32(request.QueryString["id"]); //TODO: itten try meg ilyenek
+                        return Response.favoritesResponse(id);
+                    }
+                    else
+                    {
+                        return null;
+                    }
+
+                case "item":
+                    //int id;
                     if (request.QueryString["id"] != null)
                     {
                         id = Convert.ToInt32(request.QueryString["id"]); //TODO: itten try meg ilyenek

@@ -622,7 +622,7 @@ namespace Server
             return ret;
         }
 
-        public static List<Item> getFavorites(string userId)
+        public static List<Item> getFavorites(int userId)
         {
             List<Item> ret = new List<Item>();
 

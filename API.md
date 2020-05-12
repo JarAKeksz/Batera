@@ -47,3 +47,12 @@ Is used to get a session token for a session of a registered user.
 * Returns:
 	* `success`: a boolean containing if the login was successful
 	* `token`: a string containing the session token in case of a successful login
+
+### Favorites
+Returns a list of items tagged as favorites by the user.
+* Request type: `GET`
+* Endpoint: `/favorites`
+* Parameters:
+	* `id`: a number containing the id of the user.
+* Retruns:
+	* `items`: an array containing objects. Each object has an `id` (int), `name` (string), `price` (int), `category` (string) and `image` (string, base64 coded image).
