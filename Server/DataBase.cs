@@ -48,7 +48,8 @@ namespace Server
                         string userName = reader.GetString(1);
                         string logInToken = token;
                         string name = reader.GetString(2);
-                        string birthDate = reader.GetString(3);
+                        DateTime tmp = (DateTime)reader[3];
+                        string birthDate = tmp.ToString("YYYY/MM/DD");
                         string emailAddr = reader.GetString(4);
                         ret = new User(id, userName, logInToken, name, birthDate, emailAddr);
                         if (!reader.IsDBNull(5))
@@ -78,8 +79,14 @@ namespace Server
 
             try
             {
-                string query = "SELECT Id, UserName, CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', CONCAT(Id, UserName, GETDATE())), 2), Name, BirthDate, Email, Phone " +
-                    "FROM Users WHERE Email = @email AND PasswordHash = CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @password), 2)";
+                string query = "SET TRANSACTION ISOLATION LEVEL READ COMMITTED " +
+                    "BEGIN TRANSACTION " +
+                    "DECLARE @id INT, @token CHAR(64) " +
+                    "SELECT @id = Id, @token = CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', CONCAT(Id, UserName, GETDATE())), 2) " +
+                    "FROM Users WHERE Email = @email AND PasswordHash = CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @password), 2) " +
+                    "UPDATE Users SET Token = @token WHERE Id = @id " +
+                    "SELECT Id, UserName, Token, Name, BirthDate, Phone FROM Users WHERE Token = @token " +
+                    "COMMIT TRANSACTION";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@email", email));
@@ -94,12 +101,12 @@ namespace Server
                         string userName = reader.GetString(1);
                         string logInToken = reader.GetString(2);
                         string name = reader.GetString(3);
-                        string birthDate = reader.GetString(4);
-                        string emailAddr = reader.GetString(5);
-                        ret = new User(id, userName, logInToken, name, birthDate, emailAddr);
-                        if (!reader.IsDBNull(6))
+                        DateTime tmp = (DateTime)reader[4];
+                        string birthDate = tmp.ToString("YYYY/MM/DD");
+                        ret = new User(id, userName, logInToken, name, birthDate, email);
+                        if (!reader.IsDBNull(5))
                         {
-                            ret.phone = reader.GetString(6);
+                            ret.phone = reader.GetString(5);
                         }
                     }
                     else
@@ -107,18 +114,6 @@ namespace Server
                         ret = null;
                     }
                     reader.Close();
-                }
-                if (ret != null)
-                {
-                    string createTokenQuery = "UPDATE Users SET Token = @logInToken WHERE Id = @id";
-                    using (SqlCommand update = new SqlCommand(createTokenQuery, connection))
-                    {
-                        //update.Parameters.Add(new SqlParameter("@logInToken", ret.logInToken));
-                        update.Parameters.Add("@logInToken", SqlDbType.Char).Value = ret.logInToken;
-                        update.Parameters.Add(new SqlParameter("@id", ret.id));
-
-                        Console.WriteLine("Rows affected: " + update.ExecuteNonQuery());
-                    }
                 }
             }
             catch (Exception e)
@@ -550,8 +545,10 @@ namespace Server
 
                         seller = reader.GetString(5);
                         description = reader.GetString(6);
-                        date = reader.GetDateTime(7).ToString();
-                        endDate = reader.GetDateTime(8).ToString();
+                        DateTime tmpDate = (DateTime)reader[7];
+                        date = tmpDate.ToString("YYYY/MM/DD");
+                        tmpDate = (DateTime)reader[8];
+                        endDate = tmpDate.ToString("YYYY/MM/DD");
                         isItNew = (bool)reader[9];
                         buyWithoutBid = (bool)reader[10];
                         bidStart = reader.GetInt32(11);
@@ -643,7 +640,7 @@ namespace Server
             return ret;
         }
 
-        public static List<Item> getFavorites(int userId)
+        public static List<Item> getFavorites(string token)
         {
             List<Item> ret = new List<Item>();
 
@@ -651,10 +648,11 @@ namespace Server
             {
                 string query = "SELECT f.ItemId, i.Name, c.Name, ISNULL(i.Price,-1), ISNULL(MAX(b.Value),i.BidStart), i.Image " +
                     "FROM Favorites AS f JOIN Items AS i ON f.ItemId = i.Id JOIN Categories AS c ON i.CategoryId = c.Id " +
-                    "LEFT JOIN Bids AS b ON i.Id = b.ItemId WHERE f.UserId = @userId GROUP BY f.ItemId, i.Name, c.Name, i.Price, i.BidStart, i.Image";
+                    "LEFT JOIN Bids AS b ON i.Id = b.ItemId LEFT JOIN Users AS u ON f.UserId = u.Id WHERE u.Token = @token " +
+                    "GROUP BY f.ItemId, i.Name, c.Name, i.Price, i.BidStart, i.Image";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@userId", userId));
+                    command.Parameters.Add(new SqlParameter("@token", token));
 
                     SqlDataReader reader = command.ExecuteReader();
                     while (reader.Read())
@@ -679,30 +677,35 @@ namespace Server
             return ret;
         }
 
-        public static byte toggleFavorite(int itemId, string userId)
+        public static byte toggleFavorite(int itemId, string token)
         {
             bool favorite = false;
             try
             {
-                string favoriteCheckQuery = "CASE WHEN EXISTS(SELECT ItemId FROM Favorites WHERE ItemId = @itemId AND UserId = @userId) THEN 1 ELSE 0 END";
+                string favoriteCheckQuery = "SELECT f.ItemId FROM Favorites AS f RIGHT JOIN Users AS u ON f.UserId = u.Id " +
+                    "WHERE u.Token = @token AND f.ItemId = @itemId";
                 using (SqlCommand command = new SqlCommand(favoriteCheckQuery, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@userId", userId));
+                    command.Parameters.Add(new SqlParameter("@token", token));
                     command.Parameters.Add(new SqlParameter("@itemId", itemId));
 
                     SqlDataReader reader = command.ExecuteReader();
                     if (reader.Read())
                     {
-                        favorite = (bool)reader[0];
+                        favorite = reader.GetInt32(0) != -1;
                     }
                     reader.Close();
                 }
                 if(favorite)
                 {
-                    string query = "DELETE Favorites WHERE ItemId = @itemId AND UserId = @userId";
+                    string query = "BEGIN TRANSACTION " +
+                        "DECLARE @id INT " +
+                        "SELECT @id = Id FROM Users WHERE Token = @token " +
+                        "DELETE Favorites WHERE ItemId = @itemId AND UserId = @id " +
+                        "COMMIT TRANSACTION";
                     using (SqlCommand command = new SqlCommand(query, connection))
                     {
-                        command.Parameters.Add(new SqlParameter("@userId", userId));
+                        command.Parameters.Add(new SqlParameter("@token", token));
                         command.Parameters.Add(new SqlParameter("@itemId", itemId));
 
                         Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
@@ -711,10 +714,14 @@ namespace Server
                 }
                 else
                 {
-                    string query = "INSERT INTO Favorites (ItemId, UserId) VALUES(@itemId, @userId)";
+                    string query = "BEGIN TRANSACTION " +
+                        "DECLARE @id INT " +
+                        "SELECT @id = Id FROM Users WHERE Token = @token " +
+                        "INSERT INTO Favorites (ItemId, UserId) VALUES(@itemId, @id) " +
+                        "COMMIT TRANSACTION";
                     using (SqlCommand command = new SqlCommand(query, connection))
                     {
-                        command.Parameters.Add(new SqlParameter("@userId", userId));
+                        command.Parameters.Add(new SqlParameter("@token", token));
                         command.Parameters.Add(new SqlParameter("@itemId", itemId));
 
                         Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
@@ -730,18 +737,19 @@ namespace Server
             return Convert.ToByte(favorite);
         }
 
-        public static List<Item> getBidsByUser(string userId)
+        public static List<Item> getBidsByUser(string token)
         {
             List<Item> ret = new List<Item>();
 
             try
             {
                 string query = "SELECT b.ItemId, i.Name, c.Name, ISNULL(i.Price,-1), b.Value, i.Image " +
-                    "FROM Bids AS b JOIN Items AS i ON b.ItemId = i.Id JOIN Categories AS c ON i.CategoryId = c.Id WHERE b.userId = @userId " +
+                    "FROM Bids AS b JOIN Items AS i ON b.ItemId = i.Id JOIN Categories AS c ON i.CategoryId = c.Id " +
+                    "LEFT JOIN Users AS u ON f.UserId = u.Id WHERE u.Token = @token " +
                     "GROUP BY b.ItemId, i.Name, c.Name, i.Price, b.Value, i.BidStart, i.Image";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@userId", userId));
+                    command.Parameters.Add(new SqlParameter("@token", token));
 
                     SqlDataReader reader = command.ExecuteReader();
                     while (reader.Read())
@@ -766,7 +774,7 @@ namespace Server
             return ret;
         }
 
-        public static byte addBid(int itemId, string userId, int value)
+        public static byte addBid(int itemId, string token, int value)
         {
             try
             {
@@ -792,10 +800,15 @@ namespace Server
                         return 1; // == a megadott licit nem éri el a küszöböt
                     }
                 }
-                string query = "INSERT INTO Bids (ItemId, UserId, Value) VALUES(@itemId, @userId, @value)";
+                string query = "SET TRANSACTION ISOLATION LEVEL READ COMMITTED " +
+                    "BEGIN TRANSACTION " +
+                    "DECLARE @id INT " +
+                    "SELECT @id = Id FROM Users WHERE Token = @token " +
+                    "INSERT INTO Bids(ItemId, UserId, Value) VALUES(@itemId, @id, @value) " +
+                    "COMMIT TRANSACTION";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@userId", userId));
+                    command.Parameters.Add(new SqlParameter("@token", token));
                     command.Parameters.Add(new SqlParameter("@itemId", itemId));
                     command.Parameters.Add(new SqlParameter("@value", value));
 

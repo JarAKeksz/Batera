@@ -116,11 +116,11 @@ namespace Server
                     return Response.categoriesResponse();
 
                 case "favorites":
-                    int id;
+                    string token;
                     if (request.QueryString["id"] != null)
                     {
-                        id = Convert.ToInt32(request.QueryString["id"]); //TODO: itten try meg ilyenek
-                        return Response.favoritesResponse(id);
+                        token = Convert.ToString(request.QueryString["token"]); //TODO: itten try meg ilyenek
+                        return Response.favoritesResponse(token);
                     }
                     else
                     {
@@ -128,7 +128,7 @@ namespace Server
                     }
 
                 case "item":
-                    //int id;
+                    int id;
                     if (request.QueryString["id"] != null)
                     {
                         id = Convert.ToInt32(request.QueryString["id"]); //TODO: itten try meg ilyenek

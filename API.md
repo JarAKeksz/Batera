@@ -18,7 +18,7 @@ Returns a list of items based on a search term.
 	* `BuyWithoutBid` (optional): a boolean ("true"/"false") containing if item can be purchased directly.
 	* `MinPrice` (optional): a number containing minimum price (inclusive).
 	* `MaxPrice` (optional): a number containing maximum price (inclusive).
-* Retruns:
+* Returns:
 	* `items`: an array containing objects. Each object has an `id` (int), `name` (string), `price` (int), `category` (string) and `image` (string, base64 coded image).
 
 ### Item details
@@ -27,14 +27,14 @@ Returns a list of items based on a search term.
 * Endpoint: `/item`
 * Parameters:
 	* `id`: a number containing the id of the item.
-* Retruns:
+* Returns:
 	* `item`: an object that has an `id` (int), `name` (string), `price` (int), `category` (string), `image` (string, base64 coded image), `description` (string), `end_date` (string), `seller` (string).
 
 ### Category list
 Returns a list of available categories.
 * Request type: `GET`
 * Endpoint: `/categories`
-* Retruns:
+* Returns:
 	* `categories`: an array containing objects. Each object has an `id` (int) and `name` (string).
 
 ### Login
@@ -53,6 +53,6 @@ Returns a list of items tagged as favorites by the user.
 * Request type: `GET`
 * Endpoint: `/favorites`
 * Parameters:
-	* `id`: a number containing the id of the user.
-* Retruns:
+	* `token`: a string containing the session token in case of a successful login.
+* Returns:
 	* `items`: an array containing objects. Each object has an `id` (int), `name` (string), `price` (int), `category` (string) and `image` (string, base64 coded image).

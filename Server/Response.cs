@@ -93,7 +93,7 @@ namespace Server
             }
         }
         
-        public static byte[] favoritesResponse(int id)
+        public static byte[] favoritesResponse(string token)
         {
             using (MemoryStream stream = new MemoryStream())
             {
@@ -101,7 +101,7 @@ namespace Server
                 {
                     writer.WriteStartObject();
                     writer.WriteStartArray("items");
-                    foreach (Item i in DataBase.getFavorites(id))
+                    foreach (Item i in DataBase.getFavorites(token))
                     {
                         writer.WriteStartObject();
                         writer.WriteNumber("id", i.id);
