@@ -66,23 +66,30 @@ namespace Server
 
                 byte[] data;
 
-                switch (request.HttpMethod)
+                try
                 {
-                    case "GET":
-                        data = handleGET(request);
-                        break;
-                    case "POST":
-                        data = handlePOST(request);
-                        break;
-                    default:
-                        data = null;
-                        break;
-                }
+                    switch (request.HttpMethod)
+                    {
+                        case "GET":
+                            data = handleGET(request);
+                            break;
+                        case "POST":
+                            data = handlePOST(request);
+                            break;
+                        default:
+                            data = null;
+                            break;
+                    }
 
-                if (data == null)
+                    if (data == null)
+                    {
+                        data = Encoding.UTF8.GetBytes("{}");
+                        response.StatusCode = 400;
+                    }
+                }catch(Exception e)
                 {
                     data = Encoding.UTF8.GetBytes("{}");
-                    response.StatusCode = 400;
+                    response.StatusCode = 500;
                 }
 
 
@@ -117,7 +124,7 @@ namespace Server
 
                 case "favorites":
                     string token;
-                    if (request.QueryString["id"] != null)
+                    if (request.QueryString["token"] != null)
                     {
                         token = Convert.ToString(request.QueryString["token"]); //TODO: itten try meg ilyenek
                         return Response.favoritesResponse(token);
