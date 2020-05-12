@@ -141,6 +141,7 @@ namespace Client
             string itemsJson = JsonBody(url);
             Console.WriteLine(url);
 
+
             //json parse 
             var options = new JsonDocumentOptions
             {
@@ -150,8 +151,8 @@ namespace Client
             if(itemsJson != null) { 
                 using (JsonDocument document = JsonDocument.Parse(itemsJson, options))
                 {
-                    foreach (JsonElement element in document.RootElement.GetProperty("items").EnumerateArray())
-                    {
+                    JsonElement element = document.RootElement;
+                    
 
                         int id = element.GetProperty("id").GetInt32();
                         string name = element.GetProperty("name").GetString();
@@ -160,7 +161,7 @@ namespace Client
                         string image = element.GetProperty("image").GetString();
 
                         result.Add(new Item(id, name, price, category, image));
-                    }
+                    
                 }
             }
 
@@ -198,5 +199,82 @@ namespace Client
 
             return result;
         }
+
+        public DetailedItem GetDetailedItem(int id)
+        {
+            DetailedItem result = null;
+            string itemsJson = JsonBody($"http://localhost:8000/item?id={id.ToString()}");
+            //json parse 
+            var options = new JsonDocumentOptions
+            {
+                AllowTrailingCommas = true
+            };
+            if (itemsJson != null)
+            {
+                using (JsonDocument document = JsonDocument.Parse(itemsJson, options))
+                {
+                    JsonElement element = document.RootElement;
+                    
+
+                        int id2 = element.GetProperty("id").GetInt32();
+                        string name = element.GetProperty("name").GetString();
+                        int price = element.GetProperty("price").GetInt32();
+                        string category = element.GetProperty("category").GetString();
+                        string image = element.GetProperty("image").GetString();
+                        string description = element.GetProperty("description").GetString();
+                        string end_date = element.GetProperty("end_date").GetString();
+                        string seller = element.GetProperty("seller").GetString();
+                        result = (new DetailedItem(id2, name, price, category, image,description,end_date,seller));
+                    
+                }
+            }
+
+            return result;
+        }
+
+
+        public List<Item> FavoriteItem(string id)
+        {
+            List<Item> result = new List<Item>();
+
+            string itemsJson = JsonBody($"http://localhost:8000/favorites?id={id}");
+
+            //json parse 
+            var options = new JsonDocumentOptions
+            {
+                AllowTrailingCommas = true
+            };
+            if (itemsJson != null)
+            {
+                using (JsonDocument document = JsonDocument.Parse(itemsJson, options))
+                {
+                    foreach (JsonElement element in document.RootElement.GetProperty("items").EnumerateArray())
+                    {
+
+                        int id2 = element.GetProperty("id").GetInt32();
+                        string name = element.GetProperty("name").GetString();
+                        int price = element.GetProperty("price").GetInt32();
+                        string category = element.GetProperty("category").GetString();
+                        string image = element.GetProperty("image").GetString();
+
+                        result.Add(new Item(id2, name, price, category, image));
+                    }
+                }
+            }
+
+            return result;
+        }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+

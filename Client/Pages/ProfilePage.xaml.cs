@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Client.Modells;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,11 +21,14 @@ namespace Client
     /// </summary>
     public partial class ProfilePage : Page
     {
+        BateraCliensClass helper = new BateraCliensClass();
+
         public ProfilePage()
         {
             InitializeComponent();
+            ProfilPageContent.NavigationService.Navigate(new ProfilPageContent.SavedItemsPage(helper.FavoriteItem(User.Instance.getId())));
 
-            ProfilPageContent.NavigationService.Navigate(new ProfilPageContent.SavedItemsPage());
+            
         }
 
         private void logoTextBlock_PreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -34,7 +38,7 @@ namespace Client
 
         private void savedItemsButton_Click(object sender, RoutedEventArgs e)
         {
-            ProfilPageContent.NavigationService.Navigate(new ProfilPageContent.SavedItemsPage());
+            ProfilPageContent.NavigationService.Navigate(new ProfilPageContent.SavedItemsPage(helper.FavoriteItem(User.Instance.getId())));
         }
 
         private void boughtItemsButton_Click(object sender, RoutedEventArgs e)
