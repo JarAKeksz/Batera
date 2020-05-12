@@ -161,6 +161,22 @@ namespace Server
                         }
                     }
 
+                case "upload":
+                    using (var reader = new StreamReader(request.InputStream))
+                    {
+                        string s = reader.ReadToEnd();
+                        using (JsonDocument document = JsonDocument.Parse(s))
+                        {
+                            return Response.uploadResponse(document.RootElement.GetProperty("token").GetString(), 
+                                                          document.RootElement.GetProperty("name").GetString(),
+                                                          document.RootElement.GetProperty("description").GetString(),
+                                                          document.RootElement.GetProperty("image").GetString(),
+                                                          document.RootElement.GetProperty("category_id").GetInt32(),
+                                                          document.RootElement.GetProperty("start_price").GetInt32(),
+                                                          document.RootElement.GetProperty("buy_price").GetInt32());
+                        }
+                    }
+
                 default:
                     return null;
             }

@@ -48,6 +48,21 @@ Is used to get a session token for a session of a registered user.
 	* `success`: a boolean containing if the login was successful
 	* `token`: a string containing the session token in case of a successful login
 
+### Upload item
+Is used to upload a new item to the marketplace
+* Request type: `POST`
+* Endpoint: `/upload`
+* Parameters:
+	* `token`: a string containing the session token
+	* `name`: a string containing the item name
+	* `description`: a string containing a description of the item
+	* `image`: a string containing a base64 encoded image of the item
+	* `category_id`: an integer containing the category id
+	* `start_price`: an integer containing the starting price of the item
+	* `buy_price` (optional): an integer containing the quick buy price of the item
+* Returns:
+	* `success`: a boolean containing if the login was successful
+
 ### Favorites
 Returns a list of items tagged as favorites by the user.
 * Request type: `GET`
