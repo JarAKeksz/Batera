@@ -24,11 +24,11 @@ namespace Client.ProfilPageContent
     {
         BateraCliensClass helper = new BateraCliensClass();
 
-        public SavedItemsPage(List<Item> FavoriteItemList)
+        public SavedItemsPage()
         {
             InitializeComponent();
 
-            favoriteItemsList.ItemsSource = FavoriteItemList;
+            favoriteItemsList.ItemsSource = helper.GetFavoriteItem(User.Instance.getToken());
         }
         private void ItemList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

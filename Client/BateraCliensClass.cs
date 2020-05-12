@@ -151,8 +151,8 @@ namespace Client
             if(itemsJson != null) { 
                 using (JsonDocument document = JsonDocument.Parse(itemsJson, options))
                 {
-                    JsonElement element = document.RootElement;
-                    
+                    foreach (JsonElement element in document.RootElement.GetProperty("items").EnumerateArray())
+                    {
 
                         int id = element.GetProperty("id").GetInt32();
                         string name = element.GetProperty("name").GetString();
@@ -161,7 +161,7 @@ namespace Client
                         string image = element.GetProperty("image").GetString();
 
                         result.Add(new Item(id, name, price, category, image));
-                    
+                    }
                 }
             }
 
@@ -233,11 +233,11 @@ namespace Client
         }
 
 
-        public List<Item> FavoriteItem(string id)
+        public List<Item> GetFavoriteItem(string token)
         {
             List<Item> result = new List<Item>();
 
-            string itemsJson = JsonBody($"http://localhost:8000/favorites?id={id}");
+            string itemsJson = JsonBody($"http://localhost:8000/favorites?token={token}");
 
             //json parse 
             var options = new JsonDocumentOptions

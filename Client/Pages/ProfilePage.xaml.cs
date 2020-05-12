@@ -26,7 +26,7 @@ namespace Client
         public ProfilePage()
         {
             InitializeComponent();
-            ProfilPageContent.NavigationService.Navigate(new ProfilPageContent.SavedItemsPage(helper.FavoriteItem(User.Instance.getId())));
+            ProfilPageContent.NavigationService.Navigate(new ProfilPageContent.SavedItemsPage());
 
             
         }
@@ -38,7 +38,7 @@ namespace Client
 
         private void savedItemsButton_Click(object sender, RoutedEventArgs e)
         {
-            ProfilPageContent.NavigationService.Navigate(new ProfilPageContent.SavedItemsPage(helper.FavoriteItem(User.Instance.getId())));
+            ProfilPageContent.NavigationService.Navigate(new ProfilPageContent.SavedItemsPage());
         }
 
         private void boughtItemsButton_Click(object sender, RoutedEventArgs e)
