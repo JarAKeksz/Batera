@@ -513,6 +513,22 @@ namespace Server
 
             try
             {
+                int id;
+                string name;
+                string category;
+                int price;
+                int current;
+                string image;
+
+                string seller;
+                string description;
+                string date;
+                string endDate;
+                bool isItNew;
+                bool buyWithoutBid;
+                int bidStart;
+                int bidIncrement;
+
                 string query = "SELECT i.Name, c.Name, ISNULL(i.Price,-1), ISNULL(MAX(b.Value),i.BidStart), i.Image, u.UserName, i.Description, i.Date, i.EndDate, " +
                     "i.IsItNew, i.BuyWithoutBid, i.BidStart, i.BidIncrement " +
                     "FROM Items AS i JOIN Categories AS c ON i.CategoryId = c.Id LEFT JOIN Bids AS b ON i.Id = b.ItemId LEFT JOIN Users AS u ON i.Seller = u.Id " +
@@ -525,45 +541,50 @@ namespace Server
                     SqlDataReader reader = command.ExecuteReader();
                     if (reader.Read())
                     {
-                        int id = itemId;
-                        string name = reader.GetString(0);
-                        string category = reader.GetString(1);
-                        int price = reader.GetInt32(2);
-                        int current = reader.GetInt32(3);
-                        string image = reader.GetString(4);
+                        id = itemId;
+                        name = reader.GetString(0);
+                        category = reader.GetString(1);
+                        price = reader.GetInt32(2);
+                        current = reader.GetInt32(3);
+                        image = reader.GetString(4);
 
-                        string seller = reader.GetString(5);
-                        string description = reader.GetString(6);
-                        string date = reader.GetString(7);
-                        string endDate = reader.GetString(8);
-                        bool isItNew = (bool)reader[9];
-                        bool buyWithoutBid = (bool)reader[10];
-                        int bidStart = reader.GetInt32(11);
-                        int bidIncrement = (int)reader.GetFloat(12);
-
-                        List<Bid> tmp = new List<Bid>();
-
-                        string bidsQuery = "SELECT u.Id, u.UserName, b.Value FROM Bids AS b JOIN Users AS u ON b.UserId = u.Id WHERE b.ItemId = @itemId";
-                        using (SqlCommand subcommand = new SqlCommand(bidsQuery, connection))
-                        {
-                            subcommand.Parameters.Add(new SqlParameter("@itemId", itemId));
-
-                            SqlDataReader bidReader = subcommand.ExecuteReader();
-                            if (bidReader.Read())
-                            {
-                                int userId = bidReader.GetInt32(0);
-                                string userName = bidReader.GetString(1);
-                                int value = bidReader.GetInt32(2);
-
-                                tmp.Add(new Bid(userId, userName, value));
-                            }
-                            bidReader.Close();
-                        }
-
-                        ret = new DetailedItem(id, name, category, price, current, image, seller, description, date, endDate, isItNew, buyWithoutBid, bidStart, bidIncrement, tmp);
+                        seller = reader.GetString(5);
+                        description = reader.GetString(6);
+                        date = reader.GetDateTime(7).ToString();
+                        endDate = reader.GetDateTime(8).ToString();
+                        isItNew = (bool)reader[9];
+                        buyWithoutBid = (bool)reader[10];
+                        bidStart = reader.GetInt32(11);
+                        bidIncrement = (int)reader.GetDecimal(12);
                     }
+                    else
+                    {
+                        return null;
+                    }
+
                     reader.Close();
                 }
+
+                List<Bid> tmp = new List<Bid>();
+
+                string bidsQuery = "SELECT u.Id, u.UserName, b.Value FROM Bids AS b JOIN Users AS u ON b.UserId = u.Id WHERE b.ItemId = @itemId";
+                using (SqlCommand subcommand = new SqlCommand(bidsQuery, connection))
+                {
+                    subcommand.Parameters.Add(new SqlParameter("@itemId", itemId));
+
+                    SqlDataReader bidReader = subcommand.ExecuteReader();
+                    if (bidReader.Read())
+                    {
+                        int userId = bidReader.GetInt32(0);
+                        string userName = bidReader.GetString(1);
+                        int value = bidReader.GetInt32(2);
+
+                        tmp.Add(new Bid(userId, userName, value));
+                    }
+                    bidReader.Close();
+                }
+
+                ret = new DetailedItem(id, name, category, price, current, image, seller, description, date, endDate, isItNew, buyWithoutBid, bidStart, bidIncrement, tmp);
             }
             catch (Exception e)
             {
