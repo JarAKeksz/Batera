@@ -842,8 +842,15 @@ namespace Server
 
             try
             {
-                string query = "SELECT n.Id, n.ItemId, i.Name, n.TimeStamp, n.TextType FROM Notifications AS n LEFT JOIN Users AS u ON n.UserId = u.Id " +
-                    "JOIN Items AS i ON n.ItemId = i.Id WHERE u.Token = @token";
+                string query = "SET TRANSACTION ISOLATION LEVEL READ COMMITTED " +
+                    "BEGIN TRANSACTION " +
+                    "DECLARE @id INT " +
+                    "SELECT @id = Id FROM Users WHERE Token = @token " +
+                    "SELECT n.Id, n.ItemId, i.Name, n.TimeStamp, n.TextType INTO #tmp FROM Notifications AS n " +
+                    "JOIN Items AS i ON n.ItemId = i.Id WHERE n.UserId = @id " +
+                    "DELETE Notifications WHERE UserId = @id " +
+                    "SELECT * FROM #tmp " +
+                    "COMMIT TRANSACTION";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@token", token));
@@ -865,33 +872,10 @@ namespace Server
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                return null;
             }
 
             return ret;
-        }
-
-        public static bool emptyNotifications(string token, string seenNotifications)
-        {
-            try
-            {
-                string query = "BEGIN TRANSACTION " +
-                    "DECLARE @id INT " +
-                    "SELECT @id = Id FROM Users WHERE Token = @token " +
-                    "DELETE Notifications WHERE UserId = @id AND Id IN (@seenNotifications) " +
-                    "COMMIT TRANSACTION";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.Add(new SqlParameter("@token", token));
-                    command.Parameters.Add(new SqlParameter("@seenNotifications", seenNotifications));
-                    Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return false;
-            }
-            return true;
         }
 
         public static List<int> getSubscriptions(string token)
@@ -982,6 +966,89 @@ namespace Server
                 return 2;
             }
             return Convert.ToByte(subscribed);
+        }
+
+        /*public static byte getEndedSaleNotifications()
+        {
+            try
+            {
+                string thresholdCheckQuery = "SELECT i.Id, ISNULL(b.Value,i.BidStart)+i.BidIncrement FROM Items AS i " +
+                    "LEFT JOIN Bids AS b ON b.ItemId = i.Id WHERE i.Id = @itemId ORDER BY ISNULL(b.Value,i.BidStart) DESC";
+                using (SqlCommand command = new SqlCommand(thresholdCheckQuery, connection))
+                {
+
+                    SqlDataReader reader = command.ExecuteReader();
+                    int tmp = -1;
+                    DateTime tmpDate = new DateTime();
+                    if (reader.Read())
+                    {
+                        tmpDate = (DateTime)reader[0];
+                        tmp = (int)reader.GetFloat(1);
+                    }
+                    reader.Close();
+                    if (tmp == -1)
+                    {
+                        return 3; // == nem található a termék
+                    }
+                    if (tmpDate <= DateTime.Now)
+                    {
+                        return 2; // == a termékre már nem érkezhet licit
+                    }
+                    if (tmp > value)
+                    {
+                        return 1; // == a megadott licit nem éri el a küszöböt
+                    }
+                }
+                string query = "SET TRANSACTION ISOLATION LEVEL READ COMMITTED " +
+                    "BEGIN TRANSACTION " +
+                    "DECLARE @id INT " +
+                    "SELECT @id = Id FROM Users WHERE Token = @token " +
+                    "INSERT INTO Bids(ItemId, UserId, Value) VALUES(@itemId, @id, @value) " +
+                    "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
+                    "SELECT UserId, ItemId, GETDATE(), '0' FROM Subscriptions " +
+                    "WHERE ItemId = @itemId AND UserId != @id " +
+                    "COMMIT TRANSACTION";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@token", token));
+                    command.Parameters.Add(new SqlParameter("@itemId", itemId));
+                    command.Parameters.Add(new SqlParameter("@value", value));
+
+                    Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return 4; // == oops
+            }
+            return 0;
+        } ne foglalkozz vele, szar */
+
+        public static int tokenToId(string token)
+        {
+            int id = -1;
+            try
+            {
+                string query = "SELECT Id FROM Users WHERE Token = @token";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@token", token));
+
+                    SqlDataReader reader = command.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        id = reader.GetInt32(0);
+                    }
+                    reader.Close();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return -2;
+            }
+            return id;
         }
     }
 }
