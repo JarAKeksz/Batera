@@ -1,0 +1,47 @@
+﻿<Page x:Class="Client.Pages.DetailedItemPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Client.Pages"
+      mc:Ignorable="d" 
+      d:DesignHeight="600" d:DesignWidth="1200"
+      Title="DetailedItemPage">
+
+    <Grid Background="#FFFFB1F7">
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="4*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0" >
+            <Button x:Name="Back" Height="40" Content="Back" Margin="10" Click="backButton_Click"/>
+        </Grid>
+
+        <Grid Grid.Column="1" Background="Gray">
+            <StackPanel Margin="10">
+                <TextBlock x:Name="itemTitle" Text="Title" FontSize="24"/>
+                <Image x:Name="itemImage" Width="250" Margin="5"/>
+                <TextBlock x:Name="itemPrice" Text="Price:"/>
+                <TextBlock x:Name="itemSeller" Text="Seller:"/>
+                <TextBlock x:Name="itemDescription" Text="Description:"/>
+                <TextBlock x:Name="itemEndDate" Text="End date:"/>
+
+                <Button x:Name="addFavorite" Content="Add to Favorite" Margin="5,5,300.8,0"/>
+
+                <TextBlock Text="place bid:"/>
+                <TextBox x:Name="itemBid" Margin="5,5,300.8,0" />
+                <Button x:Name="placeBidButton" Content="Place Bid" Margin="5,5,300.8,0"/>
+                <Button x:Name="buyNowButton" Content="Buy now" Margin="5,5,300.8,0"/>
+
+            </StackPanel>
+            
+            
+            
+        </Grid>
+        
+
+    </Grid>
+</Page>

@@ -42,8 +42,13 @@ namespace Client
         {
             if (itemsList.SelectedItem != null)
             {
-                Item s = itemsList.SelectedItem as Item;
-                Console.WriteLine(s.Id);
+                Item i = itemsList.SelectedItem as Item;
+                Console.WriteLine(i.Id);
+
+                if (helper.GetDetailedItem(i.Id) != null)
+                {
+                    this.NavigationService.Navigate(new DetailedItemPage(helper.GetDetailedItem(i.Id)));
+                }
             }
         }
 

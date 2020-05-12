@@ -9,6 +9,21 @@
       Title="SavedItemsPage">
 
     <Grid Background="AliceBlue">
-        <TextBlock Text="Saved Items"/>
+        <ListBox Name="favoriteItemsList" HorizontalContentAlignment="Stretch" SelectionChanged="ItemList_SelectionChanged">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="3" Background="Aqua">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Image Source="{Binding Image}" Grid.Column="0"/>
+                        <TextBlock Text="{Binding Id}" Grid.Column="1"/>
+                        <TextBlock Text="{Binding Name}" Grid.Column="2"/>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
     </Grid>
 </Page>

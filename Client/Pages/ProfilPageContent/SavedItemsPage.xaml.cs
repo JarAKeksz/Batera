@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Client.Modells;
+using Client.Pages;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,9 +22,26 @@ namespace Client.ProfilPageContent
     /// </summary>
     public partial class SavedItemsPage : Page
     {
-        public SavedItemsPage()
+        BateraCliensClass helper = new BateraCliensClass();
+
+        public SavedItemsPage(List<Item> FavoriteItemList)
         {
             InitializeComponent();
+
+            favoriteItemsList.ItemsSource = FavoriteItemList;
+        }
+        private void ItemList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (favoriteItemsList.SelectedItem != null)
+            {
+                Item i = favoriteItemsList.SelectedItem as Item;
+                Console.WriteLine(i.Id);
+
+                if (helper.GetDetailedItem(i.Id) != null)
+                {
+                    this.NavigationService.Navigate(new DetailedItemPage(helper.GetDetailedItem(i.Id)));
+                }
+            }
         }
     }
 }
