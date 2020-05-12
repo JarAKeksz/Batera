@@ -55,5 +55,10 @@ namespace Client
         {
             this.NavigationService.Navigate(new ProfilePage());
         }
+
+        private void AddItemButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.NavigationService.Navigate(new Pages.ProfilPageContent.AddItemPage());
+        }
     }
 }

@@ -89,6 +89,12 @@
     <Compile Include="Pages\DetailedItemPage.xaml.cs">
       <DependentUpon>DetailedItemPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\ProfilPageContent\AddItemPage.xaml.cs">
+      <DependentUpon>AddItemPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\ProfilPageContent\ItemsForSalePage.xaml.cs">
+      <DependentUpon>ItemsForSalePage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="User.cs" />
     <Page Include="Pages\DetailedItemPage.xaml">
       <SubType>Designer</SubType>
@@ -126,7 +132,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Pages\ProfilPageContent\AddItemPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Pages\ProfilPageContent\BoughtItemsPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\ProfilPageContent\ItemsForSalePage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
