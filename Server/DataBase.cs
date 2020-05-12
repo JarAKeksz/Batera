@@ -696,7 +696,7 @@ namespace Server
             return ret;
         }
 
-        public static byte toggleFavorite(int itemId, string token)
+        public static byte toggleFavorite(string token, int itemId)
         {
             bool favorite = false;
             try
@@ -793,7 +793,7 @@ namespace Server
             return ret;
         }
 
-        public static byte addBid(int itemId, string token, int value)
+        public static byte addBid(string token, int itemId, int value)
         {
             try
             {
@@ -824,6 +824,9 @@ namespace Server
                     "DECLARE @id INT " +
                     "SELECT @id = Id FROM Users WHERE Token = @token " +
                     "INSERT INTO Bids(ItemId, UserId, Value) VALUES(@itemId, @id, @value) " +
+                    "INSERT INTO Notifications(UserId, ItemId, TimeStamp, TextType) " +
+                    "SELECT UserId, ItemId, GETDATE(), '0' FROM Subscriptions " +
+                    "WHERE ItemId = @itemId AND UserId != @id " +
                     "COMMIT TRANSACTION";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
@@ -840,6 +843,154 @@ namespace Server
                 return 3; // == oops
             }
             return 0;
+        }
+
+        public static List<Notification> getNotifications(string token)
+        {
+            List<Notification> ret = new List<Notification>();
+
+            try
+            {
+                string query = "SELECT n.Id, n.ItemId, i.Name, n.TimeStamp, n.TextType FROM Notifications AS n LEFT JOIN Users AS u ON n.UserId = u.Id " +
+                    "JOIN Items AS i ON n.ItemId = i.Id WHERE u.Token = @token";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@token", token));
+
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        int id = reader.GetInt32(0);
+                        int itemId = reader.GetInt32(1);
+                        string itemName = reader.GetString(2);
+                        DateTime timeStamp = reader.GetDateTime(3);
+                        byte textType = reader.GetByte(4);
+
+                        ret.Add(new Notification(id, itemId, itemName, timeStamp, textType));
+                    }
+                    reader.Close();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+            return ret;
+        }
+
+        public static bool emptyNotifications(string token, string seenNotifications)
+        {
+            try
+            {
+                string query = "BEGIN TRANSACTION " +
+                    "DECLARE @id INT " +
+                    "SELECT @id = Id FROM Users WHERE Token = @token " +
+                    "DELETE Notifications WHERE UserId = @id AND Id IN (@seenNotifications) " +
+                    "COMMIT TRANSACTION";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@token", token));
+                    command.Parameters.Add(new SqlParameter("@seenNotifications", seenNotifications));
+                    Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
+            return true;
+        }
+
+        public static List<int> getSubscriptions(string token)
+        {
+            List<int> ret = new List<int>();
+
+            try
+            {
+                string query = "SELECT s.ItemId FROM Subscriptions AS s LEFT JOIN Users AS u ON s.UserId = u.Id " +
+                    "WHERE u.Token = @token";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@token", token));
+
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        int id = reader.GetInt32(0);
+                        ret.Add(id);
+                    }
+                    reader.Close();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+            return ret;
+        }
+
+        public static byte toggleSubscription(string token, int itemId)
+        {
+            bool subscribed = false;
+            try
+            {
+                string favoriteCheckQuery = "SELECT s.ItemId FROM Subscriptions AS s RIGHT JOIN Users AS u ON s.UserId = u.Id " +
+                    "WHERE u.Token = @token AND s.ItemId = @itemId";
+                using (SqlCommand command = new SqlCommand(favoriteCheckQuery, connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@token", token));
+                    command.Parameters.Add(new SqlParameter("@itemId", itemId));
+
+                    SqlDataReader reader = command.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        subscribed = reader.GetInt32(0) != -1;
+                    }
+                    reader.Close();
+                }
+                if (subscribed)
+                {
+                    string query = "BEGIN TRANSACTION " +
+                        "DECLARE @id INT " +
+                        "SELECT @id = Id FROM Users WHERE Token = @token " +
+                        "DELETE Subscriptions WHERE ItemId = @itemId AND UserId = @id " +
+                        "DELETE Notifications WHERE ItemId = @itemId AND UserId = @id " +
+                        "COMMIT TRANSACTION";
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.Add(new SqlParameter("@token", token));
+                        command.Parameters.Add(new SqlParameter("@itemId", itemId));
+
+                        Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
+                    }
+                    subscribed = false;
+                }
+                else
+                {
+                    string query = "BEGIN TRANSACTION " +
+                        "DECLARE @id INT " +
+                        "SELECT @id = Id FROM Users WHERE Token = @token " +
+                        "INSERT INTO Subscriptions (ItemId, UserId) VALUES(@itemId, @id) " +
+                        "COMMIT TRANSACTION";
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.Add(new SqlParameter("@token", token));
+                        command.Parameters.Add(new SqlParameter("@itemId", itemId));
+
+                        Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
+                    }
+                    subscribed = true;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return 2;
+            }
+            return Convert.ToByte(subscribed);
         }
     }
 }
