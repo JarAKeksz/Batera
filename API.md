@@ -72,6 +72,16 @@ Returns a list of items tagged as favorites by the user.
 * Returns:
 	* `items`: an array containing objects. Each object has an `id` (int), `name` (string), `price` (int), `category` (string) and `image` (string, base64 coded image).
 
+### Toggle favorite
+Toggles the favorite status of an item
+* Request type: `POST`
+* Endpoint: `/toggle_favorite`
+* Parameters:
+	* `token`: a string containing the session token in case of a successful login.
+	* `item_id`: an integer containing the id of the favorite item.
+* Returns:
+	* `is_favorite`: a boolean containing if the item is now a favorite.
+
 ### Notifications
 Returns a list of items tagged as favorites by the user.
 * Request type: `GET`

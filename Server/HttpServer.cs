@@ -161,6 +161,17 @@ namespace Server
                         }
                     }
 
+                case "toggle_favorite":
+                    using (var reader = new StreamReader(request.InputStream))
+                    {
+                        string s = reader.ReadToEnd();
+                        using (JsonDocument document = JsonDocument.Parse(s))
+                        {
+                            return Response.toggleFavoriteResponse(document.RootElement.GetProperty("token").GetString(),
+                                                          document.RootElement.GetProperty("item_id").GetInt32());
+                        }
+                    }
+
                 case "upload":
                     using (var reader = new StreamReader(request.InputStream))
                     {

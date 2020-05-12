@@ -198,6 +198,29 @@ namespace Server
                 return stream.ToArray();
             }
         }
+        
+        public static byte[] toggleFavoriteResponse(string token, int itemId)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
+                {
+                    writer.WriteStartObject();
+
+                    byte b = DataBase.toggleFavorite(token, itemId);
+
+                    if(b >= 2)
+                    {
+                        throw new Exception();
+                    }
+
+                    writer.WriteBoolean("is_favorite", b == 1);
+                    writer.WriteEndObject();
+                }
+
+                return stream.ToArray();
+            }
+        }
 
         public static byte[] uploadResponse(string token, string name, string description, string imageBase64, int categoryId, int startPrice, int buyPrice)
         {
