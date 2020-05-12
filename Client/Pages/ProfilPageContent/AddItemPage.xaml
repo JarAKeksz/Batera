@@ -30,7 +30,7 @@
             <ComboBox x:Name="categoriesComboBox" SelectedItem="0" Padding="2" Margin="4 ,0,4,15" />
 
             <Button x:Name="addItemButton" Margin="20" Content="Add Item" Click="addItemButton_Click"/>
-
+            <Button x:Name="Back" Margin="20" Content="Back"  Click="backButton_Click"/>
 
         </StackPanel>
     </Grid>
