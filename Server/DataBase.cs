@@ -125,6 +125,25 @@ namespace Server
             return ret;
         }
 
+        public static bool logOut(string token)
+        {
+            try
+            {
+                string query = "UPDATE Users SET Token = NULL WHERE Token = @token";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@token", token));
+                    Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
+            return true;
+        }
+
         public static byte signUp(string userName, string name, string email, string password, string birthDate, string phone = null)
         {
             try
