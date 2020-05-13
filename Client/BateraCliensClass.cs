@@ -77,10 +77,11 @@ namespace Client
                         int id = element.GetProperty("id").GetInt32();
                         string name = element.GetProperty("name").GetString();
                         int price = element.GetProperty("price").GetInt32();
+                        int current = element.GetProperty("current").GetInt32();
                         string category = element.GetProperty("category").GetString();
                         string image = element.GetProperty("image").GetString();
 
-                        result.Add(new Item(id, name, price, category, image));
+                        result.Add(new Item(id, name, price, current, category, image));
                     }
                 }
             }
@@ -159,9 +160,10 @@ namespace Client
                         string name = element.GetProperty("name").GetString();
                         int price = element.GetProperty("price").GetInt32();
                         string category = element.GetProperty("category").GetString();
+                        int current = element.GetProperty("current").GetInt32();
                         string image = element.GetProperty("image").GetString();
 
-                        result.Add(new Item(id, name, price, category, image));
+                        result.Add(new Item(id, name, price, current, category, image));
                     }
                 }
             }
@@ -264,10 +266,11 @@ namespace Client
                         int id2 = element.GetProperty("id").GetInt32();
                         string name = element.GetProperty("name").GetString();
                         int price = element.GetProperty("price").GetInt32();
+                        int current = element.GetProperty("current").GetInt32();
                         string category = element.GetProperty("category").GetString();
                         string image = element.GetProperty("image").GetString();
 
-                        result.Add(new Item(id2, name, price, category, image));
+                        result.Add(new Item(id2, name, price, current, category, image));
                     }
                 }
             }
