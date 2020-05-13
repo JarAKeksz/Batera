@@ -9,6 +9,23 @@
       Title="BoughtItemsPage">
 
     <Grid Background="AliceBlue">
-        <TextBlock Text="Bought Items ok"/>
+        <ListBox Name="NotificationList" HorizontalContentAlignment="Stretch">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="3" Background="Aqua">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="100" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{Binding Id}" Grid.Column="0"/>
+                        <TextBlock Text="{Binding Name}" Grid.Column="1"/>
+                        <TextBlock Text="{Binding Type}" Grid.Column="2"/>
+                        <TextBlock Text="{Binding Date}" Grid.Column="3"/>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
     </Grid>
 </Page>

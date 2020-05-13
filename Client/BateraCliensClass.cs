@@ -224,14 +224,17 @@ namespace Client
                     if (element.GetProperty("quick_buy").GetBoolean())
                     {
                         priceBuy = element.GetProperty("buy_price").GetInt32();
-
                     }
+                    int minBid = element.GetProperty("min_bid").GetInt32();
+                    bool quickBuy = element.GetProperty("quick_buy").GetBoolean();
+                    bool New = element.GetProperty("new").GetBoolean();
+
                     string category = element.GetProperty("category").GetString();
                     string image = element.GetProperty("image").GetString();
                     string description = element.GetProperty("description").GetString();
                     string end_date = element.GetProperty("end_date").GetString();
                     string seller = element.GetProperty("seller").GetString();
-                    result = (new DetailedItem(id2, name, price, priceBuy, category, image,description,end_date,seller));
+                    result = (new DetailedItem(id2, name, price, priceBuy, category, image,description,end_date,seller,minBid,quickBuy,New));
                     
                 }
             }
@@ -407,6 +410,35 @@ namespace Client
 
 
 
+        public List<Notification> GetNotafication(string token)
+        {
+            List<Notification> result = new List<Notification>();
+
+            string itemsJson = JsonBody($"http://localhost:8000/notifications?token={token}");
+
+            //json parse 
+            var options = new JsonDocumentOptions
+            {
+                AllowTrailingCommas = true
+            };
+            if (itemsJson != null)
+            {
+                using (JsonDocument document = JsonDocument.Parse(itemsJson, options))
+                {
+                    foreach (JsonElement element in document.RootElement.GetProperty("notifications").EnumerateArray())
+                    {
+
+                        int id = element.GetProperty("id").GetInt32();
+                        string name = element.GetProperty("name").GetString();
+                        string time = element.GetProperty("time").GetString();
+                        string type = element.GetProperty("type").GetString();
+                        result.Add(new Notification(id, name, time, type));
+                    }
+                }
+            }
+
+            return result;
+        }
 
 
     }

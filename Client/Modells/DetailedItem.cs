@@ -16,9 +16,11 @@ namespace Client.Modells
         public string   Seller { get; set; }
 
         public int PriceBuy { get; set; }
+        public bool New { get; set; }
+        public bool QuickBuy { get; set; }
+        public int MinBid { get; set; }
 
-
-        public DetailedItem(int id, string name, int price, int priceBuy, string category, string image, string description, string endDate, string seller): base(id, name, price, category, image)
+        public DetailedItem(int id, string name, int price, int priceBuy, string category, string image, string description, string endDate, string seller, int minBid, bool quickBuy, bool New): base(id, name, price, category, image)
         {
             Id = id;
             Name = name;
@@ -29,6 +31,9 @@ namespace Client.Modells
             EndDate = endDate;
             Seller = seller;
             PriceBuy = priceBuy;
+            this.New = New;
+            QuickBuy = quickBuy;
+            MinBid = minBid;
         }
 
 

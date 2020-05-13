@@ -87,6 +87,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Modells\DetailedItem.cs" />
+    <Compile Include="Modells\Notification.cs" />
     <Compile Include="Pages\DetailedItemPage.xaml.cs">
       <DependentUpon>DetailedItemPage.xaml</DependentUpon>
     </Compile>

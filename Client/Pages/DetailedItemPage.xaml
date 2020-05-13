@@ -19,28 +19,30 @@
         <Grid Grid.Column="0" >
             <Button x:Name="Back" Height="40" Content="Back" Margin="10" Click="backButton_Click"/>
         </Grid>
+        
+            <Grid Grid.Column="1" Background="Gray">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto">
+                <StackPanel Margin="10">
+                    <TextBlock x:Name="itemTitle" Text="Title" FontSize="24"/>
+                    <Image x:Name="itemImage" Width="250" Margin="5"/>
+                    <TextBlock x:Name="itemPrice" Text="Price:"/>
+                    <TextBlock x:Name="itemPricebuy" Text="Price:"/>
+                    <TextBlock x:Name="itemSeller" Text="Seller:"/>
+                    <TextBlock x:Name="itemDescription" Text="Description:"/>
+                    <TextBlock x:Name="itemEndDate" Text="End date:"/>
 
-        <Grid Grid.Column="1" Background="Gray">
-            <StackPanel Margin="10">
-                <TextBlock x:Name="itemTitle" Text="Title" FontSize="24"/>
-                <Image x:Name="itemImage" Width="250" Margin="5"/>
-                <TextBlock x:Name="itemPrice" Text="Price:"/>
-                <TextBlock x:Name="itemPricebuy" Text="Price:"/>
-                <TextBlock x:Name="itemSeller" Text="Seller:"/>
-                <TextBlock x:Name="itemDescription" Text="Description:"/>
-                <TextBlock x:Name="itemEndDate" Text="End date:"/>
+                    <TextBlock x:Name="itemCondition" Text="Condition: "/>
 
-                <Button x:Name="addFavorite" Content="Add to Favorite" Margin="5,5,300.8,0" Click="addFavorite_Click"/>
+                    <Button x:Name="addFavorite" Content="Add to Favorite" Margin="5,5,300.8,0" Click="addFavorite_Click"/>
 
-                <TextBlock Text="place bid:"/>
-                <TextBox x:Name="itemBid" Margin="5,5,300.8,0" />
-                <Button x:Name="placeBidButton" Content="Place Bid" Margin="5,5,300.8,0" Click="placeBidButton_Click"/>
-                <Button x:Name="buyNowButton" Content="Buy now" Margin="5,5,300.8,0"/>
+                    <TextBlock Text="place bid:"/>
+                    <TextBox x:Name="itemBid" Margin="5,5,300.8,0" />
+                    <TextBlock Text="Minimum bid:" x:Name="minBidTextBlock"/>
+                    <Button x:Name="placeBidButton" Content="Place Bid" Margin="5,5,300.8,0" Click="placeBidButton_Click"/>
+                    <Button x:Name="buyNowButton" Content="Buy now" Margin="5,5,300.8,0"/>
 
-            </StackPanel>
-            
-            
-            
+                </StackPanel>
+            </ScrollViewer>
         </Grid>
         
 
