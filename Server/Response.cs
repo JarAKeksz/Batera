@@ -189,7 +189,7 @@ namespace Server
                     switch (b)
                     {
                         case 4:
-                            throw new Exception();
+                            throw new Exception("Database error");
                             break;
                         case 3:
                             writer.WriteBoolean("success", false);
@@ -255,7 +255,7 @@ namespace Server
 
                     if(b >= 2)
                     {
-                        throw new Exception();
+                        throw new Exception("wtf");
                     }
 
                     writer.WriteBoolean("is_favorite", b == 1);
