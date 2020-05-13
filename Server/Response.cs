@@ -164,7 +164,7 @@ namespace Server
                     writer.WriteNumber("buy_price", i.price);
                     writer.WriteNumber("start_price", i.bidStart);
                     writer.WriteNumber("min_bid", i.current + i.bidIncrement);
-                    writer.WriteNumber("current", i.current);
+                    writer.WriteNumber("current_price", i.current);
                     writer.WriteBoolean("quick_buy", i.buyWithoutBid);
                     writer.WriteBoolean("new", i.isItNew);
                     writer.WriteString("category", i.category);
