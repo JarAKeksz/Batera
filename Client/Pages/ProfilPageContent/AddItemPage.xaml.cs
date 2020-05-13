@@ -105,7 +105,7 @@ namespace Client.Pages.ProfilPageContent
 
                 helper.AddItem(User.Instance.getToken(), title, description, base64String,categorie, startingPirce, price);
 
-                
+                this.NavigationService.GoBack();
 
 
             }

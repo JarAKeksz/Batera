@@ -36,8 +36,19 @@ namespace Client.Pages
             itemDescription.Text = "Description: \n" + item.Description;
             itemSeller.Text = "Seller: " + item.Seller;
             itemEndDate.Text = "End date: " + item.EndDate;
+            minBidTextBlock.Text = "Minimum bid:" + item.MinBid;
 
-            if(item.PriceBuy != -1)
+            if(item.New == true)
+            {
+                itemCondition.Text = "condition: New";
+            }
+            else
+            {
+                itemCondition.Text = "condition: Used";
+            }
+
+
+            if (item.QuickBuy == true)
             {
                 itemPricebuy.Text = "Price (for buy now): " + item.PriceBuy.ToString();
                 buyNowButton.IsEnabled = true;
@@ -46,7 +57,12 @@ namespace Client.Pages
             {
                 buyNowButton.IsEnabled = false;
             }
-            
+
+            int e = -1;
+            if (item.Price == e)
+            {
+                itemPrice.Text = "Price: " + (item.Price+1).ToString();
+            }
 
         }
         private void backButton_Click(object sender, RoutedEventArgs e)
