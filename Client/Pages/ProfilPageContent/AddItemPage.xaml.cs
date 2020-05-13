@@ -74,8 +74,10 @@ namespace Client.Pages.ProfilPageContent
         {
             int price = -1;
             int startingPirce = -1;
+            bool startingPirceOk = Int32.TryParse(startingPirceTextbox.Text, out startingPirce);
+            bool pirceOk = Int32.TryParse(startingPirceTextbox.Text, out price);
 
-            if (titleTextbox.Text != "" && descriptionTextbox.Text != "" && itemImage.Source != null)
+            if (titleTextbox.Text != "" && descriptionTextbox.Text != "" && itemImage.Source != null && startingPirceOk && pirceOk)
             {
                 string title = titleTextbox.Text;
                 string description = descriptionTextbox.Text;
@@ -100,14 +102,9 @@ namespace Client.Pages.ProfilPageContent
 
                 int categorie = categoriesComboBox.SelectedIndex;
 
-                 
-
-
                 helper.AddItem(User.Instance.getToken(), title, description, base64String,categorie, startingPirce, price);
 
                 this.NavigationService.GoBack();
-
-
             }
         }
 
