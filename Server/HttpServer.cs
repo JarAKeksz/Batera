@@ -185,6 +185,25 @@ namespace Server
                         }
                     }
 
+                case "autobid":
+                    using (var reader = new StreamReader(request.InputStream))
+                    {
+                        string s = reader.ReadToEnd();
+                        using (JsonDocument document = JsonDocument.Parse(s))
+                        {
+                            if (document.RootElement.GetProperty("subscribe").GetBoolean()) {
+                                return Response.autobidSubscribeResponse(document.RootElement.GetProperty("token").GetString(),
+                                                                   document.RootElement.GetProperty("item_id").GetInt32(),
+                                                                   document.RootElement.GetProperty("max_bid").GetInt32());
+                            }
+                            else
+                            {
+                                return Response.autobidRemoveResponse(document.RootElement.GetProperty("token").GetString(),
+                                                                   document.RootElement.GetProperty("item_id").GetInt32());
+                            }
+                        }
+                    }
+
                 case "upload":
                     using (var reader = new StreamReader(request.InputStream))
                     {
