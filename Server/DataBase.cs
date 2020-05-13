@@ -203,12 +203,12 @@ namespace Server
                 string query;
                 if (buyWithoutBid && price != -1)
                 {
-                    query = "INSERT INTO Items (Name, Seller, CategoryId, Image, Description, Date, EndDate, IsItNew, BuyWithoutBid, Price, BidStart) " +
+                    query = "INSERT INTO Items (Name, Seller, CategoryId, Image, Description, EndDate, IsItNew, BuyWithoutBid, Price, BidStart) " +
                         "VALUES(@Name, @Seller, @CategoryId, @Image, @Description, GETDATE(), DATEADD(DAY, 7, GETDATE()), @IsItNew, @BuyWithoutBid, @Price, @BidStart)";
                 }
                 else if (!buyWithoutBid)
                 {
-                    query = "INSERT INTO Items (Name, Seller, CategoryId, Image, Description, Date, EndDate, IsItNew, BidStart) " +
+                    query = "INSERT INTO Items (Name, Seller, CategoryId, Image, Description, EndDate, IsItNew, BidStart) " +
                         "VALUES(@Name, @Seller, @CategoryId, @Image, @Description, GETDATE(), DATEADD(DAY, 7, GETDATE()), @IsItNew, @BidStart)";
                 }
                 else
