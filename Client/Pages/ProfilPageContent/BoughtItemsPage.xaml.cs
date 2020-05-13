@@ -20,9 +20,15 @@ namespace Client.ProfilPageContent
     /// </summary>
     public partial class BoughtItemsPage : Page
     {
+
+        BateraCliensClass helper = new BateraCliensClass();
         public BoughtItemsPage()
         {
             InitializeComponent();
+            NotificationList.ItemsSource = helper.GetNotafication(User.Instance.getToken());
+
         }
+
+
     }
 }
