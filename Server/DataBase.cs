@@ -35,7 +35,7 @@ namespace Server
 
             try
             {
-                string tokenCheckQuery = "SELECT Id, UserName, Name, BirthDate, Email, Phone FROM Users WHERE Token = @logInToken";
+                string tokenCheckQuery = "SELECT Id, UserName, Name, Email FROM Users WHERE Token = @logInToken";
                 using (SqlCommand command = new SqlCommand(tokenCheckQuery, connection))
                 {
                     command.Parameters.Add("@logInToken", SqlDbType.Char).Value = token;
@@ -46,16 +46,9 @@ namespace Server
                     {
                         int id = reader.GetInt32(0);
                         string userName = reader.GetString(1);
-                        string logInToken = token;
                         string name = reader.GetString(2);
-                        DateTime tmp = (DateTime)reader[3];
-                        string birthDate = tmp.ToString("YYYY/MM/DD");
-                        string emailAddr = reader.GetString(4);
-                        ret = new User(id, userName, logInToken, name, birthDate, emailAddr);
-                        if (!reader.IsDBNull(5))
-                        {
-                            ret.phone = reader.GetString(5);
-                        }
+                        string email = reader.GetString(3);
+                        ret = new User(id, userName, token, name, email);
                     }
                     else
                     {
@@ -85,7 +78,7 @@ namespace Server
                     "SELECT @id = Id, @token = CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', CONCAT(Id, UserName, GETDATE())), 2) " +
                     "FROM Users WHERE Email = @email AND PasswordHash = CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @password), 2) " +
                     "UPDATE Users SET Token = @token WHERE Id = @id " +
-                    "SELECT Id, UserName, Token, Name, BirthDate, Phone FROM Users WHERE Token = @token " +
+                    "SELECT Id, UserName, Token, Name FROM Users WHERE Token = @token " +
                     "COMMIT TRANSACTION";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
@@ -99,15 +92,9 @@ namespace Server
                     {
                         int id = reader.GetInt32(0);
                         string userName = reader.GetString(1);
-                        string logInToken = reader.GetString(2);
+                        string token = reader.GetString(2);
                         string name = reader.GetString(3);
-                        DateTime tmp = (DateTime)reader[4];
-                        string birthDate = tmp.ToString("YYYY/MM/DD");
-                        ret = new User(id, userName, logInToken, name, birthDate, email);
-                        if (!reader.IsDBNull(5))
-                        {
-                            ret.phone = reader.GetString(5);
-                        }
+                        ret = new User(id, userName, token, name, email);
                     }
                     else
                     {
@@ -144,32 +131,18 @@ namespace Server
             return true;
         }
 
-        public static byte signUp(string userName, string name, string email, string password, string birthDate, string phone = null)
+        public static byte signUp(string userName, string name, string email, string password)
         {
             try
             {
-                string query;
-                if (phone != null)
-                {
-                    query = "INSERT INTO Users (UserName, Name, Email, PasswordHash, BirthDate, Phone) " +
-                        "VALUES(@userName, @name, @email, CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @password), 2), '@birthDate', @phone)";
-                }
-                else
-                {
-                    query = "INSERT INTO Users (UserName, Name, Email, PasswordHash, BirthDate) " +
-                        "VALUES(@userName, @name, @email, CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @password), 2), '@birthDate')";
-                }
+                string query = "INSERT INTO Users (UserName, Name, Email, PasswordHash) " +
+                        "VALUES(@userName, @name, @email, CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @password), 2))";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@userName", userName));
                     command.Parameters.Add(new SqlParameter("@name", name));
                     command.Parameters.Add(new SqlParameter("@email", email));
                     command.Parameters.Add(new SqlParameter("@password", password));
-                    command.Parameters.Add(new SqlParameter("@birthDate", birthDate));
-                    if (phone != null)
-                    {
-                        command.Parameters.Add(new SqlParameter("@phone", phone));
-                    }
 
                     Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
                 }
@@ -259,13 +232,9 @@ namespace Server
                     string query = "UPDATE Users SET ";
                     foreach (string key in changes.Keys)
                     {
-                        if (key == "Name" || key == "UserName" || key == "Email" || key == "Phone")
+                        if (key == "Name" || key == "UserName" || key == "Email")
                         {
                             query += key + " = [@" + key + "]";
-                        }
-                        else if (key == "BirthDate")
-                        {
-                            query += key + " = '@" + key + "'";
                         }
                         else if (key == "Password")
                         {
@@ -303,12 +272,6 @@ namespace Server
                                     case "Email":
                                         user.email = pair.Value;
                                         break;
-                                    case "Phone":
-                                        user.phone = pair.Value;
-                                        break;
-                                    case "BirthDate":
-                                        user.birthDate = pair.Value;
-                                        break;
                                 }
                             }
                         }
@@ -344,19 +307,11 @@ namespace Server
                             case "Name":
                             case "UserName":
                             case "Email":
-                            case "Phone":
                                 query += key + " LIKE '%' + @" + key + " + '%'";
                                 break;
 
                             case "Id":
                                 query += key + " = @" + key;
-                                break;
-
-                            case "MinBirthDate":
-                                query += "BirthDate >= '@" + key + "'";
-                                break;
-                            case "MaxBirthDate":
-                                query += "BirthDate <= '@" + key + "'";
                                 break;
 
                             default:
