@@ -19,7 +19,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Column="0" x:Name="logoTextBlock" Text="Batera" Foreground="Magenta" FontSize="24" FontWeight="Bold" FontStyle="Italic" TextDecorations="Underline" Width="150" TextAlignment="Center" Height="30"/>
+            <TextBlock Grid.Column="0" x:Name="logoTextBlock" Text="ばてら" Foreground="Magenta" FontSize="24" FontWeight="Bold" FontStyle="Italic" TextDecorations="Underline" Width="150" TextAlignment="Center" Height="30"/>
 
             <!-- Sarch bar -->
             <Grid Grid.Column="1" HorizontalAlignment="Stretch"  VerticalAlignment="Center">
