@@ -1,6 +1,7 @@
 ﻿using Client.Modells;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -264,6 +265,58 @@ namespace Client
 
             return result;
         }
+
+
+
+        public async void AddItem(string token, string name, string description, string image, int category, int startPrice, int buyPrice)
+        {
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri("http://localhost:8000");
+
+                HttpContent content;
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    JsonWriterOptions JW_OPTS = new JsonWriterOptions { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+                    using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
+                    {
+                        writer.WriteStartObject();
+                        writer.WriteString("token", token);
+                        writer.WriteString("name", name);
+                        writer.WriteString("description", description);
+                        writer.WriteNumber("start_price", startPrice);
+                        writer.WriteNumber("buy_price", buyPrice);
+                        writer.WriteNumber("category_id", category);
+                        writer.WriteString("image", image);
+                        writer.WriteEndObject();
+                    }
+
+                    content = new StringContent(Encoding.UTF8.GetString(stream.ToArray()), Encoding.UTF8, "application/json");
+                }
+                var result = await client.PostAsync("/upload", content);
+                string resultContent = await result.Content.ReadAsStringAsync();
+
+                Console.WriteLine("fasz"+result +"\n" + resultContent);
+
+                using (JsonDocument document = JsonDocument.Parse(resultContent))
+                {
+                    bool success = document.RootElement.GetProperty("success").GetBoolean();
+                    if (success)
+                    {
+                        Console.WriteLine("Item uploaded");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Item upload failed.");
+                    }
+                }
+            }
+
+        }
+
+
+
     }
 }
 
