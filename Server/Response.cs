@@ -324,7 +324,7 @@ namespace Server
                     int id = DataBase.tokenToId(token);
                     if (id < 0) return null;
 
-                    byte b = DataBase.addItem(name, categoryId, imageBase64, id, description, true, startPrice);
+                    byte b = DataBase.addItem(name, categoryId, imageBase64, id, description, true, startPrice, buyPrice != -1, buyPrice);
 
                     if (b != 0) return null; //TODO: success false meg társai?
                     

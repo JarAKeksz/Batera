@@ -20,11 +20,12 @@ namespace Client.Modells
         public bool QuickBuy { get; set; }
         public int MinBid { get; set; }
 
-        public DetailedItem(int id, string name, int price, int priceBuy, string category, string image, string description, string endDate, string seller, int minBid, bool quickBuy, bool New): base(id, name, price, category, image)
+        public DetailedItem(int id, string name, int price, int priceBuy, string category, string image, string description, string endDate, string seller, int minBid, bool quickBuy, bool New): base(id, name, priceBuy, price, category, image)
         {
             Id = id;
             Name = name;
             Price = price;
+            Current = Current;
             Category = category;
             convertImage(image);
             Description = description;

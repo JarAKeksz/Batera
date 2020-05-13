@@ -14,14 +14,16 @@ namespace Client.Modells
         public int Id { get; set; }
         public string Name { get; set; }
         public int Price { get; set; }
+        public int Current { get; set; }
         public string Category { get; set; }
         public BitmapImage Image { get; set; }
 
-        public Item(int id, string name, int price, string category, string image)
+        public Item(int id, string name, int price, int current, string category, string image)
         {
             Id = id;
             Name = name;
             Price = price;
+            Current = current;
             Category = category;
             convertImage(image);
         }

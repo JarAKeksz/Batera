@@ -74,6 +74,10 @@ namespace Client.Pages
                     }
                 }
             }
+            else
+            {
+                Console.WriteLine("email and password is mandatory");
+            }
         }
 
         private void signupButton_Click(object sender, RoutedEventArgs e)
@@ -83,6 +87,7 @@ namespace Client.Pages
 
         private void backButton_Click(object sender, RoutedEventArgs e)
         {
+            this.NavigationService.GoBack();
             this.NavigationService.Navigate(new MainPage());
         }
 

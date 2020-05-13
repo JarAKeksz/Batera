@@ -39,7 +39,12 @@
                     <TextBox x:Name="itemBid" Margin="5,5,300.8,0" />
                     <TextBlock Text="Minimum bid:" x:Name="minBidTextBlock"/>
                     <Button x:Name="placeBidButton" Content="Place Bid" Margin="5,5,300.8,0" Click="placeBidButton_Click"/>
-                    <Button x:Name="buyNowButton" Content="Buy now" Margin="5,5,300.8,0"/>
+
+                    <TextBlock Text="make auto bid:"/>
+                    <TextBox x:Name="itemAutoBid" Margin="5,5,300.8,0" />
+                    <Button x:Name="placeAutoBidButton" Content="make Auto Bid" Margin="5,5,300.8,0" Click="placeAutoBidButton_Click"/>
+                    
+                    <Button x:Name="buyNowButton" Content="Buy now" Margin="5,20,300.8,0"/>
 
                 </StackPanel>
             </ScrollViewer>

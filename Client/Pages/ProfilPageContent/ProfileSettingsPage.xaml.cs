@@ -27,7 +27,14 @@ namespace Client.ProfilPageContent
 
         private void LogOutButton_Click(object sender, RoutedEventArgs e)
         {
-
+            User.Instance.setToken(null);
+            this.NavigationService.GoBack();
+            this.NavigationService.GoBack();
+            this.NavigationService.GoBack();
+            this.NavigationService.GoBack();
+            this.NavigationService.GoBack();
+            this.NavigationService.GoBack();
+            this.NavigationService.Navigate(new MainPage());
         }
     }
 }

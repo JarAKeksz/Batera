@@ -77,10 +77,11 @@ namespace Client
                         int id = element.GetProperty("id").GetInt32();
                         string name = element.GetProperty("name").GetString();
                         int price = element.GetProperty("price").GetInt32();
+                        int current = element.GetProperty("current").GetInt32();
                         string category = element.GetProperty("category").GetString();
                         string image = element.GetProperty("image").GetString();
 
-                        result.Add(new Item(id, name, price, category, image));
+                        result.Add(new Item(id, name, price, current, category, image));
                     }
                 }
             }
@@ -159,9 +160,10 @@ namespace Client
                         string name = element.GetProperty("name").GetString();
                         int price = element.GetProperty("price").GetInt32();
                         string category = element.GetProperty("category").GetString();
+                        int current = element.GetProperty("current").GetInt32();
                         string image = element.GetProperty("image").GetString();
 
-                        result.Add(new Item(id, name, price, category, image));
+                        result.Add(new Item(id, name, price, current, category, image));
                     }
                 }
             }
@@ -264,10 +266,11 @@ namespace Client
                         int id2 = element.GetProperty("id").GetInt32();
                         string name = element.GetProperty("name").GetString();
                         int price = element.GetProperty("price").GetInt32();
+                        int current = element.GetProperty("current").GetInt32();
                         string category = element.GetProperty("category").GetString();
                         string image = element.GetProperty("image").GetString();
 
-                        result.Add(new Item(id2, name, price, category, image));
+                        result.Add(new Item(id2, name, price, current, category, image));
                     }
                 }
             }
@@ -408,7 +411,48 @@ namespace Client
             }
         }
 
+        public async void MakeAutoBid(string token, int item_id, int bid)
+        {
 
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri("http://localhost:8000");
+
+                HttpContent content;
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    JsonWriterOptions JW_OPTS = new JsonWriterOptions { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+                    using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
+                    {
+                        writer.WriteStartObject();
+                        writer.WriteString("token", token);
+                        writer.WriteNumber("item_id", item_id);
+                        writer.WriteNumber("bid", bid);
+                        writer.WriteEndObject();
+                    }
+
+                    content = new StringContent(Encoding.UTF8.GetString(stream.ToArray()), Encoding.UTF8, "application/json");
+
+                }
+                var result = await client.PostAsync("/bid", content);
+                string resultContent = await result.Content.ReadAsStringAsync();
+
+
+                using (JsonDocument document = JsonDocument.Parse(resultContent))
+                {
+                    bool success = document.RootElement.GetProperty("success").GetBoolean();
+                    if (success)
+                    {
+                        Console.WriteLine("price: " + document.RootElement.GetProperty("price"));
+                    }
+                    else
+                    {
+
+                        Console.WriteLine(" problem : " + document.RootElement.GetProperty("problem"));
+                    }
+                }
+            }
+        }
 
         public List<Notification> GetNotafication(string token)
         {

@@ -72,19 +72,27 @@ namespace Client.Pages
                             string success = document.RootElement.GetProperty("token").GetString();
                             if (success != null)
                             {
-                                //LOGIN SUCCESS
+                                //Sign up SUCCESS
                                 string token = document.RootElement.GetProperty("token").GetString();
                                 User.Instance.setToken(token);
                                 this.NavigationService.Navigate(new MainPage());
                             }
                             else
                             {
-                                //LOGIN FAIL
+                                //Sign up FAIL
                                 Console.WriteLine("Sign up failed.");
                             }
                         }
                     }
                 }
+                else
+                {
+                    Console.WriteLine("email, password, name are mandatory");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Password not maching");
             }
 
             this.NavigationService.Navigate(new SignUpPage());
