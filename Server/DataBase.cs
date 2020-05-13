@@ -142,19 +142,18 @@ namespace Server
                     command.Parameters.Add(new SqlParameter("@userName", userName));
                     command.Parameters.Add(new SqlParameter("@name", name));
                     command.Parameters.Add(new SqlParameter("@email", email));
-                    command.Parameters.Add(new SqlParameter("@password", password));
+                    command.Parameters.Add("@password", SqlDbType.VarChar).Value = password;
 
                     Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
                 }
             }
             catch (SqlException e)
             {
-                Console.WriteLine(e);
+                //Console.WriteLine(e);
                 if (e.Message.Contains("UserNameCheck")) //haha vibe check
                 {
                     return 1; // == van már ilyen nevű felhasználó
                 }
-                Console.WriteLine(e);
                 if (e.Message.Contains("EmailCheck"))
                 {
                     return 2; // == van már ilyen email
@@ -268,8 +267,15 @@ namespace Server
                         {
                             foreach (KeyValuePair<string, string> pair in changes)
                             {
-                                string tmp = "@" + pair.Key;
-                                update.Parameters.Add(new SqlParameter(tmp, pair.Value));
+                                if (pair.Key == "Password")
+                                {
+                                    update.Parameters.Add("@password", SqlDbType.VarChar).Value = pair.Value;
+                                }
+                                else
+                                {
+                                    string tmp = "@" + pair.Key;
+                                    update.Parameters.Add(new SqlParameter(tmp, pair.Value));
+                                }
 
                                 switch (pair.Key)
                                 {
@@ -948,7 +954,7 @@ namespace Server
                     "FETCH NEXT FROM cur into @itemId, @sellerId " +
                     "WHILE @@FETCH_STATUS = 0 " +
                     "BEGIN " +
-                    "UPDATE Items SET Active = 0 WHERE Id = @itemId" +
+                    "UPDATE Items SET Active = 0 WHERE Id = @itemId " +
                     "SELECT @winnerId = UserId FROM Bids " +
                     "WHERE Value IN (SELECT MAX(Value) FROM Bids GROUP BY ItemId) " +
                     "AND ItemId = @itemId " +
@@ -1016,3 +1022,4 @@ namespace Server
         }
     }
 }
+
