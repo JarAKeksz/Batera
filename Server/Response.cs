@@ -181,9 +181,9 @@ namespace Server
             }
         }
 
-        public static byte[] signUpResponse(string email, string password, string name)
+        public static byte[] signUpResponse(string email, string password, string userName, string name)
         {
-            byte b = DataBase.signUp(name, name, email, password, "");
+            byte b = DataBase.signUp(userName, name, email, password);
             if (b == 0)
             {
                 using (MemoryStream stream = new MemoryStream())

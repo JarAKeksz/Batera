@@ -83,7 +83,8 @@ Is used to get a session token for a session of a registered user.
 * Parameters:
 	* `email`: a string containing the e-mail address
 	* `password`: a string containing the password
-	* `name`: a string containing the password
+	* `username`: a string containing the username
+	* `name`: a string containing full name
 * Returns:
 	* `token` (in case of success): a string containing the session token in case of a successful login
 

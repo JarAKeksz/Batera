@@ -170,6 +170,7 @@ namespace Server
                         {
                             return Response.signUpResponse(document.RootElement.GetProperty("email").GetString(),
                                                           document.RootElement.GetProperty("password").GetString(),
+                                                          document.RootElement.GetProperty("username").GetString(),
                                                           document.RootElement.GetProperty("name").GetString());
                         }
                     }
