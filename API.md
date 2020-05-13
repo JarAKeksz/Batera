@@ -79,7 +79,7 @@ Is used to get a session token for a session of a registered user.
 ### Sign up
 Is used to get a session token for a session of a registered user.
 * Request type: `POST`
-* Endpoint: `/login`
+* Endpoint: `/sign_up`
 * Parameters:
 	* `email`: a string containing the e-mail address
 	* `password`: a string containing the password

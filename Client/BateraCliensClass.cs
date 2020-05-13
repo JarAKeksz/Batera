@@ -431,7 +431,30 @@ namespace Client
                         int id = element.GetProperty("id").GetInt32();
                         string name = element.GetProperty("name").GetString();
                         string time = element.GetProperty("time").GetString();
-                        string type = element.GetProperty("type").GetString();
+                        int typenum = element.GetProperty("type").GetInt32();
+                        string type;
+                        switch (typenum)
+                        {
+                            case 0:
+                                type = "new bid has arrived, you lost the lead";
+                                break;
+                            case 1:
+                                type = "bidding ended, you didn't win";
+                                break;
+                            case 2:
+                                type = "bidding ended, you won";
+                                break;
+                            case 3:
+                                type = "bidding ended, item unsold";
+                                break;
+                            case 4:
+                                type = "bidding ended, you sold the item";
+                                break;
+
+                            default:
+                                type = "Error";
+                                break;
+                        }
                         result.Add(new Notification(id, name, time, type));
                     }
                 }

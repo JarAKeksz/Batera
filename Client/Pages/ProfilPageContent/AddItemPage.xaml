@@ -9,29 +9,31 @@
       Title="AddItemPage">
 
     <Grid Background="AliceBlue">
-        <StackPanel  Margin="10">
-            <TextBlock Text="title:"/>
-            <TextBox x:Name="titleTextbox"/>
+        <ScrollViewer HorizontalScrollBarVisibility="Auto">
+            <StackPanel  Margin="10">
+                <TextBlock Text="title:"/>
+                <TextBox x:Name="titleTextbox"/>
 
-            <TextBlock Text="description:"/>
-            <TextBox x:Name="descriptionTextbox"/>
-            
-            <TextBlock Text="buy it now price:"/>
-            <TextBox x:Name="priceTextbox"/>
+                <TextBlock Text="description:"/>
+                <TextBox x:Name="descriptionTextbox"/>
 
-            <TextBlock Text="Starting price: "/>
-            <TextBox x:Name="startingPirceTextbox"/>
+                <TextBlock Text="buy it now price:"/>
+                <TextBox x:Name="priceTextbox"/>
+
+                <TextBlock Text="Starting price: "/>
+                <TextBox x:Name="startingPirceTextbox"/>
 
 
-            <Image x:Name="itemImage" Margin="5,5,500,0"/>
-            <Button x:Name="uploadButton" Margin="5,5,500,0"  Content="UPLOAD PICTURE" Click="uploadButton_Click"></Button>
+                <Image x:Name="itemImage" Margin="5,5,500,0"/>
+                <Button x:Name="uploadButton" Margin="5,5,500,0"  Content="UPLOAD PICTURE" Click="uploadButton_Click"></Button>
 
-            <TextBlock Text="category"/>
-            <ComboBox x:Name="categoriesComboBox" SelectedItem="0" Padding="2" Margin="4 ,0,4,15" />
+                <TextBlock Text="category"/>
+                <ComboBox x:Name="categoriesComboBox" SelectedItem="0" Padding="2" Margin="4 ,0,4,15" />
 
-            <Button x:Name="addItemButton" Margin="20" Content="Add Item" Click="addItemButton_Click"/>
-            <Button x:Name="Back" Margin="20" Content="Back"  Click="backButton_Click"/>
+                <Button x:Name="addItemButton" Margin="20" Content="Add Item" Click="addItemButton_Click"/>
+                <Button x:Name="Back" Margin="20" Content="Back"  Click="backButton_Click"/>
 
-        </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </Page>
