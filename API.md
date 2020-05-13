@@ -40,7 +40,9 @@ Allows to make a bid.
 	* `item_id`: a number containing the id of the item.
 	* `bid`: a number containing the amount the user is bidding.
 * Returns:
-	* `item`: an object that has an `id` (int), `name` (string), `price` (int), `category` (string), `image` (string, base64 coded image), `description` (string), `end_date` (string), `seller` (string).
+	* `success`: a boolean containing if the upload was successful.
+	* `price` (in case of successful upload): an integer containing the new price.
+	* `problem` (in case of unsuccessful upload): a string containing the problem for debug purposes.
 
 ### Category list
 Returns a list of available categories.
