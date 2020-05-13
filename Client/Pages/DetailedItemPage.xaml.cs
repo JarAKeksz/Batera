@@ -37,6 +37,17 @@ namespace Client.Pages
             itemSeller.Text = "Seller: " + item.Seller;
             itemEndDate.Text = "End date: " + item.EndDate;
 
+            if(item.PriceBuy != -1)
+            {
+                itemPricebuy.Text = "Price (for buy now): " + item.PriceBuy.ToString();
+                buyNowButton.IsEnabled = true;
+            }
+            else
+            {
+                buyNowButton.IsEnabled = false;
+            }
+            
+
         }
         private void backButton_Click(object sender, RoutedEventArgs e)
         {
@@ -52,6 +63,30 @@ namespace Client.Pages
             else
             {
                 Console.WriteLine("Need to sign in");
+                this.NavigationService.Navigate(new LoginPage());
+            }
+        }
+
+        private void placeBidButton_Click(object sender, RoutedEventArgs e)
+        {
+
+            
+            if (User.Instance.getToken() != null && itemBid.Text !="")
+            {
+                int bid = int.Parse(itemBid.Text);
+                if (itemx.Price < bid)
+                {
+                    helper.MakeBid(User.Instance.getToken(), itemx.Id, bid);
+                }
+                else
+                {
+                    Console.WriteLine("Bid more!");
+                }
+                
+            }
+            else
+            {
+                Console.WriteLine(" need to log in");
                 this.NavigationService.Navigate(new LoginPage());
             }
         }

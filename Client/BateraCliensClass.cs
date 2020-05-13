@@ -217,15 +217,21 @@ namespace Client
                     JsonElement element = document.RootElement;
                     
 
-                        int id2 = element.GetProperty("id").GetInt32();
-                        string name = element.GetProperty("name").GetString();
-                        int price = element.GetProperty("price").GetInt32();
-                        string category = element.GetProperty("category").GetString();
-                        string image = element.GetProperty("image").GetString();
-                        string description = element.GetProperty("description").GetString();
-                        string end_date = element.GetProperty("end_date").GetString();
-                        string seller = element.GetProperty("seller").GetString();
-                        result = (new DetailedItem(id2, name, price, category, image,description,end_date,seller));
+                    int id2 = element.GetProperty("id").GetInt32();
+                    string name = element.GetProperty("name").GetString();
+                    int price = element.GetProperty("current_price").GetInt32();
+                    int priceBuy = -1;
+                    if (element.GetProperty("quick_buy").GetBoolean())
+                    {
+                        priceBuy = element.GetProperty("buy_price").GetInt32();
+
+                    }
+                    string category = element.GetProperty("category").GetString();
+                    string image = element.GetProperty("image").GetString();
+                    string description = element.GetProperty("description").GetString();
+                    string end_date = element.GetProperty("end_date").GetString();
+                    string seller = element.GetProperty("seller").GetString();
+                    result = (new DetailedItem(id2, name, price, priceBuy, category, image,description,end_date,seller));
                     
                 }
             }
@@ -353,8 +359,53 @@ namespace Client
                     }
                 }
             }
-
         }
+
+
+        public async void MakeBid(string token, int item_id, int bid)
+        {
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri("http://localhost:8000");
+
+                HttpContent content;
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    JsonWriterOptions JW_OPTS = new JsonWriterOptions { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+                    using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
+                    {
+                        writer.WriteStartObject();
+                        writer.WriteString("token", token);
+                        writer.WriteNumber("item_id", item_id);
+                        writer.WriteNumber("bid", bid);
+                        writer.WriteEndObject();
+                    }
+
+                    content = new StringContent(Encoding.UTF8.GetString(stream.ToArray()), Encoding.UTF8, "application/json");
+
+                }
+                var result = await client.PostAsync("/bid", content);
+                string resultContent = await result.Content.ReadAsStringAsync();
+
+
+                using (JsonDocument document = JsonDocument.Parse(resultContent))
+                {
+                    bool success = document.RootElement.GetProperty("success").GetBoolean();
+                    if (success)
+                    {
+                        Console.WriteLine("price: " + document.RootElement.GetProperty("price"));
+                    }
+                    else
+                    {
+                        
+                        Console.WriteLine(" problem : " + document.RootElement.GetProperty("problem"));
+                    }
+                }
+            }
+        }
+
+
 
 
 

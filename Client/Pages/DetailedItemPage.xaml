@@ -25,6 +25,7 @@
                 <TextBlock x:Name="itemTitle" Text="Title" FontSize="24"/>
                 <Image x:Name="itemImage" Width="250" Margin="5"/>
                 <TextBlock x:Name="itemPrice" Text="Price:"/>
+                <TextBlock x:Name="itemPricebuy" Text="Price:"/>
                 <TextBlock x:Name="itemSeller" Text="Seller:"/>
                 <TextBlock x:Name="itemDescription" Text="Description:"/>
                 <TextBlock x:Name="itemEndDate" Text="End date:"/>
@@ -33,7 +34,7 @@
 
                 <TextBlock Text="place bid:"/>
                 <TextBox x:Name="itemBid" Margin="5,5,300.8,0" />
-                <Button x:Name="placeBidButton" Content="Place Bid" Margin="5,5,300.8,0"/>
+                <Button x:Name="placeBidButton" Content="Place Bid" Margin="5,5,300.8,0" Click="placeBidButton_Click"/>
                 <Button x:Name="buyNowButton" Content="Buy now" Margin="5,5,300.8,0"/>
 
             </StackPanel>

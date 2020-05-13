@@ -15,8 +15,10 @@ namespace Client.Modells
         public string  EndDate { get; set; }
         public string   Seller { get; set; }
 
-        
-        public DetailedItem(int id, string name, int price, string category, string image, string description, string endDate, string seller): base(id, name, price, category, image)
+        public int PriceBuy { get; set; }
+
+
+        public DetailedItem(int id, string name, int price, int priceBuy, string category, string image, string description, string endDate, string seller): base(id, name, price, category, image)
         {
             Id = id;
             Name = name;
@@ -26,6 +28,7 @@ namespace Client.Modells
             Description = description;
             EndDate = endDate;
             Seller = seller;
+            PriceBuy = priceBuy;
         }
 
 
