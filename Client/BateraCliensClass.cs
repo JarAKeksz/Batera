@@ -411,7 +411,7 @@ namespace Client
             }
         }
 
-        public async void MakeAutoBid(string token, int item_id, int bid)
+        public async void MakeAutoBid(string token, int item_id, int maxBid, bool subscribe)
         {
 
             using (var client = new HttpClient())
@@ -427,14 +427,15 @@ namespace Client
                         writer.WriteStartObject();
                         writer.WriteString("token", token);
                         writer.WriteNumber("item_id", item_id);
-                        writer.WriteNumber("bid", bid);
+                        writer.WriteNumber("max_bid", maxBid);
+                        writer.WriteBoolean("subscribe", subscribe);
                         writer.WriteEndObject();
                     }
 
                     content = new StringContent(Encoding.UTF8.GetString(stream.ToArray()), Encoding.UTF8, "application/json");
 
                 }
-                var result = await client.PostAsync("/bid", content);
+                var result = await client.PostAsync("/autobid", content);
                 string resultContent = await result.Content.ReadAsStringAsync();
 
 
@@ -472,8 +473,8 @@ namespace Client
                     foreach (JsonElement element in document.RootElement.GetProperty("notifications").EnumerateArray())
                     {
 
-                        int id = element.GetProperty("id").GetInt32();
-                        string name = element.GetProperty("name").GetString();
+                        int id = element.GetProperty("item_id").GetInt32();
+                        string name = element.GetProperty("item_name").GetString();
                         string time = element.GetProperty("time").GetString();
                         int typenum = element.GetProperty("type").GetInt32();
                         string type;
