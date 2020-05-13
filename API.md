@@ -76,6 +76,17 @@ Is used to get a session token for a session of a registered user.
 	* `token` (in case of success): a string containing the session token in case of a successful login
 	* `problem` (in case of failed attempt): a string containing the problem for debug purposes
 
+### Sign up
+Is used to get a session token for a session of a registered user.
+* Request type: `POST`
+* Endpoint: `/login`
+* Parameters:
+	* `email`: a string containing the e-mail address
+	* `password`: a string containing the password
+	* `name`: a string containing the password
+* Returns:
+	* `token` (in case of success): a string containing the session token in case of a successful login
+
 ### Upload item
 Is used to upload a new item to the marketplace
 * Request type: `POST`

@@ -181,6 +181,37 @@ namespace Server
             }
         }
 
+        public static byte[] signUpResponse(string email, string password, string name)
+        {
+            byte b = DataBase.signUp(name, name, email, password, "");
+            if (b == 0)
+            {
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
+                    {
+                        writer.WriteStartObject();
+                        User u = DataBase.logIn(email, password);
+                        if (u == null)
+                        {
+                            throw new Exception("User registered but cant find none the less, oof");
+                        }
+                        else
+                        {
+                            writer.WriteString("token", u.logInToken);
+                        }
+                        writer.WriteEndObject();
+                    }
+
+                    return stream.ToArray();
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         public static byte[] autobidSubscribeResponse(string token, int itemId, int maxPrice)
         {
             throw new NotImplementedException();

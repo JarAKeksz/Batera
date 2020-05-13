@@ -162,6 +162,18 @@ namespace Server
                         }
                     }
 
+                case "sign_up":
+                    using (var reader = new StreamReader(request.InputStream))
+                    {
+                        string s = reader.ReadToEnd();
+                        using (JsonDocument document = JsonDocument.Parse(s))
+                        {
+                            return Response.signUpResponse(document.RootElement.GetProperty("email").GetString(),
+                                                          document.RootElement.GetProperty("password").GetString(),
+                                                          document.RootElement.GetProperty("name").GetString());
+                        }
+                    }
+
                 case "bid":
                     using (var reader = new StreamReader(request.InputStream))
                     {
