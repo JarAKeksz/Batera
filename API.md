@@ -1,5 +1,6 @@
 # API
 Our API is a more or less RESTful API using JSON over HTTP.
+GET requests use parameters embedded in URL, POST methods use JSON.
 Here is the list of endpoints and their usage:
 
 ### Ping
@@ -29,6 +30,19 @@ Returns a list of items based on a search term.
 	* `id`: a number containing the id of the item.
 * Returns:
 	* `item`: an object that has an `id` (int), `name` (string), `price` (int), `category` (string), `image` (string, base64 coded image), `description` (string), `end_date` (string), `seller` (string).
+
+### Bid
+Allows to make a bid.
+* Request type: `POST`
+* Endpoint: `/bid`
+* Parameters:
+	* `token`: a string containing the session token of the user.
+	* `item_id`: a number containing the id of the item.
+	* `bid`: a number containing the amount the user is bidding.
+* Returns:
+	* `success`: a boolean containing if the upload was successful.
+	* `price` (in case of successful upload): an integer containing the new price.
+	* `problem` (in case of unsuccessful upload): a string containing the problem for debug purposes.
 
 ### Category list
 Returns a list of available categories.
@@ -71,6 +85,16 @@ Returns a list of items tagged as favorites by the user.
 	* `token`: a string containing the session token in case of a successful login.
 * Returns:
 	* `items`: an array containing objects. Each object has an `id` (int), `name` (string), `price` (int), `category` (string) and `image` (string, base64 coded image).
+
+### Toggle favorite
+Toggles the favorite status of an item
+* Request type: `POST`
+* Endpoint: `/toggle_favorite`
+* Parameters:
+	* `token`: a string containing the session token in case of a successful login.
+	* `item_id`: an integer containing the id of the favorite item.
+* Returns:
+	* `is_favorite`: a boolean containing if the item is now a favorite.
 
 ### Notifications
 Returns a list of items tagged as favorites by the user.

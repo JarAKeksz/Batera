@@ -176,6 +176,50 @@ namespace Server
             }
         }
 
+        public static byte[] bidResponse(string token, int itemId, int bid)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
+                {
+                    writer.WriteStartObject();
+
+                    byte b = DataBase.addBid(token, itemId, bid);
+
+                    switch (b)
+                    {
+                        case 4:
+                            throw new Exception();
+                            break;
+                        case 3:
+                            writer.WriteBoolean("success", false);
+                            writer.WriteString("problem", "Item not found!");
+                            break;
+                        case 2:
+                            writer.WriteBoolean("success", false);
+                            writer.WriteString("problem", "Bidding has ended!");
+                            break;
+                        case 1:
+                            writer.WriteBoolean("success", false);
+                            writer.WriteString("problem", "Bid too low!");
+                            break;
+                        case 0:
+                            writer.WriteBoolean("success", true);
+                            writer.WriteNumber("price", bid);
+                            break;
+                        default:
+                            writer.WriteBoolean("success", false);
+                            writer.WriteString("problem", "Unknown error");
+                            break;
+                    }
+
+                    writer.WriteEndObject();
+                }
+
+                return stream.ToArray();
+            }
+        }
+
         public static byte[] loginResponse(string email, string password)
         {
             using (MemoryStream stream = new MemoryStream())
@@ -198,6 +242,29 @@ namespace Server
                 return stream.ToArray();
             }
         }
+        
+        public static byte[] toggleFavoriteResponse(string token, int itemId)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
+                {
+                    writer.WriteStartObject();
+
+                    byte b = DataBase.toggleFavorite(token, itemId);
+
+                    if(b >= 2)
+                    {
+                        throw new Exception();
+                    }
+
+                    writer.WriteBoolean("is_favorite", b == 1);
+                    writer.WriteEndObject();
+                }
+
+                return stream.ToArray();
+            }
+        }
 
         public static byte[] uploadResponse(string token, string name, string description, string imageBase64, int categoryId, int startPrice, int buyPrice)
         {
@@ -207,10 +274,12 @@ namespace Server
                 {
                     writer.WriteStartObject();
 
-                    //TODO: ide a useres tokenes ids gedva
-                    byte b = DataBase.addItem(name, categoryId, imageBase64, 0, description, true, startPrice);
+                    int id = DataBase.tokenToId(token);
+                    if (id < 0) return null;
 
-                    if (b != 0) return null; //TODO: success false meg társai
+                    byte b = DataBase.addItem(name, categoryId, imageBase64, id, description, true, startPrice);
+
+                    if (b != 0) return null; //TODO: success false meg társai?
                     
                     writer.WriteBoolean("success", true);
                     writer.WriteEndObject();
