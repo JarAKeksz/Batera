@@ -29,7 +29,7 @@
                 <TextBlock x:Name="itemDescription" Text="Description:"/>
                 <TextBlock x:Name="itemEndDate" Text="End date:"/>
 
-                <Button x:Name="addFavorite" Content="Add to Favorite" Margin="5,5,300.8,0"/>
+                <Button x:Name="addFavorite" Content="Add to Favorite" Margin="5,5,300.8,0" Click="addFavorite_Click"/>
 
                 <TextBlock Text="place bid:"/>
                 <TextBox x:Name="itemBid" Margin="5,5,300.8,0" />
