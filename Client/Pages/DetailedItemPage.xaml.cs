@@ -85,11 +85,11 @@ namespace Client.Pages
 
         private void placeBidButton_Click(object sender, RoutedEventArgs e)
         {
+            int bid = int.Parse(itemBid.Text);
+            bool bidOk = Int32.TryParse(itemBid.Text, out bid);
 
-            
-            if (User.Instance.getToken() != null && itemBid.Text !="")
+            if (User.Instance.getToken() != null && itemBid.Text !="" && bidOk)
             {
-                int bid = int.Parse(itemBid.Text);
                 if (itemx.Price < bid)
                 {
                     helper.MakeBid(User.Instance.getToken(), itemx.Id, bid);
@@ -102,8 +102,45 @@ namespace Client.Pages
             }
             else
             {
-                Console.WriteLine(" need to log in");
-                this.NavigationService.Navigate(new LoginPage());
+                if(User.Instance.getToken() == null)
+                {
+                    Console.WriteLine(" need to log in");
+                    this.NavigationService.Navigate(new LoginPage());
+                }
+                if(itemBid.Text == "" && !bidOk)
+                {
+                    Console.WriteLine("make a valid bid");
+                }
+            }
+        }
+
+        private void placeAutoBidButton_Click(object sender, RoutedEventArgs e)
+        {
+            int bid = int.Parse(itemAutoBid.Text);
+            bool bidOk = Int32.TryParse(itemBid.Text, out bid);
+            if (User.Instance.getToken() != null && itemBid.Text != "" && bidOk)
+            {
+                if (itemx.Price < bid)
+                {
+                    helper.MakeAutoBid(User.Instance.getToken(), itemx.Id, bid);
+                }
+                else
+                {
+                    Console.WriteLine("Bid more!");
+                }
+
+            }
+            else
+            {
+                if (User.Instance.getToken() == null)
+                {
+                    Console.WriteLine(" need to log in");
+                    this.NavigationService.Navigate(new LoginPage());
+                }
+                if (itemBid.Text == "" && !bidOk)
+                {
+                    Console.WriteLine("make a valid auto bid");
+                }
             }
         }
     }

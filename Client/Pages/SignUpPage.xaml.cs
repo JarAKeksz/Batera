@@ -85,6 +85,14 @@ namespace Client.Pages
                         }
                     }
                 }
+                else
+                {
+                    Console.WriteLine("email, password, name are mandatory");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Password not maching");
             }
 
             this.NavigationService.Navigate(new SignUpPage());

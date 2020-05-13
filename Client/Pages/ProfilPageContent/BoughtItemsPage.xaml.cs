@@ -25,7 +25,9 @@ namespace Client.ProfilPageContent
         public BoughtItemsPage()
         {
             InitializeComponent();
-            NotificationList.ItemsSource = helper.GetNotafication(User.Instance.getToken());
+            var notificationList = helper.GetNotafication(User.Instance.getToken());
+            notificationList.Add(new Notification(1, "valami", "2020/05/13", "tipus"));
+            NotificationList.ItemsSource = notificationList;
 
         }
 

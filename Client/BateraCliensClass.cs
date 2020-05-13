@@ -408,7 +408,48 @@ namespace Client
             }
         }
 
+        public async void MakeAutoBid(string token, int item_id, int bid)
+        {
 
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri("http://localhost:8000");
+
+                HttpContent content;
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    JsonWriterOptions JW_OPTS = new JsonWriterOptions { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+                    using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
+                    {
+                        writer.WriteStartObject();
+                        writer.WriteString("token", token);
+                        writer.WriteNumber("item_id", item_id);
+                        writer.WriteNumber("bid", bid);
+                        writer.WriteEndObject();
+                    }
+
+                    content = new StringContent(Encoding.UTF8.GetString(stream.ToArray()), Encoding.UTF8, "application/json");
+
+                }
+                var result = await client.PostAsync("/bid", content);
+                string resultContent = await result.Content.ReadAsStringAsync();
+
+
+                using (JsonDocument document = JsonDocument.Parse(resultContent))
+                {
+                    bool success = document.RootElement.GetProperty("success").GetBoolean();
+                    if (success)
+                    {
+                        Console.WriteLine("price: " + document.RootElement.GetProperty("price"));
+                    }
+                    else
+                    {
+
+                        Console.WriteLine(" problem : " + document.RootElement.GetProperty("problem"));
+                    }
+                }
+            }
+        }
 
         public List<Notification> GetNotafication(string token)
         {
