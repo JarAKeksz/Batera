@@ -789,12 +789,12 @@ namespace Server
                     command.Parameters.Add(new SqlParameter("@itemId", itemId));
 
                     SqlDataReader reader = command.ExecuteReader();
-                    int tmp = -1;
+                    float tmp = -1;
                     DateTime tmpDate = new DateTime();
                     if (reader.Read())
                     {
                         tmpDate = (DateTime)reader[0];
-                        tmp = (int)reader.GetFloat(1);
+                        tmp = reader.GetFloat(1);
                     }
                     reader.Close();
                     if (tmp == -1)

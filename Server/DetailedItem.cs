@@ -16,13 +16,6 @@ namespace Server
         public int bidStart { get; }
         public int bidIncrement { get; }
         public List<Bid> bidList { get; }
-        //public List<string> images { get; }
-        /*
-         * this.images = _images;
-         * 
-         * List<string> _images
-         */
-
         public DetailedItem(int _id, string _name, string _category, int _price, int _current, string _image,
             string _seller, string _description, DateTime _endDate, bool _isItNew, bool _buyWithoutBid, int _bidStart, int _bidIncrement, List<Bid> _bidList)
             : base(_id, _name, _category, _price, _current, _image)
