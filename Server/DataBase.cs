@@ -787,18 +787,10 @@ namespace Server
                     "SELECT @id = Id FROM Users WHERE Token = @token " +
                     "INSERT INTO Bids(ItemId, UserId, Value) VALUES(@itemId, @id, @value) " +
                     "INSERT INTO Subscriptions (ItemId, UserId) VALUES(@itemId, @id) " +
-                    "DECLARE @bidJump INT " +
-                    "SELECT @bidJump = BidIncrement FROM Items WHERE Id = @itemId " +
-                    "INSERT INTO Bids(ItemId, UserId, Value) " +
-                    "SELECT a.UserId, a.ItemId, MAX(b.Value)+@bidJump FROM AutoBids AS a " +
-                    "JOIN Bids AS b ON a.ItemId = b.ItemId " +
-                    "WHERE ItemId = @itemId AND a.Limit > MAX(b.Value)+@bidJump " +
-                    "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
-                    "SELECT UserId, ItemId, GETDATE(), '5' FROM Autobid " +
-                    "WHERE ItemId = @itemId AND UserId != @id " +
                     "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
                     "SELECT UserId, ItemId, GETDATE(), '0' FROM Subscriptions " +
-                    "WHERE ItemId = @itemId AND UserId != @id ";
+                    "WHERE ItemId = @itemId AND UserId != @id " +
+                    "COMMIT TRANSACTION";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@token", token));
@@ -814,61 +806,6 @@ namespace Server
                 return 4; // == oops
             }
             return 0;
-        }
-
-        public static bool setAutoBid(string token, int itemId, int limit)
-        {
-            try
-            {
-                string query = "SET TRANSACTION ISOLATION LEVEL READ COMMITTED " +
-                    "BEGIN TRANSACTION " +
-                    "DECLARE @id INT " +
-                    "SELECT @id = Id FROM Users WHERE Token = @token " +
-                    "INSERT INTO AutoBids(ItemId, UserId, Value) VALUES(@itemId, @id, @limit) " +
-                    "INSERT INTO Subscriptions (ItemId, UserId) VALUES(@itemId, @id) " +
-                    "COMMIT TRANSACTION";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.Add(new SqlParameter("@token", token));
-                    command.Parameters.Add(new SqlParameter("@itemId", itemId));
-                    command.Parameters.Add(new SqlParameter("@value", limit));
-
-                    Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return false; // == oops
-            }
-            return true;
-        }
-
-        public static bool removeAutoBid(string token, int itemId)
-        {
-            try
-            {
-                string query = "SET TRANSACTION ISOLATION LEVEL READ COMMITTED " +
-                    "BEGIN TRANSACTION " +
-                    "DECLARE @id INT " +
-                    "SELECT @id = Id FROM Users WHERE Token = @token " +
-                    "DELETE AutoBids WHERE ItemId = @itemId AND UserId = @id " +
-                    "DELETE Subscriptions WHERE ItemId = @itemId AND UserId = @id " +
-                    "COMMIT TRANSACTION";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.Add(new SqlParameter("@token", token));
-                    command.Parameters.Add(new SqlParameter("@itemId", itemId));
-
-                    Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return false; // == oops
-            }
-            return true;
         }
 
         public static List<Notification> getNotifications(string token)
@@ -1012,7 +949,7 @@ namespace Server
                     "DECLARE @itemId INT, @sellerId INT, @winnerId INT " +
                     "DECLARE cur CURSOR LOCAL FOR " +
                     "SELECT Id, Seller FROM Items " +
-                    "WHERE EndDate <= GETDATE() AND Active = 1 " +
+                    "WHERE EndDate <= GETDATE() " +
                     "OPEN cur " +
                     "FETCH NEXT FROM cur into @itemId, @sellerId " +
                     "WHILE @@FETCH_STATUS = 0 " +
