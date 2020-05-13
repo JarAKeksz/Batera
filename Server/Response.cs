@@ -214,12 +214,50 @@ namespace Server
 
         public static byte[] autobidSubscribeResponse(string token, int itemId, int maxPrice)
         {
-            throw new NotImplementedException();
+            bool b = DataBase.setAutoBid(token, itemId, maxPrice);
+            
+            using (MemoryStream stream = new MemoryStream())
+            {
+                using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
+                {
+                    writer.WriteStartObject();
+                    if (b)
+                    {
+                        writer.WriteBoolean("success", true);
+                    }
+                    else
+                    {
+                        writer.WriteBoolean("success", true);
+                    }
+                    writer.WriteEndObject();
+                }
+
+                return stream.ToArray();
+            }
         }
 
         public static byte[] autobidRemoveResponse(string token, int itemId)
         {
-            throw new NotImplementedException();
+            bool b = DataBase.removeAutoBid(token, itemId);
+
+            using (MemoryStream stream = new MemoryStream())
+            {
+                using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
+                {
+                    writer.WriteStartObject();
+                    if (b)
+                    {
+                        writer.WriteBoolean("success", true);
+                    }
+                    else
+                    {
+                        writer.WriteBoolean("success", true);
+                    }
+                    writer.WriteEndObject();
+                }
+
+                return stream.ToArray();
+            }
         }
 
         public static byte[] bidResponse(string token, int itemId, int bid)
