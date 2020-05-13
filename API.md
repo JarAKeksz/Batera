@@ -1,5 +1,6 @@
 # API
 Our API is a more or less RESTful API using JSON over HTTP.
+GET requests use parameters embedded in URL, POST methods use JSON.
 Here is the list of endpoints and their usage:
 
 ### Ping
@@ -27,6 +28,17 @@ Returns a list of items based on a search term.
 * Endpoint: `/item`
 * Parameters:
 	* `id`: a number containing the id of the item.
+* Returns:
+	* `item`: an object that has an `id` (int), `name` (string), `price` (int), `category` (string), `image` (string, base64 coded image), `description` (string), `end_date` (string), `seller` (string).
+
+### Bid
+Allows to make a bid.
+* Request type: `POST`
+* Endpoint: `/bid`
+* Parameters:
+	* `token`: a string containing the session token of the user.
+	* `item_id`: a number containing the id of the item.
+	* `bid`: a number containing the amount the user is bidding.
 * Returns:
 	* `item`: an object that has an `id` (int), `name` (string), `price` (int), `category` (string), `image` (string, base64 coded image), `description` (string), `end_date` (string), `seller` (string).
 

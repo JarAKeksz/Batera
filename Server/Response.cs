@@ -176,6 +176,50 @@ namespace Server
             }
         }
 
+        public static byte[] bidResponse(string token, int itemId, int bid)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
+                {
+                    writer.WriteStartObject();
+
+                    byte b = DataBase.addBid(token, itemId, bid);
+
+                    switch (b)
+                    {
+                        case 4:
+                            throw new Exception();
+                            break;
+                        case 3:
+                            writer.WriteBoolean("success", false);
+                            writer.WriteString("problem", "Item not found!");
+                            break;
+                        case 2:
+                            writer.WriteBoolean("success", false);
+                            writer.WriteString("problem", "Bidding has ended!");
+                            break;
+                        case 1:
+                            writer.WriteBoolean("success", false);
+                            writer.WriteString("problem", "Bid too low!");
+                            break;
+                        case 0:
+                            writer.WriteBoolean("success", true);
+                            writer.WriteNumber("price", bid);
+                            break;
+                        default:
+                            writer.WriteBoolean("success", false);
+                            writer.WriteString("problem", "Unknown error");
+                            break;
+                    }
+
+                    writer.WriteEndObject();
+                }
+
+                return stream.ToArray();
+            }
+        }
+
         public static byte[] loginResponse(string email, string password)
         {
             using (MemoryStream stream = new MemoryStream())

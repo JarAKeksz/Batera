@@ -74,6 +74,7 @@ namespace Server
                 {
                     data = Encoding.UTF8.GetBytes("{}");
                     response.StatusCode = 500;
+                    Console.WriteLine(e);
                 }
 
 
@@ -158,6 +159,18 @@ namespace Server
                         {
                             return Response.loginResponse(document.RootElement.GetProperty("email").GetString(),
                                                           document.RootElement.GetProperty("password").GetString());
+                        }
+                    }
+
+                case "bid":
+                    using (var reader = new StreamReader(request.InputStream))
+                    {
+                        string s = reader.ReadToEnd();
+                        using (JsonDocument document = JsonDocument.Parse(s))
+                        {
+                            return Response.bidResponse(document.RootElement.GetProperty("token").GetString(),
+                                                          document.RootElement.GetProperty("item_id").GetInt32(),
+                                                          document.RootElement.GetProperty("bid").GetInt32());
                         }
                     }
 
