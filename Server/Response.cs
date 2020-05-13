@@ -161,11 +161,12 @@ namespace Server
                     
                     writer.WriteNumber("id", i.id);
                     writer.WriteString("name", i.name);
-                    writer.WriteNumber("buy_price", i.price);
                     writer.WriteNumber("start_price", i.bidStart);
                     writer.WriteNumber("min_bid", i.current + i.bidIncrement);
                     writer.WriteNumber("current_price", i.current);
                     writer.WriteBoolean("quick_buy", i.buyWithoutBid);
+                    if(i.buyWithoutBid)
+                        writer.WriteNumber("buy_price", i.price);
                     writer.WriteBoolean("new", i.isItNew);
                     writer.WriteString("category", i.category);
                     writer.WriteString("image", i.image);
@@ -178,6 +179,16 @@ namespace Server
 
                 return stream.ToArray();
             }
+        }
+
+        public static byte[] autobidSubscribeResponse(string token, int itemId, int maxPrice)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static byte[] autobidRemoveResponse(string token, int itemId)
+        {
+            throw new NotImplementedException();
         }
 
         public static byte[] bidResponse(string token, int itemId, int bid)
@@ -234,6 +245,7 @@ namespace Server
                     User u = DataBase.logIn(email, password);
                     if (u == null) {
                         writer.WriteBoolean("success", false);
+                        writer.WriteString("problem", "Email and/or password not correct!");
                     }
                     else
                     {
