@@ -86,15 +86,20 @@
             <ListBox Name="itemsList" HorizontalContentAlignment="Stretch" SelectionChanged="ItemList_SelectionChanged">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Grid Margin="3" Background="Aqua">
+                        <Grid Margin="3" Background="LightGray">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="100"/>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <Image Source="{Binding Image}" Grid.Column="0"/>
-                            <TextBlock Text="{Binding Id}" Grid.Column="1"/>
-                            <TextBlock Text="{Binding Name}" Grid.Column="2"/>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="2*" />
+                            </Grid.RowDefinitions>
+                            <Image Source="{Binding Image}" Grid.Column="0" Grid.Row="0" Grid.RowSpan="2"/>
+                            <TextBlock Text="{Binding Name}" Grid.Column="1" Grid.Row="0"/>
+                            <TextBlock Text="{Binding Category}" Grid.Column="1" Grid.Row="1"/>
+                            <TextBlock Text="{Binding Price}" Grid.Column="2" Grid.Row="0"/>
                         </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
