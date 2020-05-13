@@ -116,4 +116,10 @@ Returns a list of items tagged as favorites by the user.
 * Parameters:
 	* `token`: a string containing the session token in case of a successful login.
 * Returns:
-	* `notifications`: an array containing objects. Each object has an `item_id` (int), `item_name` (string), `time` (string) and `type` (int, 0 = ...).
+	* `notifications`: an array containing objects. Each object has an `item_id` (int), `item_name` (string), `time` (string) and `type` (int,
+		0 = "new bid has arrived, you lost the lead",
+		1 = "bidding ended, you didn't win",
+		2 = "bidding ended, you won",
+		3 = "bidding ended, item unsold",
+		4 = "bidding ended, you sold the item",
+		5+ TBA).
