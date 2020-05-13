@@ -34,6 +34,7 @@ Returns a list of items based on a search term.
 		* `name` (string)
 		* `start_price` (int)
 		* `current_price` (int)
+		* `min_bid` (int)
 		* `quick_buy` (bool)
 		* `buy_price` (int)
 		* `new` (bool)
