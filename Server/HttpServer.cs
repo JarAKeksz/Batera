@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Server
@@ -38,6 +39,16 @@ namespace Server
 
             listener.Start();
             Console.WriteLine("Listening for connections on {0}", url);
+
+            Thread minuteTasksThread = new Thread(delegate ()
+            {
+                if (!DataBase.getEndedSaleNotifications())
+                {
+                    Console.WriteLine("Couldn't generate sale end notifications!");
+                }
+                Thread.Sleep(60000);
+            });
+            minuteTasksThread.Start();
 
             while (true)
             {
