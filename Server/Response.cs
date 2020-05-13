@@ -161,8 +161,11 @@ namespace Server
                     
                     writer.WriteNumber("id", i.id);
                     writer.WriteString("name", i.name);
-                    writer.WriteNumber("price", i.price);
+                    writer.WriteNumber("buy_price", i.price);
+                    writer.WriteNumber("start_price", i.bidStart);
                     writer.WriteNumber("current", i.current);
+                    writer.WriteBoolean("quick_buy", i.buyWithoutBid);
+                    writer.WriteBoolean("new", i.isItNew);
                     writer.WriteString("category", i.category);
                     writer.WriteString("image", i.image);
                     writer.WriteString("description", i.description);
