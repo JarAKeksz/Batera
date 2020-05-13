@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,8 +12,9 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using System.Drawing;
+using System.Net.Http;
+using System.Text.Json;
 
 namespace Client.Pages.ProfilPageContent
 {
@@ -22,6 +24,7 @@ namespace Client.Pages.ProfilPageContent
     public partial class AddItemPage : Page
     {
         BateraCliensClass helper = new BateraCliensClass();
+        string base64String;
         public AddItemPage()
         {
             InitializeComponent();
@@ -31,8 +34,13 @@ namespace Client.Pages.ProfilPageContent
             categoriesComboBox.SelectedItem = null;
             categoriesComboBox.Text = "--select--";
             startingPirceTextbox.Text = "-1";
-            startingPirceTextbox.Text = "-1";
+            priceTextbox.Text = "-1";
             categoriesComboBox.SelectedIndex = 0;
+        }
+
+        private void backButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.NavigationService.GoBack();
         }
 
         private void uploadButton_Click(object sender, RoutedEventArgs e)
@@ -45,39 +53,65 @@ namespace Client.Pages.ProfilPageContent
             if (op.ShowDialog() == true)
             {
                 itemImage.Source = new BitmapImage(new Uri(op.FileName));
+
+
+                using (System.Drawing.Image image = System.Drawing.Image.FromFile(op.FileName))
+                {
+                    using (MemoryStream m = new MemoryStream())
+                    {
+                        image.Save(m, image.RawFormat);
+                        byte[] imageBytes = m.ToArray();
+
+                        // Convert byte[] to Base64 String
+                        base64String = Convert.ToBase64String(imageBytes);
+                    }
+                }
             }
+
         }
 
         private void addItemButton_Click(object sender, RoutedEventArgs e)
         {
-            if(titleTextbox.Text != "" && descriptionTextbox.Text != "" && itemImage.Source != null)
+            int price = -1;
+            int startingPirce = -1;
+
+            if (titleTextbox.Text != "" && descriptionTextbox.Text != "" && itemImage.Source != null)
             {
                 string title = titleTextbox.Text;
                 string description = descriptionTextbox.Text;
                 if(priceTextbox.Text == "-1" && startingPirceTextbox.Text != "-1")
                 {
                     //bid only
-                    int price = int.Parse(priceTextbox.Text);
-                    int startingPirce = int.Parse(startingPirceTextbox.Text);
+                     price = int.Parse(priceTextbox.Text);
+                    startingPirce = int.Parse(startingPirceTextbox.Text);
                 }
                 else if (priceTextbox.Text != "-1" && startingPirceTextbox.Text != "-1")
                 {
                     //bid and buy
-                    int price = int.Parse(priceTextbox.Text);
-                    int startingPirce = int.Parse(startingPirceTextbox.Text);
+                    price = int.Parse(priceTextbox.Text);
+                    startingPirce = int.Parse(startingPirceTextbox.Text);
                 }
                 else if (priceTextbox.Text != "-1" && startingPirceTextbox.Text == "-1")
                 {
                     //buy only
-                    int price = int.Parse(priceTextbox.Text);
-                    int startingPirce = int.Parse(startingPirceTextbox.Text);
+                    price = int.Parse(priceTextbox.Text);
+                    startingPirce = int.Parse(startingPirceTextbox.Text);
                 }
 
-                int categories = categoriesComboBox.SelectedIndex;
-            }
+                int categorie = categoriesComboBox.SelectedIndex;
 
+                 
+
+
+                helper.AddItem(User.Instance.getToken(), title, description, base64String,categorie, startingPirce, price);
+
+                
+
+
+            }
         }
 
+       
 
 
     }

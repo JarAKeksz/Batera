@@ -29,7 +29,19 @@ Returns a list of items based on a search term.
 * Parameters:
 	* `id`: a number containing the id of the item.
 * Returns:
-	* `item`: an object that has an `id` (int), `name` (string), `price` (int), `category` (string), `image` (string, base64 coded image), `description` (string), `end_date` (string), `seller` (string).
+	* `item`: an object that has:
+		* `id` (int)
+		* `name` (string)
+		* `start_price` (int)
+		* `current_price` (int)
+		* `quick_buy` (bool)
+		* `buy_price` (int)
+		* `new` (bool)
+		* `category` (string)
+		* `image` (string, base64 coded image)
+		* `description` (string)
+		* `end_date` (string)
+		* `seller` (string).
 
 ### Bid
 Allows to make a bid.

@@ -161,8 +161,11 @@ namespace Server
                     
                     writer.WriteNumber("id", i.id);
                     writer.WriteString("name", i.name);
-                    writer.WriteNumber("price", i.price);
+                    writer.WriteNumber("buy_price", i.price);
+                    writer.WriteNumber("start_price", i.bidStart);
                     writer.WriteNumber("current", i.current);
+                    writer.WriteBoolean("quick_buy", i.buyWithoutBid);
+                    writer.WriteBoolean("new", i.isItNew);
                     writer.WriteString("category", i.category);
                     writer.WriteString("image", i.image);
                     writer.WriteString("description", i.description);
@@ -189,7 +192,7 @@ namespace Server
                     switch (b)
                     {
                         case 4:
-                            throw new Exception();
+                            throw new Exception("Database error");
                             break;
                         case 3:
                             writer.WriteBoolean("success", false);
@@ -255,7 +258,7 @@ namespace Server
 
                     if(b >= 2)
                     {
-                        throw new Exception();
+                        throw new Exception("wtf");
                     }
 
                     writer.WriteBoolean("is_favorite", b == 1);

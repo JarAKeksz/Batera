@@ -21,8 +21,11 @@ namespace Client.Pages
     /// </summary>
     public partial class DetailedItemPage : Page
     {
+        BateraCliensClass helper = new BateraCliensClass();
+        DetailedItem itemx;
         public DetailedItemPage(DetailedItem item)
         {
+            itemx = item;
             InitializeComponent();
 
             Console.WriteLine("megkaptam" + item.Seller);
@@ -40,5 +43,17 @@ namespace Client.Pages
             this.NavigationService.GoBack();
         }
 
+        private void addFavorite_Click(object sender, RoutedEventArgs e)
+        {
+            if (User.Instance.getToken() != null)
+            {
+                helper.AddFavoriteItem(User.Instance.getToken(), itemx.Id);
+            }
+            else
+            {
+                Console.WriteLine("Need to sign in");
+                this.NavigationService.Navigate(new LoginPage());
+            }
+        }
     }
 }
