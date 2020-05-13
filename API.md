@@ -73,7 +73,8 @@ Is used to get a session token for a session of a registered user.
 	* `password`: a string containing the password
 * Returns:
 	* `success`: a boolean containing if the login was successful
-	* `token`: a string containing the session token in case of a successful login
+	* `token` (in case of success): a string containing the session token in case of a successful login
+	* `problem` (in case of failed attempt): a string containing the problem for debug purposes
 
 ### Upload item
 Is used to upload a new item to the marketplace
