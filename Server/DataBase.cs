@@ -176,13 +176,24 @@ namespace Server
                 string query;
                 if (buyWithoutBid && price != -1)
                 {
-                    query = "INSERT INTO Items (Name, Seller, CategoryId, Image, Description, EndDate, IsItNew, BuyWithoutBid, Price, BidStart) " +
-                        "VALUES(@Name, @Seller, @CategoryId, @Image, @Description, DATEADD(DAY, 7, GETDATE()), @IsItNew, @BuyWithoutBid, @Price, @BidStart)";
+                    query = "SET TRANSACTION ISOLATION LEVEL READ COMMITTED " +
+                        "BEGIN TRANSACTION " +
+                        "INSERT INTO Items(Name, Seller, CategoryId, Image, Description, EndDate, IsItNew, BuyWithoutBid, Price, BidStart) " +
+                        "VALUES(@Name, @Seller, @CategoryId, @Image, @Description, DATEADD(DAY, 7, GETDATE()), @IsItNew, @BuyWithoutBid, @Price, @BidStart) " +
+                        "DECLARE @itemId INT " +
+                        "SELECT @itemId = Id FROM Items WHERE Name = @Name " +
+                        "INSERT INTO Subscriptions(ItemId, UserId) VALUES(@itemId, @Seller) " +
+                        "COMMIT TRANSACTION";
                 }
                 else if (!buyWithoutBid)
                 {
-                    query = "INSERT INTO Items (Name, Seller, CategoryId, Image, Description, EndDate, IsItNew, BidStart) " +
-                        "VALUES(@Name, @Seller, @CategoryId, @Image, @Description, DATEADD(DAY, 7, GETDATE()), @IsItNew, @BidStart)";
+                    query = "BEGIN TRANSACTION " +
+                        "INSERT INTO Items(Name, Seller, CategoryId, Image, Description, EndDate, IsItNew, BidStart) " +
+                        "VALUES(@Name, @Seller, @CategoryId, @Image, @Description, DATEADD(DAY, 7, GETDATE()), @IsItNew, @BidStart) " +
+                        "DECLARE @itemId INT " +
+                        "SELECT @itemId = Id FROM Items WHERE Name = @Name " +
+                        "INSERT INTO Subscriptions(ItemId, UserId) VALUES(@itemId, @Seller) " +
+                        "COMMIT TRANSACTION";
                 }
                 else
                 {
@@ -195,7 +206,6 @@ namespace Server
                     command.Parameters.Add(new SqlParameter("@CategoryId", categoryId));
                     command.Parameters.Add(new SqlParameter("@Image", image));
                     command.Parameters.Add(new SqlParameter("@Description", description));
-                    //command.Parameters.Add(new SqlParameter("@EndDate", endDate));
                     command.Parameters.Add(new SqlParameter("@IsItNew", isItNew));
                     command.Parameters.Add(new SqlParameter("@BidStart", bidStart));
                     if (buyWithoutBid && price != -1)
@@ -420,15 +430,15 @@ namespace Server
                 query += " GROUP BY i.Id, i.Name, c.Name, i.Price, i.BidStart, i.Image";
                 if (eMinBid && eMaxBid)
                 {
-                    query += " HAVING ISNULL(MAX(b.Value),i.BidStart) >= @MinBid AND ISNULL(MAX(b.Value),i.BidStart) <= @MaxBid";
+                    query += " HAVING ISNULL(MAX(b.Value),i.BidStart) >= @MinBid AND ISNULL(MAX(b.Value),i.BidStart) <= @MaxBid AND i.Active = 1";
                 }
                 else if (eMinBid)
                 {
-                    query += " HAVING ISNULL(MAX(b.Value),i.BidStart) >= @MinBid";
+                    query += " HAVING ISNULL(MAX(b.Value),i.BidStart) >= @MinBid AND i.Active = 1";
                 }
                 else if (eMaxBid)
                 {
-                    query += " HAVING ISNULL(MAX(b.Value),i.BidStart) <= @MaxBid";
+                    query += " HAVING ISNULL(MAX(b.Value),i.BidStart) <= @MaxBid AND i.Active = 1";
                 }
 
                 using (SqlCommand command = new SqlCommand(query, connection))
@@ -770,6 +780,7 @@ namespace Server
                     "DECLARE @id INT " +
                     "SELECT @id = Id FROM Users WHERE Token = @token " +
                     "INSERT INTO Bids(ItemId, UserId, Value) VALUES(@itemId, @id, @value) " +
+                    "INSERT INTO Subscriptions (ItemId, UserId) VALUES(@itemId, @id) " +
                     "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
                     "SELECT UserId, ItemId, GETDATE(), '0' FROM Subscriptions " +
                     "WHERE ItemId = @itemId AND UserId != @id " +
@@ -937,6 +948,7 @@ namespace Server
                     "FETCH NEXT FROM cur into @itemId, @sellerId " +
                     "WHILE @@FETCH_STATUS = 0 " +
                     "BEGIN " +
+                    "UPDATE Items SET Active = 0 WHERE Id = @itemId" +
                     "SELECT @winnerId = UserId FROM Bids " +
                     "WHERE Value IN (SELECT MAX(Value) FROM Bids GROUP BY ItemId) " +
                     "AND ItemId = @itemId " +
@@ -958,6 +970,7 @@ namespace Server
                     "SELECT UserId, ItemId, GETDATE(), '3' FROM Subscriptions " +
                     "WHERE ItemId = @itemId AND UserId = @sellerId " +
                     "END " +
+                    "DELETE Subscriptions WHERE ItemId = @itemId " +
                     "FETCH NEXT FROM cur into @itemId, @sellerId " +
                     "END " +
                     "CLOSE cur " +
