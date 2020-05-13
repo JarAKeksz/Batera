@@ -968,62 +968,58 @@ namespace Server
             return Convert.ToByte(subscribed);
         }
 
-        /*public static byte getEndedSaleNotifications()
+        public static bool getEndedSaleNotifications()
         {
             try
             {
-                string thresholdCheckQuery = "SELECT i.Id, ISNULL(b.Value,i.BidStart)+i.BidIncrement FROM Items AS i " +
-                    "LEFT JOIN Bids AS b ON b.ItemId = i.Id WHERE i.Id = @itemId ORDER BY ISNULL(b.Value,i.BidStart) DESC";
-                using (SqlCommand command = new SqlCommand(thresholdCheckQuery, connection))
-                {
-
-                    SqlDataReader reader = command.ExecuteReader();
-                    int tmp = -1;
-                    DateTime tmpDate = new DateTime();
-                    if (reader.Read())
-                    {
-                        tmpDate = (DateTime)reader[0];
-                        tmp = (int)reader.GetFloat(1);
-                    }
-                    reader.Close();
-                    if (tmp == -1)
-                    {
-                        return 3; // == nem található a termék
-                    }
-                    if (tmpDate <= DateTime.Now)
-                    {
-                        return 2; // == a termékre már nem érkezhet licit
-                    }
-                    if (tmp > value)
-                    {
-                        return 1; // == a megadott licit nem éri el a küszöböt
-                    }
-                }
                 string query = "SET TRANSACTION ISOLATION LEVEL READ COMMITTED " +
                     "BEGIN TRANSACTION " +
-                    "DECLARE @id INT " +
-                    "SELECT @id = Id FROM Users WHERE Token = @token " +
-                    "INSERT INTO Bids(ItemId, UserId, Value) VALUES(@itemId, @id, @value) " +
+                    "DECLARE @itemId INT, @sellerId INT, @winnerId INT " +
+                    "DECLARE cur CURSOR LOCAL FOR " +
+                    "SELECT Id, Seller FROM Items " +
+                    "WHERE EndDate <= GETDATE() " +
+                    "OPEN cur " +
+                    "FETCH NEXT FROM cur into @itemId, @sellerId " +
+                    "WHILE @@FETCH_STATUS = 0 " +
+                    "BEGIN " +
+                    "SELECT @winnerId = UserId FROM Bids " +
+                    "WHERE Value IN (SELECT MAX(Value) FROM Bids GROUP BY ItemId) " +
+                    "AND ItemId = @itemId " +
+                    "IF @winnerId IS NOT NULL " +
+                    "BEGIN " +
                     "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
-                    "SELECT UserId, ItemId, GETDATE(), '0' FROM Subscriptions " +
-                    "WHERE ItemId = @itemId AND UserId != @id " +
+                    "SELECT UserId, ItemId, GETDATE(), '1' FROM Subscriptions " +
+                    "WHERE ItemId = @itemId AND UserId != @winnerId AND UserId != @sellerId " +
+                    "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
+                    "SELECT UserId, ItemId, GETDATE(), '2' FROM Subscriptions " +
+                    "WHERE ItemId = @itemId AND UserId = @winnerId " +
+                    "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
+                    "SELECT UserId, ItemId, GETDATE(), '4' FROM Subscriptions " +
+                    "WHERE ItemId = @itemId AND UserId = @sellerId " +
+                    "END " +
+                    "ELSE " +
+                    "BEGIN " +
+                    "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
+                    "SELECT UserId, ItemId, GETDATE(), '3' FROM Subscriptions " +
+                    "WHERE ItemId = @itemId AND UserId = @sellerId " +
+                    "END " +
+                    "FETCH NEXT FROM cur into @itemId, @sellerId " +
+                    "END " +
+                    "CLOSE cur " +
+                    "DEALLOCATE cur " +
                     "COMMIT TRANSACTION";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@token", token));
-                    command.Parameters.Add(new SqlParameter("@itemId", itemId));
-                    command.Parameters.Add(new SqlParameter("@value", value));
-
                     Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
                 }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return 4; // == oops
+                return false; // == oops
             }
-            return 0;
-        } ne foglalkozz vele, szar */
+            return true;
+        }
 
         public static int tokenToId(string token)
         {
