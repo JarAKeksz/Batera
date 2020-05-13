@@ -20,7 +20,7 @@ Returns a list of items based on a search term.
 	* `MinPrice` (optional): a number containing minimum price (inclusive).
 	* `MaxPrice` (optional): a number containing maximum price (inclusive).
 * Returns:
-	* `items`: an array containing objects. Each object has an `id` (int), `name` (string), `price` (int), `category` (string) and `image` (string, base64 coded image).
+	* `items`: an array containing objects. Each object has an `id` (int), `name` (string), `price` (int), `current` (int), `category` (string) and `image` (string, base64 coded image).
 
 ### Item details
 Returns a list of items based on a search term.
