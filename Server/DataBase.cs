@@ -434,7 +434,7 @@ namespace Server
                         }
                     }
                 }
-                query += " GROUP BY i.Id, i.Name, c.Name, i.Price, i.BidStart, i.Image";
+                query += " GROUP BY i.Id, i.Name, c.Name, i.Price, i.BidStart, i.Image, i.Active";
                 if (eMinBid && eMaxBid)
                 {
                     query += " HAVING ISNULL(MAX(b.Value),i.BidStart) >= @MinBid AND ISNULL(MAX(b.Value),i.BidStart) <= @MaxBid AND i.Active = 1";
