@@ -186,7 +186,8 @@ namespace Server
                 }
                 else if (!buyWithoutBid)
                 {
-                    query = "BEGIN TRANSACTION " +
+                    query = "SET TRANSACTION ISOLATION LEVEL READ COMMITTED " +
+                        "BEGIN TRANSACTION " +
                         "INSERT INTO Items(Name, Seller, CategoryId, Image, Description, EndDate, IsItNew, BidStart) " +
                         "VALUES(@Name, @Seller, @CategoryId, @Image, @Description, DATEADD(DAY, 7, GETDATE()), @IsItNew, @BidStart) " +
                         "DECLARE @itemId INT " +
@@ -754,7 +755,7 @@ namespace Server
             try
             {
                 string thresholdCheckQuery = "SELECT TOP (1) i.EndDate, ISNULL(b.Value,i.BidStart)+i.BidIncrement FROM Items AS i " +
-                    "LEFT JOIN Bids AS b ON b.ItemId = i.Id WHERE i.Id = @itemId ORDER BY ISNULL(b.Value,i.BidStart) DESC";
+                    "LEFT JOIN Bids AS b ON b.ItemId = i.Id WHERE i.Id = @itemId AND i.Active = 1 ORDER BY ISNULL(b.Value,i.BidStart) DESC";
                 using (SqlCommand command = new SqlCommand(thresholdCheckQuery, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@itemId", itemId));
@@ -798,7 +799,8 @@ namespace Server
                     "WHERE ItemId = @itemId AND UserId != @id " +
                     "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
                     "SELECT UserId, ItemId, GETDATE(), '0' FROM Subscriptions " +
-                    "WHERE ItemId = @itemId AND UserId != @id ";
+                    "WHERE ItemId = @itemId AND UserId != @id " +
+                    "COMMIT TRANSACTION";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@token", token));
@@ -1056,6 +1058,67 @@ namespace Server
                 return false; // == oops
             }
             return true;
+        }
+
+        public static byte buyItem(string token, int itemId)
+        {
+            try
+            {
+                string thresholdCheckQuery = "SELECT EndDate, BuyWithoutBid FROM Items WHERE Id = @itemId AND Active = 1";
+                using (SqlCommand command = new SqlCommand(thresholdCheckQuery, connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@itemId", itemId));
+
+                    DateTime tmpDate = new DateTime(1970,1,1,0,0,0);
+                    bool buyWithoutBid = false;
+
+                    SqlDataReader reader = command.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        tmpDate = reader.GetDateTime(0);
+                        buyWithoutBid = (bool)reader[1];
+                    }
+                    reader.Close();
+                    if (tmpDate <= DateTime.Now)
+                    {
+                        return 2; // == a terméket már nem lehet megvenni
+                    }
+                    if (!buyWithoutBid)
+                    {
+                        return 1; // == a terméket nem lehetséges megvenni
+                    }
+                }
+                string query = "SET TRANSACTION ISOLATION LEVEL READ COMMITTED " +
+                    "BEGIN TRANSACTION " +
+                    "DECLARE @id INT " +
+                    "SELECT @id = Id FROM Users WHERE Token = @token " +
+                    "INSERT INTO Sales(ItemId, UserId) VALUES(@itemId, @id) " +
+                    "DECLARE @sellerId INT " +
+                    "SELECT @sellerId = Seller FROM Items WHERE Id = @itemId " +
+                    "UPDATE Items SET Active = 0 WHERE Id = @itemId " +
+                    "INSERT INTO Notifications(UserId, ItemId, TimeStamp, TextType) " +
+                    "SELECT UserId, ItemId, GETDATE(), '1' FROM Subscriptions " +
+                    "WHERE ItemId = @itemId AND UserId != @id AND UserId != @sellerId " +
+                    "INSERT INTO Notifications(UserId, ItemId, TimeStamp, TextType) " +
+                    "VALUES(@id, ItemId, GETDATE(), '2') " +
+                    "INSERT INTO Notifications(UserId, ItemId, TimeStamp, TextType) " +
+                    "VALUES(@sellerId, ItemId, GETDATE(), '4') " +
+                    "DELETE Subscriptions WHERE ItemId = @itemId " +
+                    "COMMIT TRANSACTION";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@token", token));
+                    command.Parameters.Add(new SqlParameter("@itemId", itemId));
+
+                    Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return 3; // == oops
+            }
+            return 0;
         }
 
         public static int tokenToId(string token)
