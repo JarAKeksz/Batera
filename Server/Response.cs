@@ -173,6 +173,7 @@ namespace Server
                     writer.WriteString("description", i.description);
                     writer.WriteString("end_date", i.endDate);
                     writer.WriteString("seller", i.seller);
+                    writer.WriteString("sold_to", i.soldTo);
 
                     writer.WriteEndObject();
                 }

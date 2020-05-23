@@ -42,7 +42,8 @@ Returns a list of items based on a search term.
 		* `image` (string, base64 coded image)
 		* `description` (string)
 		* `end_date` (string)
-		* `seller` (string).
+		* `seller` (string)
+		* `sold_to` (string) which is either a username, or '' when unsold.
 
 ### Bid
 Allows to make a bid.

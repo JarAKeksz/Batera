@@ -447,6 +447,10 @@ namespace Server
                 {
                     query += " HAVING ISNULL(MAX(b.Value),i.BidStart) <= @MaxBid AND i.Active = 1";
                 }
+                else
+                {
+                    query += " HAVING i.Active = 1";
+                }
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
@@ -500,14 +504,15 @@ namespace Server
                 DateTime endDate;
                 bool isItNew;
                 bool buyWithoutBid;
+                string soldTo;
                 int bidStart;
                 int bidIncrement;
 
                 string query = "SELECT i.Name, c.Name, ISNULL(i.Price,-1), ISNULL(MAX(b.Value),i.BidStart), i.Image, u.UserName, i.Description, i.EndDate, " +
-                    "i.IsItNew, i.BuyWithoutBid, i.BidStart, i.BidIncrement " +
+                    "i.IsItNew, i.BuyWithoutBid, ISNULL(s.UserId,''), i.BidStart, i.BidIncrement " +
                     "FROM Items AS i JOIN Categories AS c ON i.CategoryId = c.Id LEFT JOIN Bids AS b ON i.Id = b.ItemId LEFT JOIN Users AS u ON i.Seller = u.Id " +
-                    "WHERE i.Id = @itemId " +
-                    "GROUP BY i.Name, c.Name, i.Price, i.BidStart, i.Image, u.UserName, i.Description, i.EndDate, i.IsItNew, i.BuyWithoutBid, i.BidStart, i.BidIncrement";
+                    "LEFT JOIN Sales AS s ON i.Id = s.ItemId WHERE i.Id = @itemId " +
+                    "GROUP BY i.Name, c.Name, i.Price, i.BidStart, i.Image, u.UserName, i.Description, i.EndDate, i.IsItNew, i.BuyWithoutBid, s.ItemId, i.BidStart, i.BidIncrement";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@itemId", itemId));
@@ -527,8 +532,9 @@ namespace Server
                         endDate = reader.GetDateTime(7);
                         isItNew = (bool)reader[8];
                         buyWithoutBid = (bool)reader[9];
-                        bidStart = reader.GetInt32(10);
-                        bidIncrement = (int)reader.GetDecimal(11);
+                        soldTo = reader.GetString(10);
+                        bidStart = reader.GetInt32(11);
+                        bidIncrement = (int)reader.GetDecimal(12);
                     }
                     else
                     {
@@ -557,7 +563,7 @@ namespace Server
                     bidReader.Close();
                 }
 
-                ret = new DetailedItem(id, name, category, price, current, image, seller, description, endDate, isItNew, buyWithoutBid, bidStart, bidIncrement, tmp);
+                ret = new DetailedItem(id, name, category, price, current, image, seller, description, endDate, isItNew, buyWithoutBid, soldTo, bidStart, bidIncrement, tmp);
             }
             catch (Exception e)
             {
