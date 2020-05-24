@@ -28,7 +28,9 @@ namespace Client.Pages
             itemx = item;
             InitializeComponent();
 
-            if (item.SoldTo != "")
+            Console.WriteLine("*******" + item.SoldTo + "******");
+
+            if (item.SoldTo == "")
             {
                 setItemData();
             }
@@ -40,7 +42,7 @@ namespace Client.Pages
 
             }
 
-            
+
 
         }
 
@@ -48,7 +50,6 @@ namespace Client.Pages
         {
             itemTitle.Text = itemx.Name + "(" + itemx.Category + ")";
             itemImage.Source = itemx.Image;
-            itemPrice.Text = "Price: " + itemx.Price.ToString();
             itemDescription.Text = "Description: \n" + itemx.Description;
             itemSeller.Text = "Seller: " + itemx.Seller;
             itemEndDate.Text = "End date: " + itemx.EndDate;
@@ -117,7 +118,7 @@ namespace Client.Pages
             int bid = int.Parse(itemBid.Text);
             bool bidOk = Int32.TryParse(itemBid.Text, out bid);
 
-            if (User.Instance.getToken() != null && itemBid.Text !="" && bidOk)
+            if (User.Instance.getToken() != null && itemBid.Text != "" && bidOk)
             {
                 if (itemx.Price < bid)
                 {
@@ -128,16 +129,16 @@ namespace Client.Pages
                 {
                     Console.WriteLine("Bid more!");
                 }
-                
+
             }
             else
             {
-                if(User.Instance.getToken() == null)
+                if (User.Instance.getToken() == null)
                 {
                     Console.WriteLine(" need to log in");
                     this.NavigationService.Navigate(new LoginPage());
                 }
-                if(itemBid.Text == "" && !bidOk)
+                if (itemBid.Text == "" && !bidOk)
                 {
                     Console.WriteLine("make a valid bid");
                 }
@@ -185,7 +186,25 @@ namespace Client.Pages
             {
                 Console.WriteLine(" need to log in");
                 this.NavigationService.Navigate(new LoginPage());
-                
+
+            }
+        }
+
+        private void buyNowButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (User.Instance.getToken() != null)
+            {
+                helper.MakeBuy(User.Instance.getToken(), itemx.Id);
+
+                itemSold.Text = "SOLD";
+                setItemData();
+                disableItemActions();
+                itemx.SoldTo = User.Instance.getName();
+            }
+            else
+            {
+                Console.WriteLine(" need to log in");
+                this.NavigationService.Navigate(new LoginPage());
             }
         }
     }

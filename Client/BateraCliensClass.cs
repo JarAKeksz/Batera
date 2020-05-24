@@ -239,6 +239,7 @@ namespace Client
 
                     string sold_to = element.GetProperty("sold_to").GetString();
 
+
                     result = (new DetailedItem(id2, name, price, priceBuy, category, image,description,end_date,seller,minBid,quickBuy,New,sold_to));
                     
                 }
@@ -410,6 +411,50 @@ namespace Client
                     else
                     {
                         
+                        Console.WriteLine(" problem : " + document.RootElement.GetProperty("problem"));
+                    }
+                }
+            }
+        }
+
+        public async void MakeBuy(string token, int item_id)
+        {
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri("http://localhost:8000");
+
+                HttpContent content;
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    JsonWriterOptions JW_OPTS = new JsonWriterOptions { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+                    using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
+                    {
+                        writer.WriteStartObject();
+                        writer.WriteString("token", token);
+                        writer.WriteNumber("item_id", item_id);
+                        writer.WriteEndObject();
+                    }
+
+                    content = new StringContent(Encoding.UTF8.GetString(stream.ToArray()), Encoding.UTF8, "application/json");
+
+                }
+
+                var result = await client.PostAsync("/buy", content);
+                string resultContent = await result.Content.ReadAsStringAsync();
+
+                Console.WriteLine(resultContent);
+
+                using (JsonDocument document = JsonDocument.Parse(resultContent))
+                {
+                    bool success = document.RootElement.GetProperty("success").GetBoolean();
+                    if (success)
+                    {
+                        Console.WriteLine("succesfully bought");
+                    }
+                    else
+                    {
+
                         Console.WriteLine(" problem : " + document.RootElement.GetProperty("problem"));
                     }
                 }

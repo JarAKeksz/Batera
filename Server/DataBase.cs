@@ -767,18 +767,18 @@ namespace Server
                     command.Parameters.Add(new SqlParameter("@itemId", itemId));
 
                     SqlDataReader reader = command.ExecuteReader();
-                    int tmp = -1;
-                    DateTime tmpDate = new DateTime();
+                    int tmp;
+                    DateTime tmpDate;
                     if (reader.Read())
                     {
                         tmpDate = reader.GetDateTime(0);
                         tmp = (int)reader.GetDecimal(1);
                     }
-                    reader.Close();
-                    if (tmp == -1)
+                    else
                     {
                         return 3; // == nem található a termék
                     }
+                    reader.Close();
                     if (tmpDate <= DateTime.Now)
                     {
                         return 2; // == a termékre már nem érkezhet licit
@@ -792,8 +792,18 @@ namespace Server
                     "BEGIN TRANSACTION " +
                     "DECLARE @id INT " +
                     "SELECT @id = Id FROM Users WHERE Token = @token " +
-                    "INSERT IGNORE INTO Bids(ItemId, UserId, Value) VALUES(@itemId, @id, @value) " +
-                    "INSERT IGNORE INTO Subscriptions (ItemId, UserId) VALUES(@itemId, @id) " +
+                    "MERGE Bids AS b " +
+                    "USING(VALUES(@itemId, @id, @value)) AS s(ItemId, UserId, Value) " +
+                    "ON b.ItemId = s.ItemId AND b.UserId = s.UserId AND b.Value = s.Value " +
+                    "WHEN NOT MATCHED THEN " +
+                    "INSERT(ItemId, UserId, Value) " +
+                    "VALUES(@itemId, @id, @value); " +
+                    "MERGE Subscriptions AS sub " +
+                    "USING(VALUES(@itemId, @id)) AS s(ItemId, UserId) " +
+                    "ON sub.ItemId = s.ItemId AND sub.UserId = s.UserId " +
+                    "WHEN NOT MATCHED THEN " +
+                    "INSERT(ItemId, UserId) " +
+                    "VALUES(@itemId, @id); " +
                     "DECLARE @bidJump INT " +
                     "SELECT @bidJump = BidIncrement FROM Items WHERE Id = @itemId " +
                     "INSERT INTO Bids(ItemId, UserId, Value) " +
@@ -834,14 +844,24 @@ namespace Server
                     "BEGIN TRANSACTION " +
                     "DECLARE @id INT " +
                     "SELECT @id = Id FROM Users WHERE Token = @token " +
-                    "INSERT INTO AutoBids(ItemId, UserId, Value) VALUES(@itemId, @id, @limit) " +
-                    "INSERT INTO Subscriptions (ItemId, UserId) VALUES(@itemId, @id) " +
+                    "MERGE AutoBids AS a " +
+                    "USING(VALUES(@itemId, @id, @limit)) AS s(ItemId, UserId, Limit) " +
+                    "ON a.itemId = s.ItemId AND a.UserId = s.UserId AND a.Limit = s.Limit " +
+                    "WHEN NOT MATCHED THEN " +
+                    "INSERT(ItemId, UserId, Limit) " +
+                    "VALUES(@itemId, @id, @limit); " +
+                    "MERGE Subscriptions AS sub " +
+                    "USING(VALUES(@itemId, @id)) AS s(ItemId, UserId) " +
+                    "ON sub.itemId = s.ItemId AND sub.UserId = s.UserId " +
+                    "WHEN NOT MATCHED THEN " +
+                    "INSERT(ItemId, UserId) " +
+                    "VALUES(@itemId, @id); " +
                     "COMMIT TRANSACTION";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@token", token));
                     command.Parameters.Add(new SqlParameter("@itemId", itemId));
-                    command.Parameters.Add(new SqlParameter("@value", limit));
+                    command.Parameters.Add(new SqlParameter("@limit", limit));
 
                     Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
                 }
@@ -1072,21 +1092,33 @@ namespace Server
         {
             try
             {
-                string thresholdCheckQuery = "SELECT EndDate, BuyWithoutBid FROM Items WHERE Id = @itemId AND Active = 1";
+                string thresholdCheckQuery = "SELECT TOP (1) i.EndDate, i.Price, ISNULL(b.Value,i.BidStart)+i.BidIncrement, i.BuyWithoutBid FROM Items AS i " +
+                    "LEFT JOIN Bids AS b ON b.ItemId = i.Id WHERE i.Id = @itemId AND i.Active = 1 ORDER BY ISNULL(b.Value,i.BidStart) DESC";
                 using (SqlCommand command = new SqlCommand(thresholdCheckQuery, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@itemId", itemId));
 
-                    DateTime tmpDate = new DateTime(1970,1,1,0,0,0);
-                    bool buyWithoutBid = false;
-
                     SqlDataReader reader = command.ExecuteReader();
+                    DateTime tmpDate;
+                    int price;
+                    int topBid;
+                    bool buyWithoutBid;
                     if (reader.Read())
                     {
                         tmpDate = reader.GetDateTime(0);
-                        buyWithoutBid = (bool)reader[1];
+                        price = reader.GetInt32(1);
+                        topBid = (int)reader.GetDecimal(2);
+                        buyWithoutBid = (bool)reader[3];
+                    }
+                    else
+                    {
+                        return 4; // == nincs ilyen termék
                     }
                     reader.Close();
+                    if (topBid >= price * 0.8)
+                    {
+                        return 3; // == az ár nem éri el a szükséges értéket
+                    }
                     if (tmpDate <= DateTime.Now)
                     {
                         return 2; // == a terméket már nem lehet megvenni
@@ -1100,7 +1132,12 @@ namespace Server
                     "BEGIN TRANSACTION " +
                     "DECLARE @id INT " +
                     "SELECT @id = Id FROM Users WHERE Token = @token " +
-                    "INSERT INTO Sales(ItemId, UserId) VALUES(@itemId, @id) " +
+                    "MERGE Sales AS sa " +
+                    "USING(VALUES(@itemId, @id)) AS s(ItemId, UserId) " +
+                    "ON sa.ItemId = s.ItemId AND sa.UserId = s.UserId " +
+                    "WHEN NOT MATCHED THEN " +
+                    "INSERT(ItemId, UserId) " +
+                    "VALUES(@itemId, @id); " +
                     "DECLARE @sellerId INT " +
                     "SELECT @sellerId = Seller FROM Items WHERE Id = @itemId " +
                     "UPDATE Items SET Active = 0 WHERE Id = @itemId " +
@@ -1108,9 +1145,9 @@ namespace Server
                     "SELECT UserId, ItemId, GETDATE(), '1' FROM Subscriptions " +
                     "WHERE ItemId = @itemId AND UserId != @id AND UserId != @sellerId " +
                     "INSERT INTO Notifications(UserId, ItemId, TimeStamp, TextType) " +
-                    "VALUES(@id, ItemId, GETDATE(), '2') " +
+                    "VALUES(@id, @itemId, GETDATE(), '2') " +
                     "INSERT INTO Notifications(UserId, ItemId, TimeStamp, TextType) " +
-                    "VALUES(@sellerId, ItemId, GETDATE(), '4') " +
+                    "VALUES(@sellerId, @itemId, GETDATE(), '4') " +
                     "DELETE Subscriptions WHERE ItemId = @itemId " +
                     "COMMIT TRANSACTION";
                 using (SqlCommand command = new SqlCommand(query, connection))
@@ -1124,7 +1161,7 @@ namespace Server
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return 3; // == oops
+                return 5; // == oops
             }
             return 0;
         }
