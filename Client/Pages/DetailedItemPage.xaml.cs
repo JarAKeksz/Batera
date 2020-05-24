@@ -28,7 +28,9 @@ namespace Client.Pages
             itemx = item;
             InitializeComponent();
 
-            if (item.SoldTo != "")
+            Console.WriteLine("*******"+item.SoldTo+"******");
+
+            if (item.SoldTo == "")
             {
                 setItemData();
             }
@@ -187,6 +189,11 @@ namespace Client.Pages
                 this.NavigationService.Navigate(new LoginPage());
                 
             }
+        }
+
+        private void buyNowButton_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

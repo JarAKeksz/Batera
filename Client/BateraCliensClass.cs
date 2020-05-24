@@ -239,6 +239,7 @@ namespace Client
 
                     string sold_to = element.GetProperty("sold_to").GetString();
 
+
                     result = (new DetailedItem(id2, name, price, priceBuy, category, image,description,end_date,seller,minBid,quickBuy,New,sold_to));
                     
                 }
