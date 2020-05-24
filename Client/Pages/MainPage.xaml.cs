@@ -48,6 +48,7 @@ namespace Client
                 if (helper.GetDetailedItem(i.Id) != null)
                 {
                     this.NavigationService.Navigate(new DetailedItemPage(helper.GetDetailedItem(i.Id)));
+                    itemsList.SelectedIndex = -1;
                 }
             }
         }

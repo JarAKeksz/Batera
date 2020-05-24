@@ -24,6 +24,9 @@
             <ScrollViewer HorizontalScrollBarVisibility="Auto">
                 <StackPanel Margin="10">
                     <TextBlock x:Name="itemTitle" Text="Title" FontSize="24"/>
+
+                    <TextBlock x:Name="itemSold" FontSize="30"/>
+
                     <Image x:Name="itemImage" Width="250" Margin="5"/>
                     <TextBlock x:Name="itemPrice" Text="Price:"/>
                     <TextBlock x:Name="itemPricebuy" Text="Price:"/>
@@ -35,12 +38,12 @@
 
                     <Button x:Name="addFavorite" Content="Add to Favorite" Margin="5,5,300.8,0" Click="addFavorite_Click"/>
 
-                    <TextBlock Text="place bid:"/>
+                    <TextBlock x:Name="placeBid" Text="place bid:"/>
                     <TextBox x:Name="itemBid" Margin="5,5,300.8,0" />
                     <TextBlock Text="Minimum bid:" x:Name="minBidTextBlock"/>
                     <Button x:Name="placeBidButton" Content="Place Bid" Margin="5,5,300.8,0" Click="placeBidButton_Click"/>
 
-                    <TextBlock Text="make auto bid:"/>
+                    <TextBlock x:Name="autobid" Text="make auto bid:"/>
                     <TextBox x:Name="itemAutoBid" Margin="5,5,300.8,0" />
                     <Button x:Name="placeAutoBidButton" Content="Make Auto Bid" Margin="5,5,300.8,0" Click="placeAutoBidButton_Click"/>
                     <Button x:Name="removeAutoBidButton" Content="Remove Auto Bid" Margin="5,5,300.8,0" Click="removeAutoBidButton_Click"/>
