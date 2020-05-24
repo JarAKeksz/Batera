@@ -512,7 +512,7 @@ namespace Server
                     "i.IsItNew, i.BuyWithoutBid, ISNULL(s.UserId,''), i.BidStart, i.BidIncrement " +
                     "FROM Items AS i JOIN Categories AS c ON i.CategoryId = c.Id LEFT JOIN Bids AS b ON i.Id = b.ItemId LEFT JOIN Users AS u ON i.Seller = u.Id " +
                     "LEFT JOIN Sales AS s ON i.Id = s.ItemId WHERE i.Id = @itemId " +
-                    "GROUP BY i.Name, c.Name, i.Price, i.BidStart, i.Image, u.UserName, i.Description, i.EndDate, i.IsItNew, i.BuyWithoutBid, s.ItemId, i.BidStart, i.BidIncrement";
+                    "GROUP BY i.Name, c.Name, i.Price, i.BidStart, i.Image, u.UserName, i.Description, i.EndDate, i.IsItNew, i.BuyWithoutBid, s.UserId, i.BidStart, i.BidIncrement";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@itemId", itemId));
