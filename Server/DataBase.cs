@@ -763,15 +763,43 @@ namespace Server
             return 0;
         }
 
-        public static bool setAutoBid(string token, int itemId, int limit)
+        public static byte setAutoBid(string token, int itemId, int limit)
         {
             try
             {
+                string thresholdCheckQuery = "SELECT TOP (1) i.EndDate, ISNULL(b.Value,i.BidStart)+i.BidIncrement FROM Items AS i " +
+                    "LEFT JOIN Bids AS b ON b.ItemId = i.Id WHERE i.Id = @itemId AND i.Active = 1 ORDER BY ISNULL(b.Value,i.BidStart) DESC";
+                using (SqlCommand command = new SqlCommand(thresholdCheckQuery, connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@itemId", itemId));
+
+                    SqlDataReader reader = command.ExecuteReader();
+                    int tmp;
+                    DateTime tmpDate;
+                    if (reader.Read())
+                    {
+                        tmpDate = reader.GetDateTime(0);
+                        tmp = (int)reader.GetDecimal(1);
+                    }
+                    else
+                    {
+                        return 3; // == nem található a termék
+                    }
+                    reader.Close();
+                    if (tmpDate <= DateTime.Now)
+                    {
+                        return 2; // == a termékre már nem érkezhet licit
+                    }
+                    if (tmp > limit)
+                    {
+                        return 1; // == a limit nem éri el a licitküszöböt, nem lenne értelme
+                    }
+                }
                 string query = "SET TRANSACTION ISOLATION LEVEL READ COMMITTED " +
                     "BEGIN TRANSACTION " +
                     "DECLARE @id INT " +
                     "SELECT @id = Id FROM Users WHERE Token = @token " +
-                    "DECLARE @sellerId INT " +
+                    "DECLARE @sellerId INT" +
                     "SELECT @sellerId = Seller FROM Items WHERE Id = @itemId " +
                     "IF @id != @sellerId " +
                     "BEGIN " +
@@ -801,9 +829,9 @@ namespace Server
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return false; // == oops
+                return 4; // == oops
             }
-            return true;
+            return 0;
         }
 
         public static bool removeAutoBid(string token, int itemId)
@@ -1001,6 +1029,7 @@ namespace Server
                     "SELECT UserId, ItemId, GETDATE(), '3' FROM Subscriptions " +
                     "WHERE ItemId = @itemId AND UserId = @sellerId " +
                     "END " +
+                    "DELETE AutoBids WHERE ItemId = @itemId " +
                     "DELETE Subscriptions WHERE ItemId = @itemId " +
                     "FETCH NEXT FROM cur into @itemId, @sellerId " +
                     "END " +

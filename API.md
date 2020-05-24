@@ -153,6 +153,7 @@ Allows to set an autobid with a limit.
 	* `limit: a number containing the limit for the autobid.
 * Returns:
 	* `success`: a boolean containing if setting was successful.
+	* `problem` (in case of unsuccessful upload): a string containing the problem for debug purposes.
 
 ### Notifications
 Returns a list of items tagged as favorites by the user.

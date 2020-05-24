@@ -286,22 +286,38 @@ namespace Server
 
         public static byte[] autobidSubscribeResponse(string token, int itemId, int maxPrice)
         {
-            bool b = DataBase.setAutoBid(token, itemId, maxPrice);
-            
             using (MemoryStream stream = new MemoryStream())
             {
                 using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
                 {
-                    writer.WriteStartObject();
-                    if (b)
+
+                    byte b = DataBase.addBid(token, itemId, maxPrice);
+
+                    switch (b)
                     {
-                        writer.WriteBoolean("success", true);
+                        case 4:
+                            throw new Exception("Database error");
+                            break;
+                        case 3:
+                            writer.WriteBoolean("success", false);
+                            writer.WriteString("problem", "Item not found!");
+                            break;
+                        case 2:
+                            writer.WriteBoolean("success", false);
+                            writer.WriteString("problem", "Bidding has ended!");
+                            break;
+                        case 1:
+                            writer.WriteBoolean("success", false);
+                            writer.WriteString("problem", "Autobid limit too low!");
+                            break;
+                        case 0:
+                            writer.WriteBoolean("success", true);
+                            break;
+                        default:
+                            writer.WriteBoolean("success", false);
+                            writer.WriteString("problem", "Unknown error");
+                            break;
                     }
-                    else
-                    {
-                        writer.WriteBoolean("success", false);
-                    }
-                    writer.WriteEndObject();
                 }
 
                 return stream.ToArray();
