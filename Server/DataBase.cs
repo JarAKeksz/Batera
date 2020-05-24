@@ -1092,28 +1092,37 @@ namespace Server
         {
             try
             {
-                string thresholdCheckQuery = "SELECT EndDate, BuyWithoutBid FROM Items WHERE Id = @itemId AND Active = 1";
+                string thresholdCheckQuery = "SELECT TOP (1) i.EndDate, i.Price, ISNULL(b.Value,i.BidStart)+i.BidIncrement, i.BuyWithoutBid FROM Items AS i " +
+                    "LEFT JOIN Bids AS b ON b.ItemId = i.Id WHERE i.Id = @itemId AND i.Active = 1 ORDER BY ISNULL(b.Value,i.BidStart) DESC";
+                //Allows to buy an item that has a quick buy price(only if the latest bid is lower than 0,8 times the quick buy price).
                 using (SqlCommand command = new SqlCommand(thresholdCheckQuery, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@itemId", itemId));
 
-                    DateTime tmpDate;
-                    bool buyWithoutBid;
-
                     SqlDataReader reader = command.ExecuteReader();
+                    DateTime tmpDate;
+                    int price;
+                    int topBid;
+                    bool buyWithoutBid;
                     if (reader.Read())
                     {
                         tmpDate = reader.GetDateTime(0);
-                        buyWithoutBid = (bool)reader[1];
+                        price = (int)reader.GetDecimal(1);
+                        topBid = (int)reader.GetDecimal(2);
+                        buyWithoutBid = (bool)reader[3];
                     }
                     else
                     {
                         return 4; // == nincs ilyen termék
                     }
                     reader.Close();
+                    if (topBid >= price * 0.8)
+                    {
+                        return 3; // == az ár nem éri el a küszöböt
+                    }
                     if (tmpDate <= DateTime.Now)
                     {
-                        return 2; // == a terméket már nem lehet megvenni
+                        return 2; // == a termékre már nem érkezhet licit
                     }
                     if (!buyWithoutBid)
                     {
@@ -1126,7 +1135,7 @@ namespace Server
                     "SELECT @id = Id FROM Users WHERE Token = @token " +
                     "MERGE Sales AS sa " +
                     "USING(VALUES(@itemId, @id)) AS s(ItemId, UserId) " +
-                    "ON sa.itemId = s.itemId AND sa.UserId = s.UserId " +
+                    "ON sa.ItemId = s.ItemId AND sa.UserId = s.UserId " +
                     "WHEN NOT MATCHED THEN " +
                     "INSERT(ItemId, UserId) " +
                     "VALUES(@itemId, @id); " +
@@ -1137,9 +1146,9 @@ namespace Server
                     "SELECT UserId, ItemId, GETDATE(), '1' FROM Subscriptions " +
                     "WHERE ItemId = @itemId AND UserId != @id AND UserId != @sellerId " +
                     "INSERT INTO Notifications(UserId, ItemId, TimeStamp, TextType) " +
-                    "VALUES(@id, ItemId, GETDATE(), '2') " +
+                    "VALUES(@id, @itemId, GETDATE(), '2') " +
                     "INSERT INTO Notifications(UserId, ItemId, TimeStamp, TextType) " +
-                    "VALUES(@sellerId, ItemId, GETDATE(), '4') " +
+                    "VALUES(@sellerId, @itemId, GETDATE(), '4') " +
                     "DELETE Subscriptions WHERE ItemId = @itemId " +
                     "COMMIT TRANSACTION";
                 using (SqlCommand command = new SqlCommand(query, connection))
@@ -1153,7 +1162,7 @@ namespace Server
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return 3; // == oops
+                return 5; // == oops
             }
             return 0;
         }
