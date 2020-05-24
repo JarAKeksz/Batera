@@ -846,7 +846,7 @@ namespace Server
                     "SELECT @id = Id FROM Users WHERE Token = @token " +
                     "MERGE AutoBids AS a " +
                     "USING(VALUES(@itemId, @id, @limit)) AS s(ItemId, UserId, Limit) " +
-                    "ON a.itemId = s.ItemId AND a.UserId = s.UserId AND a.Value = s.Value " +
+                    "ON a.itemId = s.ItemId AND a.UserId = s.UserId AND a.Limit = s.Limit " +
                     "WHEN NOT MATCHED THEN " +
                     "INSERT(ItemId, UserId, Limit) " +
                     "VALUES(@itemId, @id, @limit); " +
@@ -861,7 +861,7 @@ namespace Server
                 {
                     command.Parameters.Add(new SqlParameter("@token", token));
                     command.Parameters.Add(new SqlParameter("@itemId", itemId));
-                    command.Parameters.Add(new SqlParameter("@value", limit));
+                    command.Parameters.Add(new SqlParameter("@limit", limit));
 
                     Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
                 }
