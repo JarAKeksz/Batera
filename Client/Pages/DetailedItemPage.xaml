@@ -12,44 +12,53 @@
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="4*"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="5*"/>
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0" >
             <Button x:Name="Back" Height="40" Content="Back" Margin="10" Click="backButton_Click"/>
         </Grid>
         
-            <Grid Grid.Column="1" Background="Gray">
-            <ScrollViewer HorizontalScrollBarVisibility="Auto">
-                <StackPanel Margin="10">
-                    <TextBlock x:Name="itemTitle" Text="Title" FontSize="24"/>
+        <Grid Grid.Column="1" Background="#F1F1F1">
 
-                    <TextBlock x:Name="itemSold" FontSize="30"/>
+            <ScrollViewer Grid.Column="0" HorizontalScrollBarVisibility="Disabled">
+                <Grid Grid.Column="0" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Margin="10">
+                        <TextBlock x:Name="itemTitle" Text="Title" FontSize="24" TextWrapping="Wrap"/>
+                        <TextBlock x:Name="itemSold" FontSize="30"/>
 
-                    <Image x:Name="itemImage" Width="250" Margin="5"/>
-                    <TextBlock x:Name="itemPrice" Text="Price:"/>
-                    <TextBlock x:Name="itemPricebuy" Text="Price:"/>
-                    <TextBlock x:Name="itemSeller" Text="Seller:"/>
-                    <TextBlock x:Name="itemDescription" Text="Description:"/>
-                    <TextBlock x:Name="itemEndDate" Text="End date:"/>
+                        <TextBlock x:Name="itemPrice" Text="Price:"/>
+                        <TextBlock x:Name="itemPricebuy" Text="Price:"/>
+                        <TextBlock x:Name="itemEndDate" Text="End date:"/>
 
-                    <TextBlock x:Name="itemCondition" Text="Condition: "/>
+                        <Button x:Name="addFavorite" Content="Favorite ☆" Click="addFavorite_Click"/>
 
-                    <Button x:Name="addFavorite" Content="Add to Favorite" Margin="5,5,300.8,0" Click="addFavorite_Click"/>
+                        <TextBlock x:Name="placeBid" Text="place bid:"/>
+                        <TextBox x:Name="itemBid" />
+                        <TextBlock Text="Minimum bid:" x:Name="minBidTextBlock"/>
+                        <Button x:Name="placeBidButton" Content="Place Bid" Click="placeBidButton_Click"/>
 
-                    <TextBlock x:Name="placeBid" Text="place bid:"/>
-                    <TextBox x:Name="itemBid" Margin="5,5,300.8,0" />
-                    <TextBlock Text="Minimum bid:" x:Name="minBidTextBlock"/>
-                    <Button x:Name="placeBidButton" Content="Place Bid" Margin="5,5,300.8,0" Click="placeBidButton_Click"/>
+                        <TextBlock x:Name="autobid" Text="make auto bid:"/>
+                        <TextBox x:Name="itemAutoBid"/>
+                        <Button x:Name="placeAutoBidButton" Content="Make Auto Bid"  Click="placeAutoBidButton_Click"/>
+                        <Button x:Name="removeAutoBidButton" Content="Remove Auto Bid"  Click="removeAutoBidButton_Click"/>
+                        <Button x:Name="buyNowButton" Content="Buy now"  Click="buyNowButton_Click"/>
 
-                    <TextBlock x:Name="autobid" Text="make auto bid:"/>
-                    <TextBox x:Name="itemAutoBid" Margin="5,5,300.8,0" />
-                    <Button x:Name="placeAutoBidButton" Content="Make Auto Bid" Margin="5,5,300.8,0" Click="placeAutoBidButton_Click"/>
-                    <Button x:Name="removeAutoBidButton" Content="Remove Auto Bid" Margin="5,5,300.8,0" Click="removeAutoBidButton_Click"/>
-                    <Button x:Name="buyNowButton" Content="Buy now" Margin="5,20,300.8,0" Click="buyNowButton_Click"/>
+                    </StackPanel>
 
-                </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="10">
+                        <Image x:Name="itemImage"/>
+                        <TextBlock x:Name="itemSeller" Text="Seller:"/>
+                        <TextBlock x:Name="itemCondition" Text="Condition: "/>
+                        <TextBlock x:Name="itemDescription" Text="Description:" TextWrapping="Wrap"/>
+
+                    </StackPanel>
+                </Grid>
             </ScrollViewer>
         </Grid>
         
