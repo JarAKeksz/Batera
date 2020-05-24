@@ -478,7 +478,6 @@ namespace Client
                         writer.WriteString("token", token);
                         writer.WriteNumber("item_id", item_id);
                         writer.WriteNumber("max_bid", maxBid);
-                        writer.WriteBoolean("subscribe", subscribe);
                         writer.WriteEndObject();
                     }
 
@@ -488,18 +487,18 @@ namespace Client
                 var result = await client.PostAsync("/autobid", content);
                 string resultContent = await result.Content.ReadAsStringAsync();
 
-
+                Console.WriteLine("**************"+resultContent);
                 using (JsonDocument document = JsonDocument.Parse(resultContent))
                 {
                     bool success = document.RootElement.GetProperty("success").GetBoolean();
                     if (success)
                     {
-                        Console.WriteLine("price: " + document.RootElement.GetProperty("price"));
+                        Console.WriteLine("Autobid added");
                     }
                     else
                     {
-
-                        Console.WriteLine(" problem : " + document.RootElement.GetProperty("problem"));
+                        Console.WriteLine("Autobid problem accured");
+                        //Console.WriteLine(" problem : " + document.RootElement.GetProperty("problem"));
                     }
                 }
             }

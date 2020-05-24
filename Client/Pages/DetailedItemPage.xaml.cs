@@ -148,8 +148,8 @@ namespace Client.Pages
         private void placeAutoBidButton_Click(object sender, RoutedEventArgs e)
         {
             int bid = int.Parse(itemAutoBid.Text);
-            bool bidOk = Int32.TryParse(itemBid.Text, out bid);
-            if (User.Instance.getToken() != null && itemBid.Text != "" && bidOk)
+            bool bidOk = Int32.TryParse(itemAutoBid.Text, out bid);
+            if (User.Instance.getToken() != null && itemAutoBid.Text != "" && bidOk)
             {
                 if (itemx.Price < bid)
                 {
@@ -168,7 +168,7 @@ namespace Client.Pages
                     Console.WriteLine(" need to log in");
                     this.NavigationService.Navigate(new LoginPage());
                 }
-                if (itemBid.Text == "" && !bidOk)
+                if (itemAutoBid.Text == "" && !bidOk)
                 {
                     Console.WriteLine("make a valid auto bid");
                 }
@@ -196,10 +196,6 @@ namespace Client.Pages
             {
                 helper.MakeBuy(User.Instance.getToken(), itemx.Id);
 
-                itemSold.Text = "SOLD";
-                setItemData();
-                disableItemActions();
-                itemx.SoldTo = User.Instance.getName();
             }
             else
             {
