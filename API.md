@@ -58,6 +58,17 @@ Allows to make a bid.
 	* `price` (in case of successful upload): an integer containing the new price.
 	* `problem` (in case of unsuccessful upload): a string containing the problem for debug purposes.
 
+### Buy
+Allows to buy an item that has a quick buy price (only if the latest bid is lower than 0,8 times the quick buy price).
+* Request type: `POST`
+* Endpoint: `/buy`
+* Parameters:
+	* `token`: a string containing the session token of the user.
+	* `item_id`: a number containing the id of the item.
+* Returns:
+	* `success`: a boolean containing if the upload was successful.
+	* `problem` (in case of unsuccessful upload): a string containing the problem for debug purposes.
+
 ### Category list
 Returns a list of available categories.
 * Request type: `GET`

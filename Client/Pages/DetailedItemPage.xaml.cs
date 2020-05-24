@@ -28,17 +28,33 @@ namespace Client.Pages
             itemx = item;
             InitializeComponent();
 
-            Console.WriteLine("megkaptam" + item.Seller);
+            if (item.SoldTo != "")
+            {
+                setItemData();
+            }
+            else
+            {
+                itemSold.Text = "SOLD";
+                setItemData();
+                disableItemActions();
 
-            itemTitle.Text = item.Name + "("+item.Category+")";
-            itemImage.Source = item.Image;
-            itemPrice.Text = "Price: " + item.Price.ToString();
-            itemDescription.Text = "Description: \n" + item.Description;
-            itemSeller.Text = "Seller: " + item.Seller;
-            itemEndDate.Text = "End date: " + item.EndDate;
-            minBidTextBlock.Text = "Minimum bid:" + item.MinBid;
+            }
 
-            if(item.New == true)
+            
+
+        }
+
+        private void setItemData()
+        {
+            itemTitle.Text = itemx.Name + "(" + itemx.Category + ")";
+            itemImage.Source = itemx.Image;
+            itemPrice.Text = "Price: " + itemx.Price.ToString();
+            itemDescription.Text = "Description: \n" + itemx.Description;
+            itemSeller.Text = "Seller: " + itemx.Seller;
+            itemEndDate.Text = "End date: " + itemx.EndDate;
+            minBidTextBlock.Text = "Minimum bid:" + itemx.MinBid;
+
+            if (itemx.New == true)
             {
                 itemCondition.Text = "condition: New";
             }
@@ -48,9 +64,9 @@ namespace Client.Pages
             }
 
 
-            if (item.QuickBuy == true)
+            if (itemx.QuickBuy == true)
             {
-                itemPricebuy.Text = "Price (for buy now): " + item.PriceBuy.ToString();
+                itemPricebuy.Text = "Price (for buy now): " + itemx.PriceBuy.ToString();
                 buyNowButton.IsEnabled = true;
             }
             else
@@ -59,12 +75,25 @@ namespace Client.Pages
             }
 
             int e = -1;
-            if (item.Price == e)
+            if (itemx.Price == e)
             {
-                itemPrice.Text = "Price: " + (item.Price+1).ToString();
+                itemPrice.Text = "Price: " + (itemx.Price + 1).ToString();
             }
-
         }
+        private void disableItemActions()
+        {
+            addFavorite.Visibility = Visibility.Hidden;
+            placeBid.Visibility = Visibility.Hidden;
+            minBidTextBlock.Visibility = Visibility.Hidden;
+            placeBidButton.Visibility = Visibility.Hidden;
+            autobid.Visibility = Visibility.Hidden;
+            itemAutoBid.Visibility = Visibility.Hidden;
+            placeAutoBidButton.Visibility = Visibility.Hidden;
+            removeAutoBidButton.Visibility = Visibility.Hidden;
+            buyNowButton.Visibility = Visibility.Hidden;
+            itemBid.Visibility = Visibility.Hidden;
+        }
+
         private void backButton_Click(object sender, RoutedEventArgs e)
         {
             this.NavigationService.GoBack();
@@ -93,6 +122,7 @@ namespace Client.Pages
                 if (itemx.Price < bid)
                 {
                     helper.MakeBid(User.Instance.getToken(), itemx.Id, bid);
+                    itemPrice.Text = "Price: " + itemx.Price.ToString();
                 }
                 else
                 {

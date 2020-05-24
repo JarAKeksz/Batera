@@ -213,6 +213,49 @@ namespace Server
             }
         }
 
+        internal static byte[] buyResponse(string token, int itemId)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
+                {
+                    writer.WriteStartObject();
+
+                    byte b = DataBase.buyItem(token, itemId);
+
+                    switch (b)
+                    {
+                        case 0:
+                            writer.WriteBoolean("success", true);
+                            break;
+                        case 1:
+                            writer.WriteBoolean("success", false);
+                            writer.WriteString("problem", "No quick buy for this item");
+                            break;
+                        case 2:
+                            writer.WriteBoolean("success", false);
+                            writer.WriteString("problem", "Item sale period has ended");
+                            break;
+                        case 3:
+                            throw new Exception("Database error");
+                            break;
+                        case 4:
+                            writer.WriteBoolean("success", false);
+                            writer.WriteString("problem", "No item with that ID");
+                            break;
+                        default:
+                            writer.WriteBoolean("success", false);
+                            writer.WriteString("problem", "Unknown error");
+                            break;
+                    }
+
+                    writer.WriteEndObject();
+                }
+
+                return stream.ToArray();
+            }
+        }
+
         public static byte[] autobidSubscribeResponse(string token, int itemId, int maxPrice)
         {
             bool b = DataBase.setAutoBid(token, itemId, maxPrice);

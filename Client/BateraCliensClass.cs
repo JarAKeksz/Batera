@@ -236,7 +236,10 @@ namespace Client
                     string description = element.GetProperty("description").GetString();
                     string end_date = element.GetProperty("end_date").GetString();
                     string seller = element.GetProperty("seller").GetString();
-                    result = (new DetailedItem(id2, name, price, priceBuy, category, image,description,end_date,seller,minBid,quickBuy,New));
+
+                    string sold_to = element.GetProperty("sold_to").GetString();
+
+                    result = (new DetailedItem(id2, name, price, priceBuy, category, image,description,end_date,seller,minBid,quickBuy,New,sold_to));
                     
                 }
             }
@@ -391,9 +394,11 @@ namespace Client
                     content = new StringContent(Encoding.UTF8.GetString(stream.ToArray()), Encoding.UTF8, "application/json");
 
                 }
+
                 var result = await client.PostAsync("/bid", content);
                 string resultContent = await result.Content.ReadAsStringAsync();
 
+                Console.WriteLine(resultContent );
 
                 using (JsonDocument document = JsonDocument.Parse(resultContent))
                 {
