@@ -233,80 +233,6 @@ namespace Server
             return 0; // == minden rendben
         }
 
-        public static User modifyUser(User user, Dictionary<string, string> changes)
-        {
-            try
-            {
-                if (changes != null)
-                {
-                    string query = "UPDATE Users SET ";
-                    foreach (string key in changes.Keys)
-                    {
-                        if (key == "Name" || key == "UserName" || key == "Email")
-                        {
-                            query += key + " = [@" + key + "]";
-                        }
-                        else if (key == "Password")
-                        {
-                            query += "PasswordHash = CONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', @Password), 2)";
-                        }
-                        else
-                        {
-                            return null;
-                        }
-
-                        if (key != changes.Last().Key)
-                        {
-                            query += ", ";
-                        }
-                    }
-                    query += " WHERE Id = @id";
-
-                    using (SqlCommand update = new SqlCommand(query, connection))
-                    {
-                        if (changes != null)
-                        {
-                            foreach (KeyValuePair<string, string> pair in changes)
-                            {
-                                if (pair.Key == "Password")
-                                {
-                                    update.Parameters.Add("@password", SqlDbType.VarChar).Value = pair.Value;
-                                }
-                                else
-                                {
-                                    string tmp = "@" + pair.Key;
-                                    update.Parameters.Add(new SqlParameter(tmp, pair.Value));
-                                }
-
-                                switch (pair.Key)
-                                {
-                                    case "Name":
-                                        user.name = pair.Value;
-                                        break;
-                                    case "UserName":
-                                        user.userName = pair.Value;
-                                        break;
-                                    case "Email":
-                                        user.email = pair.Value;
-                                        break;
-                                }
-                            }
-                        }
-
-                        update.Parameters.Add(new SqlParameter("@id", user.id));
-
-                        Console.WriteLine("Rows affected: " + update.ExecuteNonQuery());
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-
-            return user;
-        }
-
         public static List<User> getUsers(Dictionary<string, string> searchTerms = null)
         {
             List<User> ret = new List<User>();
@@ -364,6 +290,7 @@ namespace Server
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                return null;
             }
 
             return ret;
@@ -376,14 +303,17 @@ namespace Server
             try
             {
                 string query = "SELECT i.Id, i.Name, c.Name, ISNULL(i.Price,-1), ISNULL(MAX(b.Value),i.BidStart), i.Image " +
-                    "FROM Items AS i JOIN Categories AS c ON i.CategoryId = c.Id LEFT JOIN Bids AS b ON i.Id = b.ItemId";
+                    "FROM Items AS i JOIN Categories AS c ON i.CategoryId = c.Id LEFT JOIN Bids AS b ON i.Id = b.ItemId WHERE Active = 1";
                 bool eMinBid = false;
                 bool eMaxBid = false;
                 if (searchTerms != null)
                 {
-                    query += " WHERE ";
                     foreach (string key in searchTerms.Keys)
                     {
+                        if (key != "MinBid" && key != "MaxBid")
+                        {
+                            query += " AND ";
+                        }
                         switch (key)
                         {
                             case "Name":
@@ -399,11 +329,6 @@ namespace Server
                             case "BuyWithoutBid":
                                 query += "i." + key + " = @" + key;
                                 break;
-
-                            /*
-                            case "CategoryId":
-                                query += "i.CategoryId IN(@CategoryId)";
-                                break;*/
 
                             case "MinEndDate":
                                 query += "i.EndDate >= '@" + key + "'";
@@ -428,28 +353,20 @@ namespace Server
                             default:
                                 return null;
                         }
-                        if (key != searchTerms.Last().Key)
-                        {
-                            query += " AND ";
-                        }
                     }
                 }
                 query += " GROUP BY i.Id, i.Name, c.Name, i.Price, i.BidStart, i.Image, i.Active";
                 if (eMinBid && eMaxBid)
                 {
-                    query += " HAVING ISNULL(MAX(b.Value),i.BidStart) >= @MinBid AND ISNULL(MAX(b.Value),i.BidStart) <= @MaxBid AND i.Active = 1";
+                    query += " HAVING ISNULL(MAX(b.Value),i.BidStart) >= @MinBid AND ISNULL(MAX(b.Value),i.BidStart) <= @MaxBid";
                 }
                 else if (eMinBid)
                 {
-                    query += " HAVING ISNULL(MAX(b.Value),i.BidStart) >= @MinBid AND i.Active = 1";
+                    query += " HAVING ISNULL(MAX(b.Value),i.BidStart) >= @MinBid";
                 }
                 else if (eMaxBid)
                 {
-                    query += " HAVING ISNULL(MAX(b.Value),i.BidStart) <= @MaxBid AND i.Active = 1";
-                }
-                else
-                {
-                    query += " HAVING i.Active = 1";
+                    query += " HAVING ISNULL(MAX(b.Value),i.BidStart) <= @MaxBid";
                 }
 
                 using (SqlCommand command = new SqlCommand(query, connection))
@@ -481,6 +398,7 @@ namespace Server
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                return null;
             }
 
             return ret;
@@ -568,6 +486,7 @@ namespace Server
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                return null;
             }
 
             return ret;
@@ -617,6 +536,7 @@ namespace Server
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                return null;
             }
 
             return ret;
@@ -654,6 +574,7 @@ namespace Server
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                return null;
             }
 
             return ret;
@@ -751,6 +672,7 @@ namespace Server
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                return null;
             }
 
             return ret;
@@ -792,6 +714,10 @@ namespace Server
                     "BEGIN TRANSACTION " +
                     "DECLARE @id INT " +
                     "SELECT @id = Id FROM Users WHERE Token = @token " +
+                    "DECLARE @sellerId INT " +
+                    "SELECT @sellerId = Seller FROM Items WHERE Id = @itemId " +
+                    "IF @id != @sellerId " +
+                    "BEGIN " +
                     "MERGE Bids AS b " +
                     "USING(VALUES(@itemId, @id, @value)) AS s(ItemId, UserId, Value) " +
                     "ON b.ItemId = s.ItemId AND b.UserId = s.UserId AND b.Value = s.Value " +
@@ -818,6 +744,7 @@ namespace Server
                     "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
                     "SELECT UserId, ItemId, GETDATE(), '0' FROM Subscriptions " +
                     "WHERE ItemId = @itemId AND UserId != @id " +
+                    "END " +
                     "COMMIT TRANSACTION";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
@@ -844,6 +771,10 @@ namespace Server
                     "BEGIN TRANSACTION " +
                     "DECLARE @id INT " +
                     "SELECT @id = Id FROM Users WHERE Token = @token " +
+                    "DECLARE @sellerId INT " +
+                    "SELECT @sellerId = Seller FROM Items WHERE Id = @itemId " +
+                    "IF @id != @sellerId " +
+                    "BEGIN " +
                     "MERGE AutoBids AS a " +
                     "USING(VALUES(@itemId, @id, @limit)) AS s(ItemId, UserId, Limit) " +
                     "ON a.itemId = s.ItemId AND a.UserId = s.UserId AND a.Limit = s.Limit " +
@@ -856,6 +787,7 @@ namespace Server
                     "WHEN NOT MATCHED THEN " +
                     "INSERT(ItemId, UserId) " +
                     "VALUES(@itemId, @id); " +
+                    "END " +
                     "COMMIT TRANSACTION";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
@@ -883,7 +815,6 @@ namespace Server
                     "DECLARE @id INT " +
                     "SELECT @id = Id FROM Users WHERE Token = @token " +
                     "DELETE AutoBids WHERE ItemId = @itemId AND UserId = @id " +
-                    "DELETE Subscriptions WHERE ItemId = @itemId AND UserId = @id " +
                     "COMMIT TRANSACTION";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
@@ -967,6 +898,7 @@ namespace Server
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                return null;
             }
 
             return ret;
@@ -1132,14 +1064,16 @@ namespace Server
                     "BEGIN TRANSACTION " +
                     "DECLARE @id INT " +
                     "SELECT @id = Id FROM Users WHERE Token = @token " +
+                    "DECLARE @sellerId INT " +
+                    "SELECT @sellerId = Seller FROM Items WHERE Id = @itemId " +
+                    "IF @id != @sellerId " +
+                    "BEGIN " +
                     "MERGE Sales AS sa " +
                     "USING(VALUES(@itemId, @id)) AS s(ItemId, UserId) " +
                     "ON sa.ItemId = s.ItemId AND sa.UserId = s.UserId " +
                     "WHEN NOT MATCHED THEN " +
                     "INSERT(ItemId, UserId) " +
                     "VALUES(@itemId, @id); " +
-                    "DECLARE @sellerId INT " +
-                    "SELECT @sellerId = Seller FROM Items WHERE Id = @itemId " +
                     "UPDATE Items SET Active = 0 WHERE Id = @itemId " +
                     "INSERT INTO Notifications(UserId, ItemId, TimeStamp, TextType) " +
                     "SELECT UserId, ItemId, GETDATE(), '1' FROM Subscriptions " +
@@ -1149,6 +1083,7 @@ namespace Server
                     "INSERT INTO Notifications(UserId, ItemId, TimeStamp, TextType) " +
                     "VALUES(@sellerId, @itemId, GETDATE(), '4') " +
                     "DELETE Subscriptions WHERE ItemId = @itemId " +
+                    "END " +
                     "COMMIT TRANSACTION";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
@@ -1168,7 +1103,7 @@ namespace Server
 
         public static int tokenToId(string token)
         {
-            int id = -1;
+            int id;
             try
             {
                 string query = "SELECT Id FROM Users WHERE Token = @token";
@@ -1180,6 +1115,10 @@ namespace Server
                     if (reader.Read())
                     {
                         id = reader.GetInt32(0);
+                    }
+                    else
+                    {
+                        return -1;
                     }
                     reader.Close();
                 }
