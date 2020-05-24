@@ -177,10 +177,9 @@ namespace Client.Pages
 
         private void removeAutoBidButton_Click(object sender, RoutedEventArgs e)
         {
-            int bid = int.Parse(itemAutoBid.Text);
             if (User.Instance.getToken() != null)
             {
-                helper.MakeAutoBid(User.Instance.getToken(), itemx.Id, bid, true);
+                Console.WriteLine("autobid removed");
             }
             else
             {

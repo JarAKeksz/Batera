@@ -497,8 +497,8 @@ namespace Client
                     }
                     else
                     {
-                        Console.WriteLine("Autobid problem accured");
-                        //Console.WriteLine(" problem : " + document.RootElement.GetProperty("problem"));
+                        //Console.WriteLine("Autobid problem accured");
+                        Console.WriteLine(" problem : " + document.RootElement.GetProperty("problem"));
                     }
                 }
             }
