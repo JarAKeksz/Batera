@@ -794,13 +794,13 @@ namespace Server
                     "SELECT @id = Id FROM Users WHERE Token = @token " +
                     "MERGE Bids AS b " +
                     "USING(VALUES(@itemId, @id, @value)) AS s(ItemId, UserId, Value) " +
-                    "ON b.itemId = s.itemId AND b.UserId = s.UserId AND b.Value = s.Value " +
+                    "ON b.ItemId = s.ItemId AND b.UserId = s.UserId AND b.Value = s.Value " +
                     "WHEN NOT MATCHED THEN " +
                     "INSERT(ItemId, UserId, Value) " +
                     "VALUES(@itemId, @id, @value); " +
                     "MERGE Subscriptions AS sub " +
                     "USING(VALUES(@itemId, @id)) AS s(ItemId, UserId) " +
-                    "ON sub.itemId = s.itemId AND sub.UserId = s.UserId " +
+                    "ON sub.ItemId = s.ItemId AND sub.UserId = s.UserId " +
                     "WHEN NOT MATCHED THEN " +
                     "INSERT(ItemId, UserId) " +
                     "VALUES(@itemId, @id); " +
@@ -846,13 +846,13 @@ namespace Server
                     "SELECT @id = Id FROM Users WHERE Token = @token " +
                     "MERGE AutoBids AS a " +
                     "USING(VALUES(@itemId, @id, @limit)) AS s(ItemId, UserId, Limit) " +
-                    "ON a.itemId = s.itemId AND a.UserId = s.UserId AND a.Value = s.Value " +
+                    "ON a.itemId = s.ItemId AND a.UserId = s.UserId AND a.Value = s.Value " +
                     "WHEN NOT MATCHED THEN " +
                     "INSERT(ItemId, UserId, Limit) " +
                     "VALUES(@itemId, @id, @limit); " +
                     "MERGE Subscriptions AS sub " +
                     "USING(VALUES(@itemId, @id)) AS s(ItemId, UserId) " +
-                    "ON sub.itemId = s.itemId AND sub.UserId = s.UserId " +
+                    "ON sub.itemId = s.ItemId AND sub.UserId = s.UserId " +
                     "WHEN NOT MATCHED THEN " +
                     "INSERT(ItemId, UserId) " +
                     "VALUES(@itemId, @id); " +
@@ -1094,7 +1094,6 @@ namespace Server
             {
                 string thresholdCheckQuery = "SELECT TOP (1) i.EndDate, i.Price, ISNULL(b.Value,i.BidStart)+i.BidIncrement, i.BuyWithoutBid FROM Items AS i " +
                     "LEFT JOIN Bids AS b ON b.ItemId = i.Id WHERE i.Id = @itemId AND i.Active = 1 ORDER BY ISNULL(b.Value,i.BidStart) DESC";
-                //Allows to buy an item that has a quick buy price(only if the latest bid is lower than 0,8 times the quick buy price).
                 using (SqlCommand command = new SqlCommand(thresholdCheckQuery, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@itemId", itemId));
@@ -1107,7 +1106,7 @@ namespace Server
                     if (reader.Read())
                     {
                         tmpDate = reader.GetDateTime(0);
-                        price = (int)reader.GetDecimal(1);
+                        price = reader.GetInt32(1);
                         topBid = (int)reader.GetDecimal(2);
                         buyWithoutBid = (bool)reader[3];
                     }
@@ -1118,11 +1117,11 @@ namespace Server
                     reader.Close();
                     if (topBid >= price * 0.8)
                     {
-                        return 3; // == az ár nem éri el a küszöböt
+                        return 3; // == az ár nem éri el a szükséges értéket
                     }
                     if (tmpDate <= DateTime.Now)
                     {
-                        return 2; // == a termékre már nem érkezhet licit
+                        return 2; // == a terméket már nem lehet megvenni
                     }
                     if (!buyWithoutBid)
                     {

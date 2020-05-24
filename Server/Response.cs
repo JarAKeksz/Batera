@@ -237,11 +237,15 @@ namespace Server
                             writer.WriteString("problem", "Item sale period has ended");
                             break;
                         case 3:
-                            throw new Exception("Database error");
+                            writer.WriteBoolean("success", false);
+                            writer.WriteString("problem", "The price is lower than 80% of the top bid");
                             break;
                         case 4:
                             writer.WriteBoolean("success", false);
                             writer.WriteString("problem", "No item with that ID");
+                            break;
+                        case 5:
+                            throw new Exception("Database error");
                             break;
                         default:
                             writer.WriteBoolean("success", false);
