@@ -290,6 +290,7 @@ namespace Server
             {
                 using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
                 {
+                    writer.WriteStartObject();
 
                     byte b = DataBase.addBid(token, itemId, maxPrice);
 
@@ -318,6 +319,8 @@ namespace Server
                             writer.WriteString("problem", "Unknown error");
                             break;
                     }
+
+                    writer.WriteEndObject();
                 }
 
                 return stream.ToArray();
