@@ -143,6 +143,17 @@ Toggles the favorite status of an item
 * Returns:
 	* `is_favorite`: a boolean containing if the item is now a favorite.
 
+### Set autobid
+Allows to set an autobid with a limit.
+* Request type: `POST`
+* Endpoint: `/autobid`
+* Parameters:
+	* `token`: a string containing the session token of the user.
+	* `item_id`: a number containing the id of the item.
+	* `limit: a number containing the limit for the autobid.
+* Returns:
+	* `success`: a boolean containing if setting was successful.
+
 ### Notifications
 Returns a list of items tagged as favorites by the user.
 * Request type: `GET`

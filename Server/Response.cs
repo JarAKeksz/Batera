@@ -299,7 +299,7 @@ namespace Server
                     }
                     else
                     {
-                        writer.WriteBoolean("success", true);
+                        writer.WriteBoolean("success", false);
                     }
                     writer.WriteEndObject();
                 }
