@@ -173,6 +173,16 @@ namespace Server
                         }
                     }
 
+                case "logout":
+                    using (var reader = new StreamReader(request.InputStream))
+                    {
+                        string s = reader.ReadToEnd();
+                        using (JsonDocument document = JsonDocument.Parse(s))
+                        {
+                            return Response.logoutResponse(document.RootElement.GetProperty("token").GetString());
+                        }
+                    }
+
                 case "sign_up":
                     using (var reader = new StreamReader(request.InputStream))
                     {

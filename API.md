@@ -88,6 +88,15 @@ Is used to get a session token for a session of a registered user.
 	* `token` (in case of success): a string containing the session token in case of a successful login
 	* `problem` (in case of failed attempt): a string containing the problem for debug purposes
 
+### Logout
+Is used to log out of a session. On success, the token cant be used anymore!
+* Request type: `POST`
+* Endpoint: `/logout`
+* Parameters:
+	* `token`: a string containing the session token of the user.
+* Returns:
+	* `success`: a boolean containing if the login was successful
+
 ### Sign up
 Is used to get a session token for a session of a registered user.
 * Request type: `POST`

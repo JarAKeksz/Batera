@@ -182,6 +182,30 @@ namespace Server
             }
         }
 
+        internal static byte[] logoutResponse(string token)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
+                {
+                    writer.WriteStartObject();
+
+                    if (DataBase.logOut(token))
+                    {
+                        writer.WriteBoolean("success", true);
+                    }
+                    else
+                    {
+                        throw new Exception("Login error");
+                    }
+
+                    writer.WriteEndObject();
+                }
+
+                return stream.ToArray();
+            }
+        }
+
         public static byte[] signUpResponse(string email, string password, string userName, string name)
         {
             byte b = DataBase.signUp(userName, name, email, password);
