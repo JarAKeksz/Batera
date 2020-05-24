@@ -792,8 +792,8 @@ namespace Server
                     "BEGIN TRANSACTION " +
                     "DECLARE @id INT " +
                     "SELECT @id = Id FROM Users WHERE Token = @token " +
-                    "INSERT INTO Bids(ItemId, UserId, Value) VALUES(@itemId, @id, @value) " +
-                    "INSERT INTO Subscriptions (ItemId, UserId) VALUES(@itemId, @id) " +
+                    "INSERT IGNORE INTO Bids(ItemId, UserId, Value) VALUES(@itemId, @id, @value) " +
+                    "INSERT IGNORE INTO Subscriptions (ItemId, UserId) VALUES(@itemId, @id) " +
                     "DECLARE @bidJump INT " +
                     "SELECT @bidJump = BidIncrement FROM Items WHERE Id = @itemId " +
                     "INSERT INTO Bids(ItemId, UserId, Value) " +
