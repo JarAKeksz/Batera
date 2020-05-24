@@ -799,9 +799,11 @@ namespace Server
                     "INSERT INTO Bids(ItemId, UserId, Value) " +
                     "SELECT a.UserId, a.ItemId, MAX(b.Value)+@bidJump FROM AutoBids AS a " +
                     "JOIN Bids AS b ON a.ItemId = b.ItemId " +
-                    "WHERE a.ItemId = @itemId AND a.Limit > MAX(b.Value)+@bidJump " +
+                    "WHERE a.ItemId = @itemId " +
+                    "GROUP BY a.UserId, a.ItemId, a.Limit " +
+                    "HAVING a.Limit > MAX(b.Value)+@bidJump " +
                     "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
-                    "SELECT UserId, ItemId, GETDATE(), '5' FROM Autobid " +
+                    "SELECT UserId, ItemId, GETDATE(), '5' FROM Autobids " +
                     "WHERE ItemId = @itemId AND UserId != @id " +
                     "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
                     "SELECT UserId, ItemId, GETDATE(), '0' FROM Subscriptions " +
