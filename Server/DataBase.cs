@@ -705,7 +705,7 @@ namespace Server
                     {
                         return 2; // == a termékre már nem érkezhet licit
                     }
-                    if (tmp > value)
+                    if (tmp >= value)
                     {
                         return 1; // == a megadott licit nem éri el a küszöböt
                     }
@@ -724,6 +724,7 @@ namespace Server
                     "WHEN NOT MATCHED THEN " +
                     "INSERT(ItemId, UserId, Value) " +
                     "VALUES(@itemId, @id, @value); " +
+
                     "MERGE Subscriptions AS sub " +
                     "USING(VALUES(@itemId, @id)) AS s(ItemId, UserId) " +
                     "ON sub.ItemId = s.ItemId AND sub.UserId = s.UserId " +
@@ -732,12 +733,11 @@ namespace Server
                     "VALUES(@itemId, @id); " +
                     "DECLARE @bidJump INT " +
                     "SELECT @bidJump = BidIncrement FROM Items WHERE Id = @itemId " +
+
                     "INSERT INTO Bids(UserId, ItemId, Value) " +
-                    "SELECT a.UserId, a.ItemId, MAX(b.Value)+@bidJump FROM AutoBids AS a " +
-                    "JOIN Bids AS b ON a.ItemId = b.ItemId " +
-                    "WHERE a.ItemId = @itemId AND a.UserId != @id " +
-                    "GROUP BY a.UserId, a.ItemId, a.Limit " +
-                    "HAVING a.Limit > MAX(b.Value)+@bidJump*2 " +
+                    "SELECT UserId, ItemId, CEILING(@value+@bidJump) FROM AutoBids " +
+                    "WHERE ItemId = @itemId AND UserId != @id AND Limit >= CEILING(@value+@bidJump) " +
+
                     "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
                     "SELECT UserId, ItemId, GETDATE(), '5' FROM Autobids " +
                     "WHERE ItemId = @itemId AND UserId != @id " +
@@ -805,7 +805,9 @@ namespace Server
                     "BEGIN " +
                     "MERGE AutoBids AS a " +
                     "USING(VALUES(@itemId, @id, @limit)) AS s(ItemId, UserId, Limit) " +
-                    "ON a.itemId = s.ItemId AND a.UserId = s.UserId AND a.Limit = s.Limit " +
+                    "ON a.itemId = s.ItemId AND a.UserId = s.UserId " +
+                    "WHEN MATCHED THEN " +
+                    "UPDATE SET Limit = @limit " +
                     "WHEN NOT MATCHED THEN " +
                     "INSERT(ItemId, UserId, Limit) " +
                     "VALUES(@itemId, @id, @limit); " +

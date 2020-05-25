@@ -161,6 +161,17 @@ Allows to set an autobid with a limit.
 	* `success`: a boolean containing if setting was successful.
 	* `problem` (in case of unsuccessful upload): a string containing the problem for debug purposes.
 
+### Remove autobid
+Allows to set an autobid with a limit.
+* Request type: `POST`
+* Endpoint: `/autobid_remove`
+* Parameters:
+	* `token`: a string containing the session token of the user.
+	* `item_id`: a number containing the id of the item.
+* Returns:
+	* `success`: a boolean containing if setting was successful.
+
+
 ### Notifications
 Returns a list of items tagged as favorites by the user.
 * Request type: `GET`
