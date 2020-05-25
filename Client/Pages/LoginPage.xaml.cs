@@ -63,7 +63,9 @@ namespace Client.Pages
                         {
                             //LOGIN SUCCESS
                             string token = document.RootElement.GetProperty("token").GetString();
+                            string name = document.RootElement.GetProperty("username").GetString();
                             User.Instance.setToken(token);
+                            User.Instance.setName(name);
                             this.NavigationService.Navigate(new MainPage());
                         }
                         else

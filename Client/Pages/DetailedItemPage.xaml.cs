@@ -30,7 +30,15 @@ namespace Client.Pages
 
             Console.WriteLine("*******" + item.SoldTo + "******");
 
-            if (item.SoldTo == "")
+            Console.WriteLine(item.Seller +" " + User.Instance.getName());
+            if (item.Seller == User.Instance.getName())
+            {
+                Console.WriteLine();
+
+                setItemData();
+                disableItemActions();
+
+            }else if (item.SoldTo == "")
             {
                 setItemData();
             }
@@ -42,11 +50,7 @@ namespace Client.Pages
 
             }
 
-            if(item.Seller == User.Instance.getName())
-            {
-                setItemData();
-                disableItemActions();
-            }
+            
 
 
 
@@ -126,7 +130,7 @@ namespace Client.Pages
 
             if (User.Instance.getToken() != null && itemBid.Text != "" && bidOk)
             {
-                if (itemx.Price > bid)
+                if (itemx.Price < bid)
                 {
                     helper.MakeBid(User.Instance.getToken(), itemx.Id, bid);
                     itemPrice.Text = "Price: " + itemx.Price.ToString();
@@ -157,7 +161,7 @@ namespace Client.Pages
             bool bidOk = Int32.TryParse(itemAutoBid.Text, out bid);
             if (User.Instance.getToken() != null && itemAutoBid.Text != "" && bidOk)
             {
-                if (itemx.Price > bid)
+                if (itemx.Price < bid)
                 {
                     helper.MakeAutoBid(User.Instance.getToken(), itemx.Id, bid, true);
                 }
