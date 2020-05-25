@@ -64,6 +64,7 @@ namespace Client.Pages
             itemSeller.Text = "Seller: " + itemx.Seller;
             itemEndDate.Text = "End date: " + itemx.EndDate;
             minBidTextBlock.Text = "Minimum bid:" + itemx.MinBid;
+            itemPrice.Text = "Current price: " + itemx.Current;
 
             if (itemx.New == true)
             {
@@ -83,6 +84,7 @@ namespace Client.Pages
             else
             {
                 buyNowButton.IsEnabled = false;
+                itemPricebuy.Text = "";
             }
 
             int e = -1;
@@ -133,7 +135,9 @@ namespace Client.Pages
                 if (itemx.Price < bid)
                 {
                     helper.MakeBid(User.Instance.getToken(), itemx.Id, bid);
-                    itemPrice.Text = "Price: " + itemx.Price.ToString();
+                    //itemPrice.Text = "Price: " + itemx.Price.ToString();
+                    
+                    setItemData();
                 }
                 else
                 {

@@ -16,30 +16,7 @@ namespace Client
     public class BateraCliensClass
     {
         static readonly HttpClient client = new HttpClient();
-        //public async void Main()
-        //{
-        //    // Call asynchronous network methods in a try/catch block to handle exceptions.
-        //    try
-        //    {
-        //        HttpResponseMessage response =  client.GetAsync("http://localhost:8000/search?term=a").Result;
-        //        response.EnsureSuccessStatusCode();
-        //        string responseBody =  response.Content.ReadAsStringAsync().Result;
-        //        // Above three lines can be replaced with new helper method below
-        //        // string responseBody = await client.GetStringAsync(uri);
-        //        Console.WriteLine(responseBody);
-
-
-
-        //    }
-        //    catch (HttpRequestException e)
-        //    {
-        //        Console.WriteLine("\nException Caught!");
-        //        Console.WriteLine("Message :{0} ", e.Message);
-        //    }
-        //}
-
-
-        //This class returns Json from server at url
+        
         private string JsonBody(string url)
         {
             string jsonString = null;
@@ -407,6 +384,7 @@ namespace Client
                     if (success)
                     {
                         Console.WriteLine("price: " + document.RootElement.GetProperty("price"));
+
                     }
                     else
                     {
