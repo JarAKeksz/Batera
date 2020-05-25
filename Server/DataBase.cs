@@ -714,36 +714,48 @@ namespace Server
                     "BEGIN TRANSACTION " +
                     "DECLARE @id INT " +
                     "SELECT @id = Id FROM Users WHERE Token = @token " +
-                    "DECLARE @sellerId INT " +
-                    "SELECT @sellerId = Seller FROM Items WHERE Id = @itemId " +
+                    "DECLARE @sellerId INT, @bidJump FLOAT " +
+                    "SELECT @sellerId = Seller, @bidJump = BidIncrement FROM Items WHERE Id = @itemId " +
                     "IF @id != @sellerId " +
                     "BEGIN " +
                     "MERGE Bids AS b " +
-                    "USING(VALUES(@itemId, @id, @value)) AS s(ItemId, UserId, Value) " +
-                    "ON b.ItemId = s.ItemId AND b.UserId = s.UserId AND b.Value = s.Value " +
+                    "USING(VALUES(@itemId, @value)) AS s(ItemId, Value) " +
+                    "ON b.ItemId = s.ItemId AND b.Value = s.Value " +
                     "WHEN NOT MATCHED THEN " +
                     "INSERT(ItemId, UserId, Value) " +
                     "VALUES(@itemId, @id, @value); " +
-
                     "MERGE Subscriptions AS sub " +
                     "USING(VALUES(@itemId, @id)) AS s(ItemId, UserId) " +
                     "ON sub.ItemId = s.ItemId AND sub.UserId = s.UserId " +
                     "WHEN NOT MATCHED THEN " +
                     "INSERT(ItemId, UserId) " +
                     "VALUES(@itemId, @id); " +
-                    "DECLARE @bidJump INT " +
-                    "SELECT @bidJump = BidIncrement FROM Items WHERE Id = @itemId " +
-
+                    "DECLARE @maxLimit INT " +
+                    "SELECT @maxLimit = MAX(Limit) FROM AutoBids WHERE ItemId = @itemId " +
+                    "DECLARE @lastPlaceId INT, @maxBid INT " +
+                    "IF (SELECT COUNT(UserId) FROM AutoBids WHERE ItemId = @itemId) > 1 OR @id NOT IN (SELECT UserId FROM AutoBids WHERE ItemId = @itemId) " +
+                    "BEGIN " +
+                    "WHILE(SELECT MAX(Value) FROM Bids WHERE ItemId = @itemId) < @maxLimit " +
+                    "BEGIN " +
+                    "SELECT TOP(1) @lastPlaceId = a.UserId FROM AutoBids AS a LEFT JOIN Bids AS b ON a.UserId = b.UserId AND a.ItemId = b.ItemId WHERE a.ItemId = @itemId " +
+                    "GROUP BY a.UserId ORDER BY ISNULL(MAX(b.Value),0) " +
+                    "PRINT @lastPlaceId " +
+                    "SELECT @maxBid = MAX(Value) FROM Bids WHERE ItemId = @itemId " +
+                    "PRINT @maxBid " +
                     "INSERT INTO Bids(UserId, ItemId, Value) " +
-                    "SELECT UserId, ItemId, CEILING(@value+@bidJump) FROM AutoBids " +
-                    "WHERE ItemId = @itemId AND UserId != @id AND Limit >= CEILING(@value+@bidJump) " +
-
-                    "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
-                    "SELECT UserId, ItemId, GETDATE(), '5' FROM Autobids " +
-                    "WHERE ItemId = @itemId AND UserId != @id " +
-                    "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
+                    "SELECT UserId, ItemId, CEILING(@maxBid + @bidJump) FROM AutoBids " +
+                    "WHERE ItemId = @itemId AND Limit >= CEILING(@maxBid + @bidJump) AND UserId = @lastPlaceId " +
+                    "END " +
+                    "END " +
+                    "DECLARE @winner INT " +
+                    "SELECT TOP(1) @winner = a.UserId FROM AutoBids AS a JOIN Bids AS b ON a.UserId = b.UserId AND a.ItemId = b.ItemId WHERE a.ItemId = @itemId " +
+                    "GROUP BY a.UserId ORDER BY ISNULL(MAX(b.Value),0) DESC " +
+                    "INSERT INTO Notifications(UserId, ItemId, TimeStamp, TextType) " +
+                    "SELECT DISTINCT a.UserId, a.ItemId, GETDATE(), '5' FROM Autobids AS a " +
+                    "JOIN Bids AS b ON a.UserId = b.UserId AND a.ItemId = b.ItemId WHERE a.ItemId = @itemId AND a.UserId != @sellerId " +
+                    "INSERT INTO Notifications(UserId, ItemId, TimeStamp, TextType) " +
                     "SELECT UserId, ItemId, GETDATE(), '0' FROM Subscriptions " +
-                    "WHERE ItemId = @itemId AND UserId != @id " +
+                    "WHERE ItemId = @itemId AND UserId != @winner AND UserId != @sellerId " +
                     "END " +
                     "COMMIT TRANSACTION";
                 using (SqlCommand command = new SqlCommand(query, connection))
@@ -804,7 +816,7 @@ namespace Server
                     "IF @id != @sellerId " +
                     "BEGIN " +
                     "MERGE AutoBids AS a " +
-                    "USING(VALUES(@itemId, @id, @limit)) AS s(ItemId, UserId, Limit) " +
+                    "USING(VALUES(@itemId, @id)) AS s(ItemId, UserId) " +
                     "ON a.itemId = s.ItemId AND a.UserId = s.UserId " +
                     "WHEN MATCHED THEN " +
                     "UPDATE SET Limit = @limit " +
