@@ -732,12 +732,12 @@ namespace Server
                     "VALUES(@itemId, @id); " +
                     "DECLARE @bidJump INT " +
                     "SELECT @bidJump = BidIncrement FROM Items WHERE Id = @itemId " +
-                    "INSERT INTO Bids(ItemId, UserId, Value) " +
+                    "INSERT INTO Bids(UserId, ItemId, Value) " +
                     "SELECT a.UserId, a.ItemId, MAX(b.Value)+@bidJump FROM AutoBids AS a " +
                     "JOIN Bids AS b ON a.ItemId = b.ItemId " +
                     "WHERE a.ItemId = @itemId " +
                     "GROUP BY a.UserId, a.ItemId, a.Limit " +
-                    "HAVING a.Limit > MAX(b.Value)+@bidJump " +
+                    "HAVING a.Limit > MAX(b.Value)+@bidJump*2 " +
                     "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
                     "SELECT UserId, ItemId, GETDATE(), '5' FROM Autobids " +
                     "WHERE ItemId = @itemId AND UserId != @id " +
@@ -799,7 +799,7 @@ namespace Server
                     "BEGIN TRANSACTION " +
                     "DECLARE @id INT " +
                     "SELECT @id = Id FROM Users WHERE Token = @token " +
-                    "DECLARE @sellerId INT" +
+                    "DECLARE @sellerId INT " +
                     "SELECT @sellerId = Seller FROM Items WHERE Id = @itemId " +
                     "IF @id != @sellerId " +
                     "BEGIN " +
