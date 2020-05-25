@@ -42,6 +42,12 @@ namespace Client.Pages
 
             }
 
+            if(item.Seller == User.Instance.getName())
+            {
+                setItemData();
+                disableItemActions();
+            }
+
 
 
         }
@@ -120,7 +126,7 @@ namespace Client.Pages
 
             if (User.Instance.getToken() != null && itemBid.Text != "" && bidOk)
             {
-                if (itemx.Price < bid)
+                if (itemx.Price > bid)
                 {
                     helper.MakeBid(User.Instance.getToken(), itemx.Id, bid);
                     itemPrice.Text = "Price: " + itemx.Price.ToString();
@@ -138,7 +144,7 @@ namespace Client.Pages
                     Console.WriteLine(" need to log in");
                     this.NavigationService.Navigate(new LoginPage());
                 }
-                if (itemBid.Text == "" && !bidOk)
+                if (itemBid.Text == "" || !bidOk)
                 {
                     Console.WriteLine("make a valid bid");
                 }
@@ -151,7 +157,7 @@ namespace Client.Pages
             bool bidOk = Int32.TryParse(itemAutoBid.Text, out bid);
             if (User.Instance.getToken() != null && itemAutoBid.Text != "" && bidOk)
             {
-                if (itemx.Price < bid)
+                if (itemx.Price > bid)
                 {
                     helper.MakeAutoBid(User.Instance.getToken(), itemx.Id, bid, true);
                 }
@@ -168,7 +174,7 @@ namespace Client.Pages
                     Console.WriteLine(" need to log in");
                     this.NavigationService.Navigate(new LoginPage());
                 }
-                if (itemAutoBid.Text == "" && !bidOk)
+                if (itemAutoBid.Text == "" || !bidOk)
                 {
                     Console.WriteLine("make a valid auto bid");
                 }
