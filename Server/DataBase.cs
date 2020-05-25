@@ -735,6 +735,7 @@ namespace Server
                     "DECLARE @lastPlaceId INT, @maxBid INT " +
                     "IF (SELECT COUNT(UserId) FROM AutoBids WHERE ItemId = @itemId) > 1 OR @id NOT IN (SELECT UserId FROM AutoBids WHERE ItemId = @itemId) " +
                     "BEGIN " +
+
                     "WHILE(SELECT MAX(Value) FROM Bids WHERE ItemId = @itemId) < @maxLimit " +
                     "BEGIN " +
                     "SELECT TOP(1) @lastPlaceId = a.UserId FROM AutoBids AS a LEFT JOIN Bids AS b ON a.UserId = b.UserId AND a.ItemId = b.ItemId WHERE a.ItemId = @itemId " +
@@ -746,6 +747,7 @@ namespace Server
                     "SELECT UserId, ItemId, CEILING(@maxBid + @bidJump) FROM AutoBids " +
                     "WHERE ItemId = @itemId AND Limit >= CEILING(@maxBid + @bidJump) AND UserId = @lastPlaceId " +
                     "END " +
+
                     "END " +
                     "DECLARE @winner INT " +
                     "SELECT TOP(1) @winner = a.UserId FROM AutoBids AS a JOIN Bids AS b ON a.UserId = b.UserId AND a.ItemId = b.ItemId WHERE a.ItemId = @itemId " +
@@ -1173,6 +1175,35 @@ namespace Server
             }
             return id;
         }
+
+        public static int priceRefresh(int itemId)
+        {
+            int id;
+            try
+            {
+                string query = "SELECT MAX(Value) FROM Bids WHERE ItemId = @itemId";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@itemId", itemId));
+
+                    SqlDataReader reader = command.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        id = reader.GetInt32(0);
+                    }
+                    else
+                    {
+                        return -1;
+                    }
+                    reader.Close();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return -2;
+            }
+            return id;
+        }
     }
 }
-
