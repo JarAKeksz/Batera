@@ -465,7 +465,6 @@ namespace Client
                 var result = await client.PostAsync("/autobid", content);
                 string resultContent = await result.Content.ReadAsStringAsync();
 
-                Console.WriteLine("**************"+resultContent);
                 using (JsonDocument document = JsonDocument.Parse(resultContent))
                 {
                     bool success = document.RootElement.GetProperty("success").GetBoolean();
@@ -477,6 +476,46 @@ namespace Client
                     {
                         //Console.WriteLine("Autobid problem accured");
                         Console.WriteLine(" problem : " + document.RootElement.GetProperty("problem"));
+                    }
+                }
+            }
+        }
+
+        public async void RemoveAutoBid(string token, int item_id, bool subscribe)
+        {
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri("http://localhost:8000");
+
+                HttpContent content;
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    JsonWriterOptions JW_OPTS = new JsonWriterOptions { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+                    using (Utf8JsonWriter writer = new Utf8JsonWriter(stream, JW_OPTS))
+                    {
+                        writer.WriteStartObject();
+                        writer.WriteString("token", token);
+                        writer.WriteNumber("item_id", item_id);
+                        writer.WriteEndObject();
+                    }
+
+                    content = new StringContent(Encoding.UTF8.GetString(stream.ToArray()), Encoding.UTF8, "application/json");
+
+                }
+                var result = await client.PostAsync("/autobid_remove", content);
+                string resultContent = await result.Content.ReadAsStringAsync();
+
+                using (JsonDocument document = JsonDocument.Parse(resultContent))
+                {
+                    bool success = document.RootElement.GetProperty("success").GetBoolean();
+                    if (success)
+                    {
+                        Console.WriteLine("Autobid remioved");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Autobid remuve problem accured");
                     }
                 }
             }

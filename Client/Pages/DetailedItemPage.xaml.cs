@@ -194,6 +194,7 @@ namespace Client.Pages
             if (User.Instance.getToken() != null)
             {
                 Console.WriteLine("autobid removed");
+                helper.RemoveAutoBid(User.Instance.getToken(), itemx.Id, false);
             }
             else
             {
