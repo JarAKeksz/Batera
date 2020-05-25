@@ -299,16 +299,20 @@ namespace Server
 
                     switch (b)
                     {
-                        case 4:
+                        case 5:
                             throw new Exception("Database error");
                             break;
-                        case 3:
+                        case 4:
                             writer.WriteBoolean("success", false);
                             writer.WriteString("problem", "Item not found!");
                             break;
-                        case 2:
+                        case 3:
                             writer.WriteBoolean("success", false);
                             writer.WriteString("problem", "Bidding has ended!");
+                            break;
+                        case 2:
+                            writer.WriteBoolean("success", false);
+                            writer.WriteString("problem", "Autobid limit too high!");
                             break;
                         case 1:
                             writer.WriteBoolean("success", false);

@@ -52,6 +52,7 @@ namespace Server
                     }
                     else
                     {
+                        reader.Close();
                         ret = null;
                     }
                     reader.Close();
@@ -98,6 +99,7 @@ namespace Server
                     }
                     else
                     {
+                        reader.Close();
                         ret = null;
                     }
                     reader.Close();
@@ -456,6 +458,7 @@ namespace Server
                     }
                     else
                     {
+                        reader.Close();
                         return null;
                     }
 
@@ -698,6 +701,7 @@ namespace Server
                     }
                     else
                     {
+                        reader.Close();
                         return 3; // == nem található a termék
                     }
                     reader.Close();
@@ -730,39 +734,24 @@ namespace Server
                     "WHEN NOT MATCHED THEN " +
                     "INSERT(ItemId, UserId) " +
                     "VALUES(@itemId, @id); " +
-
                     "DECLARE @autobidRows INT " +
                     "SELECT @autobidRows = COUNT(UserId) FROM AutoBids WHERE ItemId = @itemId " +
                     "IF @autobidRows > 1 OR @autobidRows != 0 AND @id NOT IN (SELECT UserId FROM AutoBids WHERE ItemId = @itemId) " +
                     "BEGIN " +
-
                     "DECLARE @maxLimit INT, @maxLimitUser INT, @secondLimit INT = 0 " +
                     "SELECT TOP (1) @maxLimit = Limit, @maxLimitUser = UserId FROM AutoBids WHERE ItemId = @itemId ORDER BY Limit DESC " +
-                    "SELECT @secondLimit = MAX(Limit) FROM AutoBids WHERE ItemId = @itemId AND UserId != @maxLimitUser " +
-                    "IF @secondLimit == 0 " +
+                    "SELECT TOP (1) @secondLimit = Limit FROM AutoBids WHERE ItemId = @itemId AND UserId != @maxLimitUser ORDER BY Limit DESC " +
+                    "IF @secondLimit = 0 " +
                     "SELECT @secondLimit = MAX(Value) FROM Bids WHERE ItemId = @itemId " +
-                    "DECLARE @lastPlaceId INT, @maxBid INT " +
-
-
-                    "WHILE(SELECT MAX(Value) FROM Bids WHERE ItemId = @itemId) < @maxLimit " +
-                    "BEGIN " +
-                    "SELECT TOP(1) @lastPlaceId = a.UserId FROM AutoBids AS a LEFT JOIN Bids AS b ON a.UserId = b.UserId AND a.ItemId = b.ItemId WHERE a.ItemId = @itemId " +
-                    "GROUP BY a.UserId ORDER BY MAX(ISNULL(b.Value,0)) " +
-                    "PRINT @lastPlaceId " +
-                    "SELECT @maxBid = MAX(Value) FROM Bids WHERE ItemId = @itemId " +
-                    "PRINT @maxBid " +
+                    "DECLARE @lastPlaceId INT " +
+                    "SELECT TOP(1) @lastPlaceId = a.UserId FROM AutoBids AS a LEFT JOIN Bids AS b ON a.UserId = b.UserId AND a.ItemId = b.ItemId " +
+                    "WHERE a.ItemId = @itemId AND a.Limit >= @secondLimit GROUP BY a.UserId ORDER BY MAX(ISNULL(b.Value,0)) " +
                     "INSERT INTO Bids(UserId, ItemId, Value) " +
-                    "SELECT UserId, ItemId, CEILING(@maxBid + @bidJump) FROM AutoBids " +
-                    "WHERE ItemId = @itemId AND Limit >= CEILING(@maxBid + @bidJump) AND UserId = @lastPlaceId " +
-                    "IF @maxBid > @secondLimit " +
-                    "BREAK " +
-                    "END " +
-
-
+                    "VALUES (@lastPlaceId, @itemId, CEILING(@secondLimit + @bidJump)) " +
                     "END " +
                     "DECLARE @winner INT " +
-                    "SELECT TOP(1) @winner = a.UserId FROM AutoBids AS a JOIN Bids AS b ON a.UserId = b.UserId AND a.ItemId = b.ItemId WHERE a.ItemId = @itemId " +
-                    "GROUP BY a.UserId ORDER BY MAX(ISNULL(b.Value,0)) DESC " +
+                    "SELECT TOP(1) @winner = a.UserId FROM AutoBids AS a JOIN Bids AS b ON a.UserId = b.UserId AND a.ItemId = b.ItemId " +
+                    "WHERE a.ItemId = @itemId GROUP BY a.UserId ORDER BY ISNULL(MAX(b.Value),0) DESC " +
                     "INSERT INTO Notifications(UserId, ItemId, TimeStamp, TextType) " +
                     "SELECT DISTINCT a.UserId, a.ItemId, GETDATE(), '5' FROM Autobids AS a " +
                     "JOIN Bids AS b ON a.UserId = b.UserId AND a.ItemId = b.ItemId WHERE a.ItemId = @itemId AND a.UserId != @sellerId " +
@@ -792,30 +781,37 @@ namespace Server
         {
             try
             {
-                string thresholdCheckQuery = "SELECT TOP (1) i.EndDate, ISNULL(b.Value,i.BidStart)+i.BidIncrement FROM Items AS i " +
+                string thresholdCheckQuery = "SELECT TOP (1) i.EndDate, ISNULL(b.Value,i.BidStart), i.BidIncrement FROM Items AS i " +
                     "LEFT JOIN Bids AS b ON b.ItemId = i.Id WHERE i.Id = @itemId AND i.Active = 1 ORDER BY ISNULL(b.Value,i.BidStart) DESC";
                 using (SqlCommand command = new SqlCommand(thresholdCheckQuery, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@itemId", itemId));
 
                     SqlDataReader reader = command.ExecuteReader();
-                    int tmp;
+                    int start;
+                    decimal increment;
                     DateTime tmpDate;
                     if (reader.Read())
                     {
                         tmpDate = reader.GetDateTime(0);
-                        tmp = (int)reader.GetDecimal(1);
+                        start = reader.GetInt32(1);
+                        increment = Math.Ceiling(reader.GetDecimal(2));
                     }
                     else
                     {
-                        return 3; // == nem található a termék
+                        reader.Close();
+                        return 4; // == nem található a termék
                     }
                     reader.Close();
                     if (tmpDate <= DateTime.Now)
                     {
-                        return 2; // == a termékre már nem érkezhet licit
+                        return 3; // == a termékre már nem érkezhet licit
                     }
-                    if (tmp > limit)
+                    if (start + increment * 30 < limit)
+                    {
+                        return 2; // == a limit nagyobb, mint a licitlépcső 30-szorosa
+                    }
+                    if (start + increment > limit)
                     {
                         return 1; // == a limit nem éri el a licitküszöböt, nem lenne értelme
                     }
@@ -856,7 +852,7 @@ namespace Server
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return 4; // == oops
+                return 5; // == oops
             }
             return 0;
         }
@@ -1065,7 +1061,7 @@ namespace Server
                     "COMMIT TRANSACTION";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    Console.WriteLine("Erintett sorok: " + command.ExecuteNonQuery());
+                    Console.WriteLine("Lejart termekek ellenorizve, erintett sorok: " + command.ExecuteNonQuery());
                 }
             }
             catch (Exception e)
@@ -1100,6 +1096,7 @@ namespace Server
                     }
                     else
                     {
+                        reader.Close();
                         return 4; // == nincs ilyen termék
                     }
                     reader.Close();
@@ -1174,6 +1171,7 @@ namespace Server
                     }
                     else
                     {
+                        reader.Close();
                         return -1;
                     }
                     reader.Close();
@@ -1192,7 +1190,7 @@ namespace Server
             int price;
             try
             {
-                string query = "SELECT MAX(Value) FROM Bids WHERE ItemId = @itemId";
+                string query = "SELECT ISNULL(MAX(b.Value),i.BidStart) FROM Items AS i LEFT JOIN Bids AS b ON i.Id = b.ItemId GROUP BY i.BidStart";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@itemId", itemId));
@@ -1204,6 +1202,7 @@ namespace Server
                     }
                     else
                     {
+                        reader.Close();
                         return -1;
                     }
                     reader.Close();
