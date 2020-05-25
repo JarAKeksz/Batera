@@ -224,6 +224,9 @@ namespace Server
                         else
                         {
                             writer.WriteString("token", u.logInToken);
+                            writer.WriteString("username", u.userName);
+                            writer.WriteString("name", u.name);
+                            writer.WriteString("email", u.email);
                         }
                         writer.WriteEndObject();
                     }
@@ -292,7 +295,7 @@ namespace Server
                 {
                     writer.WriteStartObject();
 
-                    byte b = DataBase.addBid(token, itemId, maxPrice);
+                    byte b = DataBase.setAutoBid(token, itemId, maxPrice);
 
                     switch (b)
                     {
@@ -411,6 +414,9 @@ namespace Server
                     {
                         writer.WriteBoolean("success", true);
                         writer.WriteString("token", u.logInToken);
+                        writer.WriteString("username", u.userName);
+                        writer.WriteString("name", u.name);
+                        writer.WriteString("email", u.email);
                     }
                     writer.WriteEndObject();
                 }

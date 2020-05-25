@@ -86,6 +86,9 @@ Is used to get a session token for a session of a registered user.
 * Returns:
 	* `success`: a boolean containing if the login was successful
 	* `token` (in case of success): a string containing the session token in case of a successful login
+	* `username` (in case of success): the username of the user
+	* `name` (in case of success): the (real) name of the user
+	* `email` (in case of success): the email address of the user
 	* `problem` (in case of failed attempt): a string containing the problem for debug purposes
 
 ### Logout
@@ -108,6 +111,9 @@ Is used to get a session token for a session of a registered user.
 	* `name`: a string containing full name
 * Returns:
 	* `token` (in case of success): a string containing the session token in case of a successful login
+	* `username` (in case of success): the username of the user
+	* `name` (in case of success): the (real) name of the user
+	* `email` (in case of success): the email address of the user
 
 ### Upload item
 Is used to upload a new item to the marketplace
