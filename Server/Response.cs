@@ -316,6 +316,7 @@ namespace Server
                             break;
                         case 0:
                             writer.WriteBoolean("success", true);
+                            writer.WriteNumber("price", DataBase.priceRefresh(itemId));
                             break;
                         default:
                             writer.WriteBoolean("success", false);

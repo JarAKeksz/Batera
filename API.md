@@ -159,6 +159,7 @@ Allows to set an autobid with a limit.
 	* `limit: a number containing the limit for the autobid.
 * Returns:
 	* `success`: a boolean containing if setting was successful.
+	* `price` (in case of successful upload): an integer containing the new price.
 	* `problem` (in case of unsuccessful upload): a string containing the problem for debug purposes.
 
 ### Remove autobid

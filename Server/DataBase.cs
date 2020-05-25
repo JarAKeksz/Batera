@@ -730,28 +730,39 @@ namespace Server
                     "WHEN NOT MATCHED THEN " +
                     "INSERT(ItemId, UserId) " +
                     "VALUES(@itemId, @id); " +
-                    "DECLARE @maxLimit INT " +
-                    "SELECT @maxLimit = MAX(Limit) FROM AutoBids WHERE ItemId = @itemId " +
-                    "DECLARE @lastPlaceId INT, @maxBid INT " +
-                    "IF (SELECT COUNT(UserId) FROM AutoBids WHERE ItemId = @itemId) > 1 OR @id NOT IN (SELECT UserId FROM AutoBids WHERE ItemId = @itemId) " +
+
+                    "DECLARE @autobidRows INT " +
+                    "SELECT @autobidRows = COUNT(UserId) FROM AutoBids WHERE ItemId = @itemId " +
+                    "IF @autobidRows > 1 OR @autobidRows != 0 AND @id NOT IN (SELECT UserId FROM AutoBids WHERE ItemId = @itemId) " +
                     "BEGIN " +
+
+                    "DECLARE @maxLimit INT, @maxLimitUser INT, @secondLimit INT = 0 " +
+                    "SELECT TOP (1) @maxLimit = Limit, @maxLimitUser = UserId FROM AutoBids WHERE ItemId = @itemId ORDER BY Limit DESC " +
+                    "SELECT @secondLimit = MAX(Limit) FROM AutoBids WHERE ItemId = @itemId AND UserId != @maxLimitUser " +
+                    "IF @secondLimit == 0 " +
+                    "SELECT @secondLimit = MAX(Value) FROM Bids WHERE ItemId = @itemId " +
+                    "DECLARE @lastPlaceId INT, @maxBid INT " +
+
 
                     "WHILE(SELECT MAX(Value) FROM Bids WHERE ItemId = @itemId) < @maxLimit " +
                     "BEGIN " +
                     "SELECT TOP(1) @lastPlaceId = a.UserId FROM AutoBids AS a LEFT JOIN Bids AS b ON a.UserId = b.UserId AND a.ItemId = b.ItemId WHERE a.ItemId = @itemId " +
-                    "GROUP BY a.UserId ORDER BY ISNULL(MAX(b.Value),0) " +
+                    "GROUP BY a.UserId ORDER BY MAX(ISNULL(b.Value,0)) " +
                     "PRINT @lastPlaceId " +
                     "SELECT @maxBid = MAX(Value) FROM Bids WHERE ItemId = @itemId " +
                     "PRINT @maxBid " +
                     "INSERT INTO Bids(UserId, ItemId, Value) " +
                     "SELECT UserId, ItemId, CEILING(@maxBid + @bidJump) FROM AutoBids " +
                     "WHERE ItemId = @itemId AND Limit >= CEILING(@maxBid + @bidJump) AND UserId = @lastPlaceId " +
+                    "IF @maxBid > @secondLimit " +
+                    "BREAK " +
                     "END " +
+
 
                     "END " +
                     "DECLARE @winner INT " +
                     "SELECT TOP(1) @winner = a.UserId FROM AutoBids AS a JOIN Bids AS b ON a.UserId = b.UserId AND a.ItemId = b.ItemId WHERE a.ItemId = @itemId " +
-                    "GROUP BY a.UserId ORDER BY ISNULL(MAX(b.Value),0) DESC " +
+                    "GROUP BY a.UserId ORDER BY MAX(ISNULL(b.Value,0)) DESC " +
                     "INSERT INTO Notifications(UserId, ItemId, TimeStamp, TextType) " +
                     "SELECT DISTINCT a.UserId, a.ItemId, GETDATE(), '5' FROM Autobids AS a " +
                     "JOIN Bids AS b ON a.UserId = b.UserId AND a.ItemId = b.ItemId WHERE a.ItemId = @itemId AND a.UserId != @sellerId " +
@@ -1178,7 +1189,7 @@ namespace Server
 
         public static int priceRefresh(int itemId)
         {
-            int id;
+            int price;
             try
             {
                 string query = "SELECT MAX(Value) FROM Bids WHERE ItemId = @itemId";
@@ -1189,7 +1200,7 @@ namespace Server
                     SqlDataReader reader = command.ExecuteReader();
                     if (reader.Read())
                     {
-                        id = reader.GetInt32(0);
+                        price = reader.GetInt32(0);
                     }
                     else
                     {
@@ -1203,7 +1214,7 @@ namespace Server
                 Console.WriteLine(e);
                 return -2;
             }
-            return id;
+            return price;
         }
     }
 }
