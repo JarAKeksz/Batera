@@ -735,7 +735,7 @@ namespace Server
                     "INSERT INTO Bids(UserId, ItemId, Value) " +
                     "SELECT a.UserId, a.ItemId, MAX(b.Value)+@bidJump FROM AutoBids AS a " +
                     "JOIN Bids AS b ON a.ItemId = b.ItemId " +
-                    "WHERE a.ItemId = @itemId " +
+                    "WHERE a.ItemId = @itemId AND a.UserId != @id " +
                     "GROUP BY a.UserId, a.ItemId, a.Limit " +
                     "HAVING a.Limit > MAX(b.Value)+@bidJump*2 " +
                     "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
