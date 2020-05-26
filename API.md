@@ -185,5 +185,4 @@ Returns a list of items tagged as favorites by the user.
 		1 = "bidding ended, you didn't win",
 		2 = "bidding ended, you won",
 		3 = "bidding ended, item unsold",
-		4 = "bidding ended, you sold the item"
-		5 = "autobid activated")
+		4 = "bidding ended, you sold the item")

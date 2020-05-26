@@ -429,7 +429,7 @@ namespace Server
                 int bidIncrement;
 
                 string query = "SELECT i.Name, c.Name, ISNULL(i.Price,-1), ISNULL(MAX(b.Value),i.BidStart), i.Image, u.UserName, i.Description, i.EndDate, " +
-                    "i.IsItNew, i.BuyWithoutBid, ISNULL(su.UserName,''), i.BidStart, i.BidIncrement " +
+                    "i.IsItNew, i.BuyWithoutBid, ISNULL(su.UserName,''), i.BidStart, CEILING(i.BidIncrement) " +
                     "FROM Items AS i JOIN Categories AS c ON i.CategoryId = c.Id LEFT JOIN Bids AS b ON i.Id = b.ItemId JOIN Users AS u ON i.Seller = u.Id " +
                     "LEFT JOIN Sales AS s ON i.Id = s.ItemId LEFT JOIN Users AS su ON s.UserId = su.Id WHERE i.Id = @itemId " +
                     "GROUP BY i.Name, c.Name, i.Price, i.BidStart, i.Image, u.UserName, i.Description, i.EndDate, i.IsItNew, i.BuyWithoutBid, su.UserName, i.BidStart, i.BidIncrement";
@@ -709,7 +709,7 @@ namespace Server
                     {
                         return 2; // == a termékre már nem érkezhet licit
                     }
-                    if (tmp >= value)
+                    if (tmp > value)
                     {
                         return 1; // == a megadott licit nem éri el a küszöböt
                     }
@@ -726,35 +726,27 @@ namespace Server
                     "USING(VALUES(@itemId, @value)) AS s(ItemId, Value) " +
                     "ON b.ItemId = s.ItemId AND b.Value = s.Value " +
                     "WHEN NOT MATCHED THEN " +
-                    "INSERT(ItemId, UserId, Value) " +
-                    "VALUES(@itemId, @id, @value); " +
+                    "INSERT(ItemId, UserId, Value) VALUES(@itemId, @id, @value); " +
                     "MERGE Subscriptions AS sub " +
                     "USING(VALUES(@itemId, @id)) AS s(ItemId, UserId) " +
                     "ON sub.ItemId = s.ItemId AND sub.UserId = s.UserId " +
                     "WHEN NOT MATCHED THEN " +
-                    "INSERT(ItemId, UserId) " +
-                    "VALUES(@itemId, @id); " +
-                    "DECLARE @autobidRows INT " +
-                    "SELECT @autobidRows = COUNT(UserId) FROM AutoBids WHERE ItemId = @itemId " +
-                    "IF @autobidRows > 1 OR @autobidRows != 0 AND @id NOT IN (SELECT UserId FROM AutoBids WHERE ItemId = @itemId) " +
+                    "INSERT(ItemId, UserId) VALUES(@itemId, @id); " +
+                    "SELECT UserId, ItemId, Limit INTO #checkAB FROM AutoBids WHERE ItemId = @itemId AND Limit >= CEILING(@value+@bidJump) " +
+                    "IF (SELECT COUNT(*) FROM #checkAB WHERE UserId != @id) != 0 " +
                     "BEGIN " +
-                    "DECLARE @maxLimit INT, @maxLimitUser INT, @secondLimit INT = 0 " +
-                    "SELECT TOP (1) @maxLimit = Limit, @maxLimitUser = UserId FROM AutoBids WHERE ItemId = @itemId ORDER BY Limit DESC " +
-                    "SELECT TOP (1) @secondLimit = Limit FROM AutoBids WHERE ItemId = @itemId AND UserId != @maxLimitUser ORDER BY Limit DESC " +
-                    "IF @secondLimit = 0 " +
-                    "SELECT @secondLimit = MAX(Value) FROM Bids WHERE ItemId = @itemId " +
-                    "DECLARE @lastPlaceId INT " +
-                    "SELECT TOP(1) @lastPlaceId = a.UserId FROM AutoBids AS a LEFT JOIN Bids AS b ON a.UserId = b.UserId AND a.ItemId = b.ItemId " +
-                    "WHERE a.ItemId = @itemId AND a.Limit >= @secondLimit GROUP BY a.UserId ORDER BY MAX(ISNULL(b.Value,0)) " +
-                    "INSERT INTO Bids(UserId, ItemId, Value) " +
-                    "VALUES (@lastPlaceId, @itemId, CEILING(@secondLimit + @bidJump)) " +
+                    "DECLARE @maxLim INT, @maxLimUser INT, @secLim INT = CEILING(@value+@bidJump), @lastPlaceId INT " +
+                    "SELECT TOP (1) @maxLim = Limit, @maxLimUser = UserId FROM #checkAB ORDER BY Limit DESC " +
+                    "SELECT TOP (1) @secLim = Limit FROM #checkAB WHERE UserId != @maxLimUser ORDER BY Limit DESC " +
+                    "SELECT TOP(1) @lastPlaceId = c.UserId FROM #checkAB AS c LEFT JOIN Bids AS b ON c.UserId = b.UserId AND c.ItemId = b.ItemId " +
+                    "WHERE c.Limit = @maxLim GROUP BY c.UserId, c.Limit ORDER BY MAX(ISNULL(b.Value,0)) " +
+                    "IF @secLim < @maxLim " +
+                    "SET @secLim = CEILING(@secLim+@bidJump) " +
+                    "INSERT INTO Bids(UserId, ItemId, Value) VALUES (@lastPlaceId, @itemId, @secLim) " +
                     "END " +
                     "DECLARE @winner INT " +
                     "SELECT TOP(1) @winner = a.UserId FROM AutoBids AS a JOIN Bids AS b ON a.UserId = b.UserId AND a.ItemId = b.ItemId " +
-                    "WHERE a.ItemId = @itemId GROUP BY a.UserId ORDER BY ISNULL(MAX(b.Value),0) DESC " +
-                    "INSERT INTO Notifications(UserId, ItemId, TimeStamp, TextType) " +
-                    "SELECT DISTINCT a.UserId, a.ItemId, GETDATE(), '5' FROM Autobids AS a " +
-                    "JOIN Bids AS b ON a.UserId = b.UserId AND a.ItemId = b.ItemId WHERE a.ItemId = @itemId AND a.UserId != @sellerId " +
+                    "WHERE a.ItemId = @itemId GROUP BY a.UserId ORDER BY MAX(ISNULL(b.Value,0)) DESC " +
                     "INSERT INTO Notifications(UserId, ItemId, TimeStamp, TextType) " +
                     "SELECT UserId, ItemId, GETDATE(), '0' FROM Subscriptions " +
                     "WHERE ItemId = @itemId AND UserId != @winner AND UserId != @sellerId " +
