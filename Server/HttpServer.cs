@@ -42,11 +42,14 @@ namespace Server
 
             Thread minuteTasksThread = new Thread(delegate ()
             {
-                if (!DataBase.getEndedSaleNotifications())
+                while (true)
                 {
-                    Console.WriteLine("Couldn't generate sale end notifications!");
+                    if (!DataBase.getEndedSaleNotifications())
+                    {
+                        Console.WriteLine("Couldn't generate sale end notifications!");
+                    }
+                    Thread.Sleep(60000);
                 }
-                Thread.Sleep(60000);
             });
             minuteTasksThread.Start();
 
