@@ -22,23 +22,38 @@ namespace Client.Pages
     public partial class DetailedItemPage : Page
     {
         BateraCliensClass helper = new BateraCliensClass();
-        DetailedItem itemx;
+        DetailedItem itemx { get; set; }
+
+        
+        
+
         public DetailedItemPage(DetailedItem item)
         {
             itemx = item;
             InitializeComponent();
+            refreshItem();
+            initItem();
 
-            Console.WriteLine("*******" + item.SoldTo + "******");
 
-            Console.WriteLine(item.Seller +" " + User.Instance.getName());
-            if (item.Seller == User.Instance.getName())
+        }
+
+        public void refreshItem()
+        {
+            int Id = itemx.Id;
+            itemx = helper.GetDetailedItem(Id);
+
+
+        }
+
+        private void initItem()
+        {
+            Console.WriteLine(itemx.Seller + " " + User.Instance.getName());
+            if (itemx.Seller == User.Instance.getName())
             {
-                Console.WriteLine();
-
                 setItemData();
                 disableItemActions();
-
-            }else if (item.SoldTo == "")
+            }
+            else if (itemx.SoldTo == "")
             {
                 setItemData();
             }
@@ -49,11 +64,6 @@ namespace Client.Pages
                 disableItemActions();
 
             }
-
-            
-
-
-
         }
 
         private void setItemData()
@@ -92,6 +102,7 @@ namespace Client.Pages
             {
                 itemPrice.Text = "Price: " + (itemx.Price + 1).ToString();
             }
+
         }
         private void disableItemActions()
         {
@@ -136,8 +147,8 @@ namespace Client.Pages
                 {
                     helper.MakeBid(User.Instance.getToken(), itemx.Id, bid);
                     //itemPrice.Text = "Price: " + itemx.Price.ToString();
-                    
-                    setItemData();
+                    refreshItem();
+                    initItem();
                 }
                 else
                 {
@@ -157,6 +168,9 @@ namespace Client.Pages
                     Console.WriteLine("make a valid bid");
                 }
             }
+
+            refreshItem();
+            initItem();
         }
 
         private void placeAutoBidButton_Click(object sender, RoutedEventArgs e)
@@ -168,6 +182,7 @@ namespace Client.Pages
                 if (itemx.Price < bid)
                 {
                     helper.MakeAutoBid(User.Instance.getToken(), itemx.Id, bid, true);
+
                 }
                 else
                 {
@@ -187,6 +202,9 @@ namespace Client.Pages
                     Console.WriteLine("make a valid auto bid");
                 }
             }
+
+            refreshItem();
+            initItem();
         }
 
         private void removeAutoBidButton_Click(object sender, RoutedEventArgs e)
@@ -195,6 +213,9 @@ namespace Client.Pages
             {
                 Console.WriteLine("autobid removed");
                 helper.RemoveAutoBid(User.Instance.getToken(), itemx.Id, false);
+
+                refreshItem();
+                initItem();
             }
             else
             {
@@ -209,6 +230,9 @@ namespace Client.Pages
             if (User.Instance.getToken() != null)
             {
                 helper.MakeBuy(User.Instance.getToken(), itemx.Id);
+
+                refreshItem();
+                initItem();
 
             }
             else

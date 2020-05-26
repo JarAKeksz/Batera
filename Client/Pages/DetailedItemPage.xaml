@@ -32,8 +32,8 @@
                         <TextBlock x:Name="itemTitle" Text="Title" FontSize="24" TextWrapping="Wrap"/>
                         <TextBlock x:Name="itemSold" FontSize="30"/>
 
-                        <TextBlock x:Name="itemPrice" Text="Price:"/>
-                        <TextBlock x:Name="itemPricebuy" Text="Price:"/>
+                        <TextBlock x:Name="itemPrice" Text="{Binding Price}"/>
+                        <TextBlock x:Name="itemPricebuy" Text="Price (buy it now) :"/>
                         <TextBlock x:Name="itemEndDate" Text="End date:"/>
 
                         <Button x:Name="addFavorite" Content="Favorite ☆" Click="addFavorite_Click"/>

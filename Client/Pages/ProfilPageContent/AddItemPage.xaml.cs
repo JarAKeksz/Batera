@@ -103,8 +103,8 @@ namespace Client.Pages.ProfilPageContent
                 int categorie = categoriesComboBox.SelectedIndex;
 
                 helper.AddItem(User.Instance.getToken(), title, description, base64String,categorie, startingPirce, price);
-
                 this.NavigationService.GoBack();
+
             }
         }
 

@@ -40,6 +40,7 @@ namespace Client.ProfilPageContent
                 if (helper.GetDetailedItem(i.Id) != null)
                 {
                     this.NavigationService.Navigate(new DetailedItemPage(helper.GetDetailedItem(i.Id)));
+                    favoriteItemsList.SelectedIndex = -1;
                 }
             }
         }
