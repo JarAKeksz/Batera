@@ -280,6 +280,7 @@ namespace Server
                             return Response.uploadResponse(document.RootElement.GetProperty("token").GetString(), 
                                                           document.RootElement.GetProperty("name").GetString(),
                                                           document.RootElement.GetProperty("description").GetString(),
+                                                          document.RootElement.GetProperty("new").GetBoolean(),
                                                           document.RootElement.GetProperty("image").GetString(),
                                                           document.RootElement.GetProperty("category_id").GetInt32(),
                                                           document.RootElement.GetProperty("start_price").GetInt32(),
