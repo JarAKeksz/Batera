@@ -466,9 +466,27 @@ namespace Server
 
                     byte b = DataBase.addItem(name, categoryId, imageBase64, id, description, is_new, startPrice, buyPrice != -1, buyPrice);
 
-                    if (b != 0) return null; //TODO: success false meg társai?
-                    
-                    writer.WriteBoolean("success", true);
+                    switch (b)
+                    {
+                        case 3:
+                            throw new Exception("Database error");
+                            break;
+                        case 2:
+                            writer.WriteBoolean("success", false);
+                            writer.WriteString("problem", "Item name already in use!");
+                            break;
+                        case 1:
+                            writer.WriteBoolean("success", false);
+                            writer.WriteString("problem", "No price given for quickbuy!");
+                            break;
+                        case 0:
+                            writer.WriteBoolean("success", true);
+                            break;
+                        default:
+                            writer.WriteBoolean("success", false);
+                            writer.WriteString("problem", "Unknown error");
+                            break;
+                    }
                     writer.WriteEndObject();
                 }
 

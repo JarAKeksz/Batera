@@ -130,6 +130,7 @@ Is used to upload a new item to the marketplace
 	* `buy_price` (optional): an integer containing the quick buy price of the item
 * Returns:
 	* `success`: a boolean containing if the login was successful
+	* `problem` (in case of failed attempt): a string containing the problem for debug purposes
 
 ### Favorites
 Returns a list of items tagged as favorites by the user.
