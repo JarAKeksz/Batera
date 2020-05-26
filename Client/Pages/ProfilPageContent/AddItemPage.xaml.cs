@@ -69,6 +69,7 @@ namespace Client.Pages.ProfilPageContent
             }
 
         }
+        
 
         private void addItemButton_Click(object sender, RoutedEventArgs e)
         {
@@ -100,9 +101,11 @@ namespace Client.Pages.ProfilPageContent
                     startingPirce = int.Parse(startingPirceTextbox.Text);
                 }
 
+                bool isNew = newCondition.IsChecked.Value;
+
                 int categorie = categoriesComboBox.SelectedIndex;
 
-                helper.AddItem(User.Instance.getToken(), title, description, base64String,categorie, startingPirce, price);
+                helper.AddItem(User.Instance.getToken(), title, description, base64String,categorie, startingPirce, price, isNew);
                 this.NavigationService.GoBack();
 
             }

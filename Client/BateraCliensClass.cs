@@ -261,7 +261,7 @@ namespace Client
 
 
 
-        public async void AddItem(string token, string name, string description, string image, int category, int startPrice, int buyPrice)
+        public async void AddItem(string token, string name, string description, string image, int category, int startPrice, int buyPrice, bool isNew)
         {
 
             using (var client = new HttpClient())
@@ -281,6 +281,7 @@ namespace Client
                         writer.WriteNumber("start_price", startPrice);
                         writer.WriteNumber("buy_price", buyPrice);
                         writer.WriteNumber("category_id", category);
+                        writer.WriteBoolean("new", isNew);
                         writer.WriteString("image", image);
                         writer.WriteEndObject();
                     }

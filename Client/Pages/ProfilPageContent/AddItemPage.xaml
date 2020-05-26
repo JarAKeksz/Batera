@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:Client.Pages.ProfilPageContent"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      d:DesignHeight="600" d:DesignWidth="800"
       Title="AddItemPage">
 
     <Grid Background="AliceBlue">
@@ -24,11 +24,15 @@
                 <TextBox x:Name="startingPirceTextbox"/>
 
 
-                <Image x:Name="itemImage" Margin="5,5,500,0"/>
+                <Image x:Name="itemImage" Width="300" MaxHeight="250"  Margin="5"/>
                 <Button x:Name="uploadButton" Margin="5,5,500,0"  Content="UPLOAD PICTURE" Click="uploadButton_Click"></Button>
 
                 <TextBlock Text="category"/>
+                
                 <ComboBox x:Name="categoriesComboBox" SelectedItem="0" Padding="2" Margin="4 ,0,4,15" />
+                <TextBlock Text="Condition: " Margin="4"/>
+
+                <CheckBox x:Name="newCondition" Content=" New"/>
 
                 <Button x:Name="addItemButton" Margin="20" Content="Add Item" Click="addItemButton_Click"/>
                 <Button x:Name="Back" Margin="20" Content="Back"  Click="backButton_Click"/>
