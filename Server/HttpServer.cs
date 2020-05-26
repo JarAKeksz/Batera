@@ -51,10 +51,25 @@ namespace Server
                     Thread.Sleep(60000);
                 }
             });
+            //so it exits when app exits
+            minuteTasksThread.IsBackground = true;
             minuteTasksThread.Start();
 
             while (true)
             {
+                /*if(Console.In.Peek() != -1)
+                {
+                    string command = Console.ReadLine();
+                    if (command == "stop")
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine("unrecognized command: '" + command + "'");
+                    }
+                }*/
+
                 HttpListenerContext context = listener.GetContext();
                 
                 HttpListenerRequest request = context.Request;

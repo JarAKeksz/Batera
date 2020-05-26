@@ -90,7 +90,7 @@ namespace Client
             }
             if (selectedCondition != "All")
             {
-                if (selectedBuyingFormat == "New")
+                if (selectedCondition == "New")
                 {
                     query["IsItNew"] = "true";
                 }
