@@ -26,15 +26,10 @@ namespace Client
         public MainPage()
         {
             InitializeComponent();
-            List<Item> list = new List<Item>();
-            list = helper.AllItem();
+            setDefault();
 
-            itemsList.ItemsSource = list;
+
             
-            List<string> categories = helper.GetCategories();
-            categoriesComboBox.ItemsSource = categories;
-            categoriesComboBox.SelectedItem = null;
-            categoriesComboBox.Text = "--select--";
 
         }
 
@@ -122,6 +117,22 @@ namespace Client
             return format;
         }
 
-        
+        private void logoTextBlock_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            setDefault();
+        }
+
+        private void setDefault()
+        {
+            List<Item> list = new List<Item>();
+            list = helper.AllItem();
+            itemsList.ItemsSource = list;
+
+            searchBarTextBox.Text = "";
+            List<string> categories = helper.GetCategories();
+            categoriesComboBox.ItemsSource = categories;
+            categoriesComboBox.SelectedItem = null;
+            categoriesComboBox.Text = "--select--";
+        }
     }
 }

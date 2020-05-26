@@ -1,4 +1,4 @@
-# API
+/# API
 Our API is a more or less RESTful API using JSON over HTTP.
 GET requests use parameters embedded in URL, POST methods use JSON.
 Here is the list of endpoints and their usage:
