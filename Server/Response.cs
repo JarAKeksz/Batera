@@ -453,7 +453,7 @@ namespace Server
             }
         }
 
-        public static byte[] uploadResponse(string token, string name, string description, string imageBase64, int categoryId, int startPrice, int buyPrice)
+        public static byte[] uploadResponse(string token, string name, string description, bool is_new, string imageBase64, int categoryId, int startPrice, int buyPrice)
         {
             using (MemoryStream stream = new MemoryStream())
             {
@@ -464,7 +464,7 @@ namespace Server
                     int id = DataBase.tokenToId(token);
                     if (id < 0) return null;
 
-                    byte b = DataBase.addItem(name, categoryId, imageBase64, id, description, true, startPrice, buyPrice != -1, buyPrice);
+                    byte b = DataBase.addItem(name, categoryId, imageBase64, id, description, is_new, startPrice, buyPrice != -1, buyPrice);
 
                     if (b != 0) return null; //TODO: success false meg társai?
                     

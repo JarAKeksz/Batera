@@ -126,6 +126,7 @@ Is used to upload a new item to the marketplace
 	* `image`: a string containing a base64 encoded image of the item
 	* `category_id`: an integer containing the category id
 	* `start_price`: an integer containing the starting price of the item
+	* `new`: a bool containing if the item is in new condition
 	* `buy_price` (optional): an integer containing the quick buy price of the item
 * Returns:
 	* `success`: a boolean containing if the login was successful

@@ -42,16 +42,34 @@ namespace Server
 
             Thread minuteTasksThread = new Thread(delegate ()
             {
-                if (!DataBase.getEndedSaleNotifications())
+                while (true)
                 {
-                    Console.WriteLine("Couldn't generate sale end notifications!");
+                    if (!DataBase.getEndedSaleNotifications())
+                    {
+                        Console.WriteLine("Couldn't generate sale end notifications!");
+                    }
+                    Thread.Sleep(60000);
                 }
-                Thread.Sleep(60000);
             });
+            //so it exits when app exits
+            minuteTasksThread.IsBackground = true;
             minuteTasksThread.Start();
 
             while (true)
             {
+                /*if(Console.In.Peek() != -1)
+                {
+                    string command = Console.ReadLine();
+                    if (command == "stop")
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine("unrecognized command: '" + command + "'");
+                    }
+                }*/
+
                 HttpListenerContext context = listener.GetContext();
                 
                 HttpListenerRequest request = context.Request;
@@ -262,6 +280,7 @@ namespace Server
                             return Response.uploadResponse(document.RootElement.GetProperty("token").GetString(), 
                                                           document.RootElement.GetProperty("name").GetString(),
                                                           document.RootElement.GetProperty("description").GetString(),
+                                                          document.RootElement.GetProperty("new").GetBoolean(),
                                                           document.RootElement.GetProperty("image").GetString(),
                                                           document.RootElement.GetProperty("category_id").GetInt32(),
                                                           document.RootElement.GetProperty("start_price").GetInt32(),
