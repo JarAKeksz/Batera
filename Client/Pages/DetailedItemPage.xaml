@@ -27,29 +27,44 @@
                         <ColumnDefinition Width="2*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    
-                    <StackPanel Margin="10">
-                        <TextBlock x:Name="itemTitle" Text="Title" FontSize="24" TextWrapping="Wrap"/>
-                        <TextBlock x:Name="itemSold" FontSize="30"/>
 
-                        <TextBlock x:Name="itemPrice" Text="{Binding Price}"/>
-                        <TextBlock x:Name="itemPricebuy" Text="Price (buy it now) :"/>
-                        <TextBlock x:Name="itemEndDate" Text="End date:"/>
+                    <Grid Grid.Column="0"  Margin="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="2*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
 
-                        <Button x:Name="addFavorite" Content="Favorite ☆" Click="addFavorite_Click"/>
+                        <StackPanel Grid.Row="0" Grid.ColumnSpan="2">
+                            <TextBlock x:Name="itemTitle" Text="Title" FontSize="24" TextWrapping="Wrap"/>
+                            <TextBlock x:Name="itemSold" FontSize="30"/>
 
-                        <TextBlock x:Name="placeBid" Text="place bid:"/>
-                        <TextBox x:Name="itemBid" />
-                        <TextBlock Text="Minimum bid:" x:Name="minBidTextBlock"/>
-                        <Button x:Name="placeBidButton" Content="Place Bid" Click="placeBidButton_Click"/>
+                            <TextBlock x:Name="itemPrice" Text="{Binding Price}" FontSize="16"/>
+                            <TextBlock x:Name="itemPricebuy" Text="Price (buy it now) :"/>
+                            <TextBlock x:Name="itemEndDate" Text="End date:"/>
 
-                        <TextBlock x:Name="autobid" Text="make auto bid:"/>
-                        <TextBox x:Name="itemAutoBid"/>
-                        <Button x:Name="placeAutoBidButton" Content="Make Auto Bid"  Click="placeAutoBidButton_Click"/>
-                        <Button x:Name="removeAutoBidButton" Content="Remove Auto Bid"  Click="removeAutoBidButton_Click"/>
-                        <Button x:Name="buyNowButton" Content="Buy now"  Click="buyNowButton_Click"/>
+                            <Button x:Name="addFavorite" Content="Favorite ☆" Click="addFavorite_Click"/>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Row="1">
+                            <TextBlock x:Name="placeBid" Text="Your bid:"/>
+                            <TextBox x:Name="itemBid" />
+                            <TextBlock Text="Minimum bid:" x:Name="minBidTextBlock"/>
+                            <Button x:Name="placeBidButton" Content="Place Bid" Click="placeBidButton_Click"/>
+                        </StackPanel>
 
-                    </StackPanel>
+                        <StackPanel Grid.Row="2">
+                            <TextBlock x:Name="autobid" Text="Auto bid:"/>
+                            <TextBox x:Name="itemAutoBid"/>
+                            <Button x:Name="placeAutoBidButton" Content="Make Auto Bid"  Click="placeAutoBidButton_Click"/>
+                            <Button x:Name="removeAutoBidButton" Content="Remove Auto Bid"  Click="removeAutoBidButton_Click"/>
+                            <Button x:Name="buyNowButton" Content="Buy now"  Click="buyNowButton_Click"/>
+                        </StackPanel>
+                    </Grid>
 
                     <StackPanel Grid.Column="1" Margin="10">
                         <Image x:Name="itemImage"/>

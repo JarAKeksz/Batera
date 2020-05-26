@@ -15,19 +15,19 @@
         <StackPanel Background="AliceBlue" Margin="30" Width="400" Height="300">
             <TextBlock Text="Login" FontSize="32" Margin="10"/>
 
-            <TextBlock Text="email: " Margin="10 0"/>
+            <TextBlock Text="E-mail: " Margin="10 0"/>
             <TextBox x:Name="emailTextBox" Margin="10 0"/>
 
-            <TextBlock Text="password: " Margin="10 0"/>
+            <TextBlock Text="Password: " Margin="10 0"/>
             <PasswordBox x:Name="passwordPasswordBox" Margin="10 0"/>
 
-            <TextBlock Text="password again: " Margin="10 0"/>
+            <TextBlock Text="Password again: " Margin="10 0"/>
             <PasswordBox x:Name="passwordAgainPasswordBox" Margin="10 0"/>
 
             <TextBlock Text="Name: " Margin="10 0"/>
             <TextBox x:Name="nameTextBox" Margin="10 0"/>
 
-            <Button x:Name="loginButton" Content="Log in" Click="loginButton_Click" Margin="10"/>
+            <Button x:Name="loginButton" Content="Login" Click="loginButton_Click" Margin="10"/>
             <Button x:Name="signupButton" Content="Sign up" Click="signupButton_Click" Margin="10 0"/>
 
             <Button x:Name="backButton" Content="Back" Margin="10" Click="backButton_Click"/>

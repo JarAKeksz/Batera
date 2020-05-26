@@ -13,10 +13,10 @@
         <StackPanel Background="AliceBlue" Margin="30" Width="400" Height="300">
             <TextBlock Text="Login" FontSize="32" Margin="10" />
 
-            <TextBlock Text="email: " Margin="10 0"/>
+            <TextBlock Text="E-mail: " Margin="10 0"/>
             <TextBox x:Name="emailTextBox" Margin="10 0"/>
 
-            <TextBlock Text="password: " Margin="10 0"/>
+            <TextBlock Text="Password: " Margin="10 0"/>
             <PasswordBox x:Name="passwordPasswordBox" Margin="10 0"/>
 
             <Button x:Name="loginButton" Content="Log in" Click="loginButton_Click" Margin="10"/>

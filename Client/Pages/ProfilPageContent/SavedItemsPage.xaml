@@ -12,7 +12,7 @@
         <ListBox Name="favoriteItemsList" HorizontalContentAlignment="Stretch" SelectionChanged="ItemList_SelectionChanged">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <Grid Margin="3" Background="Aqua">
+                    <Grid Margin="3" Background="#F1F1F1">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="100"/>
                             <ColumnDefinition Width="*" />

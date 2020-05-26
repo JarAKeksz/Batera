@@ -9,35 +9,41 @@
       Title="AddItemPage">
 
     <Grid Background="AliceBlue">
-        <ScrollViewer HorizontalScrollBarVisibility="Auto">
-            <StackPanel  Margin="10">
-                <TextBlock Text="title:"/>
-                <TextBox x:Name="titleTextbox"/>
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+            <Grid Grid.Column="0" >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="2*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel  Margin="10" Grid.Column="0">
+                    <TextBlock Text="Title:"/>
+                    <TextBox x:Name="titleTextbox"/>
 
-                <TextBlock Text="description:"/>
-                <TextBox x:Name="descriptionTextbox"/>
+                    <TextBlock Text="Description:"/>
+                    <TextBox x:Name="descriptionTextbox" TextWrapping="Wrap" AcceptsReturn="True" Height="78"/>
 
-                <TextBlock Text="buy it now price:"/>
-                <TextBox x:Name="priceTextbox"/>
+                    <TextBlock Text="Buy it now price:"/>
+                    <TextBox x:Name="priceTextbox"/>
 
-                <TextBlock Text="Starting price: "/>
-                <TextBox x:Name="startingPirceTextbox"/>
+                    <TextBlock Text="Starting price: "/>
+                    <TextBox x:Name="startingPirceTextbox"/>
 
+                    <TextBlock Text="Category:"/>
 
-                <Image x:Name="itemImage" Width="300" MaxHeight="250"  Margin="5"/>
-                <Button x:Name="uploadButton" Margin="5,5,500,0"  Content="UPLOAD PICTURE" Click="uploadButton_Click"></Button>
+                    <ComboBox x:Name="categoriesComboBox" SelectedItem="0" Padding="2" Margin="4 ,0,4,15" />
+                    <TextBlock Text="Condition: " Margin="4"/>
 
-                <TextBlock Text="category"/>
-                
-                <ComboBox x:Name="categoriesComboBox" SelectedItem="0" Padding="2" Margin="4 ,0,4,15" />
-                <TextBlock Text="Condition: " Margin="4"/>
+                    <CheckBox x:Name="newCondition" Content=" New"/>
 
-                <CheckBox x:Name="newCondition" Content=" New"/>
+                    <Button x:Name="addItemButton" Margin="20" Content="Sell Item" Click="addItemButton_Click"/>
+                    <Button x:Name="Back" Margin="20" Content="Back"  Click="backButton_Click"/>
 
-                <Button x:Name="addItemButton" Margin="20" Content="Add Item" Click="addItemButton_Click"/>
-                <Button x:Name="Back" Margin="20" Content="Back"  Click="backButton_Click"/>
-
-            </StackPanel>
+                </StackPanel>
+                <StackPanel Grid.Column="1">
+                    <Image x:Name="itemImage" Margin="5"/>
+                    <Button x:Name="uploadButton" Content="Select image" Click="uploadButton_Click"></Button>
+                </StackPanel>
+            </Grid>
         </ScrollViewer>
     </Grid>
 </Page>

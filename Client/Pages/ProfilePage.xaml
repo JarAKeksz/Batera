@@ -35,9 +35,9 @@
                 <!-- Page Navigation -->
                 
                 <Button x:Name="savedItemsButton" Content="Favorites" Margin="5" Background="#FFFFB1F7" Click="savedItemsButton_Click"/>
-                <Button x:Name="boughtItemsButton" Content="Notafications" Margin="5" Background="#FFFFB1F7" Click="boughtItemsButton_Click"/>
+                <Button x:Name="boughtItemsButton" Content="Notifications" Margin="5" Background="#FFFFB1F7" Click="boughtItemsButton_Click"/>
                 <Button x:Name="ProfileSettingsButton" Content="Profile settings" Margin="5" Background="#FFFFB1F7" Click="ProfileSettingsButton_Click"/>
-                <Button x:Name="AddItemButton" Content="Add Item for sale" Margin="5" Background="#FFFFB1F7" Click="AddItemButton_Click"/>
+                <Button x:Name="AddItemButton" Content="Sell item" Margin="5" Background="#FFFFB1F7" Click="AddItemButton_Click"/>
 
             </StackPanel>
         </Grid>

@@ -9,6 +9,6 @@
       Title="ProfileSettingsPage">
 
     <Grid Background="AliceBlue">
-        <Button x:Name="LogOutButton" Content="LOG OUT" Click="LogOutButton_Click"/>
+        <Button x:Name="LogOutButton" Content="Log out" Click="LogOutButton_Click"/>
     </Grid>
 </Page>
