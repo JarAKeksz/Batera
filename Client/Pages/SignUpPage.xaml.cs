@@ -69,19 +69,15 @@ namespace Client.Pages
 
                         using (JsonDocument document = JsonDocument.Parse(resultContent))
                         {
-                            string success = document.RootElement.GetProperty("token").GetString();
-                            if (success != null)
-                            {
+                            try {
                                 //Sign up SUCCESS
                                 string token = document.RootElement.GetProperty("token").GetString();
                                 User.Instance.setToken(token);
                                 this.NavigationService.Navigate(new MainPage());
-                            }
-                            else
-                            {
+                            } catch(KeyNotFoundException ex) {
                                 //Sign up FAIL
                                 Console.WriteLine("Sign up failed.");
-                                MessageBox.Show("Sign up failed.");
+                                MessageBox.Show("Sign up failed, please register with another e-mail address.");
                             }
                         }
                     }
@@ -89,13 +85,13 @@ namespace Client.Pages
                 else
                 {
                     Console.WriteLine("email, password, name are mandatory");
-                    MessageBox.Show("email, password, name are mandatory");
+                    MessageBox.Show("E-mail, password, name are mandatory.");
                 }
             }
             else
             {
                 Console.WriteLine("Password not maching");
-                MessageBox.Show("Password not maching");
+                MessageBox.Show("Password not maching.");
             }
 
             this.NavigationService.Navigate(new SignUpPage());

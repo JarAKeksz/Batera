@@ -27,8 +27,8 @@
             <TextBlock Text="Name: " Margin="10 0"/>
             <TextBox x:Name="nameTextBox" Margin="10 0"/>
 
+            <Button x:Name="signupButton" Content="Sign up" Click="signupButton_Click" Margin="10, 10, 10, 0"/>
             <Button x:Name="loginButton" Content="Login" Click="loginButton_Click" Margin="10"/>
-            <Button x:Name="signupButton" Content="Sign up" Click="signupButton_Click" Margin="10 0"/>
 
             <Button x:Name="backButton" Content="Back" Margin="10" Click="backButton_Click"/>
         </StackPanel>
