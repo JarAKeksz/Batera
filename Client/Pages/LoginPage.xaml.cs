@@ -72,6 +72,7 @@ namespace Client.Pages
                         {
                             //LOGIN FAIL
                             Console.WriteLine("Login failed.");
+                            MessageBox.Show("Login failed.");
                         }
                     }
                 }
@@ -79,6 +80,9 @@ namespace Client.Pages
             else
             {
                 Console.WriteLine("email and password is mandatory");
+                
+                MessageBox.Show("email and password is mandatory");
+                
             }
         }
 

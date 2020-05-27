@@ -81,6 +81,7 @@ namespace Client.Pages
                             {
                                 //Sign up FAIL
                                 Console.WriteLine("Sign up failed.");
+                                MessageBox.Show("Sign up failed.");
                             }
                         }
                     }
@@ -88,11 +89,13 @@ namespace Client.Pages
                 else
                 {
                     Console.WriteLine("email, password, name are mandatory");
+                    MessageBox.Show("email, password, name are mandatory");
                 }
             }
             else
             {
                 Console.WriteLine("Password not maching");
+                MessageBox.Show("Password not maching");
             }
 
             this.NavigationService.Navigate(new SignUpPage());

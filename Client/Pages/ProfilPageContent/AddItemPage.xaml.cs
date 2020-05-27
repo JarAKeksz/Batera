@@ -109,6 +109,10 @@ namespace Client.Pages.ProfilPageContent
                 this.NavigationService.GoBack();
 
             }
+            else
+            {
+                MessageBox.Show("fill in the fields correctly");
+            }
         }
 
        
