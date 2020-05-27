@@ -1023,26 +1023,22 @@ namespace Server
                     "WHILE @@FETCH_STATUS = 0 " +
                     "BEGIN " +
                     "UPDATE Items SET Active = 0 WHERE Id = @itemId " +
-                    "SELECT @winnerId = UserId FROM Bids " +
-                    "WHERE Value IN (SELECT MAX(Value) FROM Bids GROUP BY ItemId) " +
-                    "AND ItemId = @itemId " +
+                    "SELECT TOP(1) @winnerId = UserId FROM Bids WHERE ItemId = @itemId ORDER BY Value DESC " +
                     "IF @winnerId IS NOT NULL " +
                     "BEGIN " +
+                    "INSERT INTO Sales (UserId, ItemId) VALUES (@winnerId, @itemId) " +
+                    "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
+                    "VALUES (@winnerId, @itemId, GETDATE(), '2')" +
+                    "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
+                    "VALUES (@sellerId, @itemId, GETDATE(), '4')" +
                     "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
                     "SELECT UserId, ItemId, GETDATE(), '1' FROM Subscriptions " +
                     "WHERE ItemId = @itemId AND UserId != @winnerId AND UserId != @sellerId " +
-                    "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
-                    "SELECT UserId, ItemId, GETDATE(), '2' FROM Subscriptions " +
-                    "WHERE ItemId = @itemId AND UserId = @winnerId " +
-                    "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
-                    "SELECT UserId, ItemId, GETDATE(), '4' FROM Subscriptions " +
-                    "WHERE ItemId = @itemId AND UserId = @sellerId " +
                     "END " +
                     "ELSE " +
                     "BEGIN " +
                     "INSERT INTO Notifications (UserId, ItemId, TimeStamp, TextType) " +
-                    "SELECT UserId, ItemId, GETDATE(), '3' FROM Subscriptions " +
-                    "WHERE ItemId = @itemId AND UserId = @sellerId " +
+                    "VALUES (@sellerId, @itemId, GETDATE(), '3')" +
                     "END " +
                     "DELETE AutoBids WHERE ItemId = @itemId " +
                     "DELETE Subscriptions WHERE ItemId = @itemId " +
