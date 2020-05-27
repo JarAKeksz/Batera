@@ -73,6 +73,7 @@ namespace Client.Pages
                                 //Sign up SUCCESS
                                 string token = document.RootElement.GetProperty("token").GetString();
                                 User.Instance.setToken(token);
+                                User.Instance.setName(name);
                                 this.NavigationService.Navigate(new MainPage());
                             } catch(KeyNotFoundException ex) {
                                 //Sign up FAIL

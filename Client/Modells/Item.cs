@@ -18,6 +18,8 @@ namespace Client.Modells
         public string Category { get; set; }
         public BitmapImage Image { get; set; }
 
+        public bool hasPrice { get; set; }
+
         public Item(int id, string name, int price, int current, string category, string image)
         {
             Id = id;
@@ -26,6 +28,8 @@ namespace Client.Modells
             Current = current;
             Category = category;
             convertImage(image);
+
+            hasPrice = price != -1;
         }
 
         private void convertImage(string b64)

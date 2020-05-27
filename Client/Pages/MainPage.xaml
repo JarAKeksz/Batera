@@ -100,7 +100,7 @@
                             <TextBlock Text="{Binding Name}" FontSize="18" Grid.Column="1" Grid.Row="0" Margin="5,5,5,5"/>
                             <TextBlock Text="{Binding Category, StringFormat=Category: {0}}" Grid.Column="1" Grid.Row="1" Margin="5,5,5,5"/>
                             <TextBlock Text="{Binding Current, StringFormat={}{0} Ft}" FontSize="14" Grid.Column="2" Grid.Row="0" Margin="5,5,5,5"/>
-                            <TextBlock Text="{Binding Price, StringFormat=Buy now: {0} Ft}" Grid.Column="2" Grid.Row="1" Margin="5,5,5,5" />
+                            <TextBlock Text="{Binding Price, StringFormat=Buy now: {0} Ft}" Grid.Column="2" Grid.Row="1" Margin="5,5,5,5" Visibility="{Binding hasPrice, Converter={StaticResource BoolToVis}}" />
                         </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
