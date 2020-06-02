@@ -1243,5 +1243,46 @@ namespace Server
 
             return ret;
         }
+
+        public static List<Item> getSoldItems(string token)
+        {
+            List<Item> ret = new List<Item>();
+
+            try
+            {
+                string query = "BEGIN TRANSACTION " +
+                    "DECLARE @id INT " +
+                    "SELECT @id = Id FROM Users WHERE Token = @token " +
+                    "SELECT i.Id, i.Name, c.Name, ISNULL(i.Price,-1), ISNULL(MAX(b.Value),i.BidStart), i.Image " +
+                    "FROM Items AS i JOIN Categories AS c ON i.CategoryId = c.Id LEFT JOIN Bids AS b ON i.Id = b.ItemId WHERE i.Seller = @id " +
+                    "GROUP BY i.Id, i.Name, c.Name, i.Price, i.BidStart, i.Image, i.Seller " +
+                    "COMMIT TRANSACTION";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@token", token));
+
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        int id = reader.GetInt32(0);
+                        string name = reader.GetString(1);
+                        string category = reader.GetString(2);
+                        int price = reader.GetInt32(3);
+                        int current = reader.GetInt32(4);
+                        string image = reader.GetString(5);
+
+                        ret.Add(new Item(id, name, category, price, current, image));
+                    }
+                    reader.Close();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return null;
+            }
+
+            return ret;
+        }
     }
 }
