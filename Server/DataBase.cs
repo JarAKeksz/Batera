@@ -1105,10 +1105,12 @@ namespace Server
                     "BEGIN TRANSACTION " +
                     "DECLARE @id INT " +
                     "SELECT @id = Id FROM Users WHERE Token = @token " +
-                    "DECLARE @sellerId INT " +
-                    "SELECT @sellerId = Seller FROM Items WHERE Id = @itemId " +
+                    "DECLARE @sellerId INT, @price INT " +
+                    "SELECT @sellerId = Seller, @price = Price FROM Items WHERE Id = @itemId " +
                     "IF @id != @sellerId " +
                     "BEGIN " +
+                    "INSERT INTO Bids(UserId, ItemId, Value) " +
+                    "VALUES(@id, @itemId, @price) " +
                     "MERGE Sales AS sa " +
                     "USING(VALUES(@itemId, @id)) AS s(ItemId, UserId) " +
                     "ON sa.ItemId = s.ItemId AND sa.UserId = s.UserId " +
@@ -1202,6 +1204,44 @@ namespace Server
                 return -2;
             }
             return price;
+        }
+
+        public static List<Item> getBoughtItems(string token)
+        {
+            List<Item> ret = new List<Item>();
+
+            try
+            {
+                string query = "SELECT s.ItemId, i.Name, c.Name, ISNULL(i.Price,-1), MAX(b.Value), i.Image " +
+                    "FROM Sales AS s JOIN Items AS i ON s.ItemId = i.Id JOIN Categories AS c ON i.CategoryId = c.Id " +
+                    "LEFT JOIN Bids AS b ON i.Id = b.ItemId LEFT JOIN Users AS u ON s.UserId = u.Id WHERE u.Token = @token " +
+                    "GROUP BY s.ItemId, i.Name, c.Name, i.Price, i.Image";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@token", token));
+
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        int id = reader.GetInt32(0);
+                        string name = reader.GetString(1);
+                        string category = reader.GetString(2);
+                        int price = reader.GetInt32(3);
+                        int current = reader.GetInt32(4);
+                        string image = reader.GetString(5);
+
+                        ret.Add(new Item(id, name, category, price, current, image));
+                    }
+                    reader.Close();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return null;
+            }
+
+            return ret;
         }
     }
 }
